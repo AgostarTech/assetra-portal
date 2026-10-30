@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Review Document - Asset Portal{% endblock %}
+{% block page_title %}Review Document{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #1a1a1a;">
+    <h3 style="margin-top: 0; color: #1a1a1a;">Document Information</h3>
+    <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <p><strong>Uploader:</strong> {{ document.uploader.username }}</p>
+        <p><strong>Category:</strong> {{ document.get_category_display }}</p>
+        <p><strong>Associated Asset:</strong> {{ document.asset.name|default:"None" }}</p>
+        <p><strong>Date Submitted:</strong> {{ document.uploaded_at }}</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ document.file.url }}" target="_blank" style="color: #0056b3; text-decoration: underline; font-weight: bold;">View Attached File</a>
+    </div>
+
+    <form method="post" style="border-top: 1px solid #eee; padding-top: 20px;">
+        {% csrf_token %}
+        <label style="font-weight: bold; display: block; margin-bottom: 8px;">Review Notes (Required for rejection):</label>
+        <textarea name="review_notes" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;"></textarea>
+        
+        <div style="display: flex; gap: 15px;">
+            <button type="submit" name="action" value="approve" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Approve</button>
+            <button type="submit" name="action" value="reject" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Reject</button>
+            <a href="{% url 'manager_dashboard' %}" style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

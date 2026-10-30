@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Enterprise Asset Portfolio{% endblock %}</title>
+    <!-- Tailwind CSS (CDN for development) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind Configuration -->
+    <script src="{% static 'js/tailwind-config.js' %}"></script>
+    <!-- Custom Public Styles -->
+    <link rel="stylesheet" href="{% static 'css/public.css' %}">
+</head>
+<body class="bg-brand-black text-slate-200 font-sans antialiased flex flex-col min-h-screen">
+    
+    {% include 'public/includes/header.html' %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'public/includes/footer.html' %}
+</body>
+</html>

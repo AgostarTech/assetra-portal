@@ -1,0 +1,335 @@
+
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="{% static 'css/user_sidebar.css' %}">
+
+<aside class="user-sidebar" id="userSidebar" aria-label="Client portal sidebar">
+    <div class="sidebar-brand-box">
+        <a href="{% url 'dashboards:user_dashboard' %}" class="sidebar-brand">
+            <span class="brand-icon" aria-hidden="true"><i class="fa-solid fa-building-columns"></i></span>
+            <span class="brand-text">
+                <strong>Private Wealth</strong>
+                <small>Client Portal</small>
+            </span>
+        </a>
+        <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close navigation">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-user-card">
+        <div class="sidebar-avatar" aria-hidden="true">
+            {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+        </div>
+        <div class="sidebar-user-info">
+            <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+            <span class="sidebar-role">Client / Beneficiary</span>
+            <span class="account-status">
+                <i class="fa-solid fa-circle" aria-hidden="true"></i>
+                {{ request.user.is_active|yesno:"Active,Inactive" }}
+            </span>
+        </div>
+        <button type="button" class="user-card-menu" id="userCardMenu"
+                aria-label="Open account menu" aria-expanded="false"
+                aria-controls="userCardDropdown">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <div class="user-card-dropdown" id="userCardDropdown" hidden>
+            <a href="{% url 'dashboards:user_dashboard' %}#profile">
+                <i class="fa-regular fa-id-card"></i> My profile
+            </a>
+            <a href="{% url 'dashboards:user_dashboard' %}#account-settings">
+                <i class="fa-solid fa-sliders"></i> Account settings
+            </a>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+        <span class="sidebar-section-label">WORKSPACE</span>
+
+        <a href="{% url 'dashboards:user_dashboard' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <span class="sidebar-section-label">MY PORTFOLIO</span>
+
+        <!-- MY ASSETS CATEGORY DROPDOWN -->
+        <div class="sidebar-menu-group asset-menu-group">
+            <button type="button"
+                    class="sidebar-dropdown-btn {% if request.resolver_match.app_name == 'assets' %}dropdown-open{% endif %}"
+                    id="assetsBtn"
+                    aria-expanded="{% if request.resolver_match.app_name == 'assets' %}true{% else %}false{% endif %}"
+                    aria-controls="assetsDropdown">
+                <i class="fa-solid fa-wallet"></i>
+                <span>My Assets</span>
+                <i class="fa-solid fa-chevron-down dropdown-chevron"></i>
+            </button>
+
+            <div class="dropdown-container" id="assetsDropdown"
+                 {% if request.resolver_match.app_name != 'assets' %}hidden{% endif %}>
+                <a href="{% url 'assets:asset_list' %}" class="dropdown-link">
+                    <i class="fa-solid fa-layer-group"></i> All My Assets
+                </a>
+                <a href="{% url 'assets:asset_list' %}?category=vehicle" class="dropdown-link">
+                    <i class="fa-solid fa-car"></i> Vehicles
+                </a>
+                <a href="{% url 'assets:asset_list' %}?category=land" class="dropdown-link">
+                    <i class="fa-solid fa-map"></i> Land
+                </a>
+                <a href="{% url 'assets:asset_list' %}?category=house" class="dropdown-link">
+                    <i class="fa-solid fa-house"></i> Houses
+                </a>
+                <a href="{% url 'assets:asset_list' %}?category=stock" class="dropdown-link">
+                    <i class="fa-solid fa-chart-line"></i> Stocks
+                </a>
+                <a href="{% url 'assets:asset_list' %}?category=government_bond" class="dropdown-link">
+                    <i class="fa-solid fa-landmark"></i> Government Bonds
+                </a>
+                <a href="{% url 'assets:asset_documents' %}" class="dropdown-link">
+                    <i class="fa-solid fa-folder-open"></i> Supporting Documents
+                </a>
+            </div>
+        </div>
+
+        <a href="{% url 'dashboards:user_dashboard' %}#portfolio-summary"
+           class="sidebar-link" data-section="portfolio-summary">
+            <i class="fa-solid fa-chart-line"></i><span>Portfolio Overview</span>
+        </a>
+        <a href="{% url 'dashboards:user_dashboard' %}#asset-distribution"
+           class="sidebar-link" data-section="asset-distribution">
+            <i class="fa-solid fa-chart-pie"></i><span>Asset Allocation</span>
+        </a>
+        <a href="{% url 'dashboards:user_dashboard' %}#performance"
+           class="sidebar-link" data-section="performance">
+            <i class="fa-solid fa-arrow-trend-up"></i><span>Performance History</span>
+        </a>
+
+        <span class="sidebar-section-label">DOCUMENTS &amp; SERVICES</span>
+
+        {% url 'documents:document_list' as document_list_url %}
+        {% if document_list_url %}
+        <a href="{{ document_list_url }}"
+           class="sidebar-link {% if request.resolver_match.app_name == 'documents' %}active{% endif %}">
+            <i class="fa-solid fa-folder-open"></i><span>My Documents</span>
+        </a>
+        {% endif %}
+
+        <a href="{% url 'dashboards:user_dashboard' %}#statements"
+           class="sidebar-link" data-section="statements">
+            <i class="fa-solid fa-file-invoice"></i><span>Statements &amp; Reports</span>
+        </a>
+        <a href="{% url 'dashboards:user_dashboard' %}#notifications"
+           class="sidebar-link" data-section="notifications">
+            <i class="fa-solid fa-bell"></i><span>Notifications</span>
+        </a>
+
+        {% url 'support:user_ticket_list' as support_url %}
+        {% if support_url %}
+        <a href="{{ support_url }}"
+           class="sidebar-link {% if request.resolver_match.app_name == 'support' %}active{% endif %}">
+            <i class="fa-solid fa-headset"></i><span>Support Center</span>
+        </a>
+        {% endif %}
+
+        <a href="{% url 'dashboards:user_dashboard' %}#help"
+           class="sidebar-link" data-section="help">
+            <i class="fa-solid fa-circle-question"></i><span>Help &amp; Guidance</span>
+        </a>
+
+        <span class="sidebar-section-label">ACCOUNT MANAGEMENT</span>
+
+        <div class="sidebar-menu-group">
+            <button type="button" class="sidebar-dropdown-btn"
+                    id="profileBtn" aria-expanded="false"
+                    aria-controls="profileDropdown">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>My Account</span>
+                <i class="fa-solid fa-chevron-down dropdown-chevron"></i>
+            </button>
+            <div class="dropdown-container" id="profileDropdown" hidden>
+                <a href="{% url 'dashboards:user_dashboard' %}#profile"
+                   class="dropdown-link" data-section="profile">
+                    <i class="fa-regular fa-id-card"></i> View Profile
+                </a>
+                <a href="{% url 'dashboards:user_dashboard' %}#account-settings"
+                   class="dropdown-link" data-section="account-settings">
+                    <i class="fa-solid fa-sliders"></i> Account Settings
+                </a>
+                <a href="{% url 'dashboards:user_dashboard' %}#security"
+                   class="dropdown-link" data-section="security">
+                    <i class="fa-solid fa-shield-halved"></i> Security &amp; Password
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-security-note">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Secure client environment</span>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-sidebar-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Sign Out Securely</span>
+            </button>
+        </form>
+        <p class="sidebar-version">Private Wealth Portal</p>
+    </div>
+</aside>
+
+<button type="button" class="sidebar-mobile-toggle" id="sidebarOpen"
+        aria-label="Open navigation" aria-controls="userSidebar"
+        aria-expanded="false">
+    <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script>
+(function () {
+    "use strict";
+
+    const sidebar = document.getElementById("userSidebar");
+    const openBtn = document.getElementById("sidebarOpen");
+    const closeBtn = document.getElementById("sidebarClose");
+    const overlay = document.getElementById("sidebarOverlay");
+
+    const assetsBtn = document.getElementById("assetsBtn");
+    const assetsDropdown = document.getElementById("assetsDropdown");
+    const profileBtn = document.getElementById("profileBtn");
+    const profileDropdown = document.getElementById("profileDropdown");
+    const userCardMenu = document.getElementById("userCardMenu");
+    const userCardDropdown = document.getElementById("userCardDropdown");
+
+    if (!sidebar || !openBtn || !closeBtn || !overlay) return;
+
+    function openSidebar() {
+        sidebar.classList.add("sidebar-open");
+        overlay.classList.add("overlay-visible");
+        document.body.classList.add("sidebar-active");
+        openBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove("sidebar-open");
+        overlay.classList.remove("overlay-visible");
+        document.body.classList.remove("sidebar-active");
+        openBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleDropdown(button, dropdown) {
+        if (!button || !dropdown) return;
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", String(!expanded));
+        dropdown.hidden = expanded;
+        button.classList.toggle("dropdown-open", !expanded);
+    }
+
+    function closeDropdown(button, dropdown) {
+        if (!button || !dropdown) return;
+        button.setAttribute("aria-expanded", "false");
+        dropdown.hidden = true;
+        button.classList.remove("dropdown-open");
+    }
+
+    openBtn.addEventListener("click", openSidebar);
+    closeBtn.addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    if (assetsBtn && assetsDropdown) {
+        assetsBtn.addEventListener("click", function () {
+            toggleDropdown(assetsBtn, assetsDropdown);
+        });
+    }
+
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener("click", function () {
+            toggleDropdown(profileBtn, profileDropdown);
+        });
+    }
+
+    if (userCardMenu && userCardDropdown) {
+        userCardMenu.addEventListener("click", function (event) {
+            event.stopPropagation();
+            toggleDropdown(userCardMenu, userCardDropdown);
+        });
+
+        userCardDropdown.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+    }
+
+    function updateActiveLink() {
+        const hash = window.location.hash.slice(1);
+        const pathname = window.location.pathname;
+
+        sidebar.querySelectorAll("[data-section]").forEach(function (link) {
+            const section = link.dataset.section;
+            let active = false;
+
+            if (hash) {
+                active = section === hash;
+            } else if (section === "dashboard") {
+                active = pathname.startsWith("/dashboard/");
+            } else if (section === "my-assets") {
+                active = pathname.startsWith("/assets/");
+            }
+
+            link.classList.toggle("active", active);
+
+            if (active) link.setAttribute("aria-current", "page");
+            else link.removeAttribute("aria-current");
+        });
+
+        // Keep the asset menu open on asset pages.
+        if (pathname.startsWith("/assets/")) {
+            if (assetsBtn && assetsDropdown) {
+                assetsBtn.setAttribute("aria-expanded", "true");
+                assetsDropdown.hidden = false;
+                assetsBtn.classList.add("dropdown-open");
+            }
+        }
+
+        if (["profile", "account-settings", "security"].includes(hash)) {
+            if (profileBtn && profileDropdown) {
+                profileBtn.setAttribute("aria-expanded", "true");
+                profileDropdown.hidden = false;
+                profileBtn.classList.add("dropdown-open");
+            }
+        }
+    }
+
+    sidebar.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            if (window.innerWidth <= 768) closeSidebar();
+        });
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeSidebar();
+            closeDropdown(assetsBtn, assetsDropdown);
+            closeDropdown(profileBtn, profileDropdown);
+            closeDropdown(userCardMenu, userCardDropdown);
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        if (
+            userCardMenu && userCardDropdown &&
+            !userCardMenu.contains(event.target) &&
+            !userCardDropdown.contains(event.target)
+        ) {
+            closeDropdown(userCardMenu, userCardDropdown);
+        }
+    });
+
+    updateActiveLink();
+    window.addEventListener("hashchange", updateActiveLink);
+    window.addEventListener("popstate", updateActiveLink);
+})();
+</script>

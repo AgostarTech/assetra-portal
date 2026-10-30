@@ -1,0 +1,8 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path("", views.document_list, name="document_list"),
+    path("upload/", views.upload_document, name="upload_document"),
+    path("review/<int:doc_id>/", views.review_document, name="review_document"),
+]

@@ -1,0 +1,907 @@
+
+{% extends "base_public.html" %}
+
+{% block title %}Open an Account | Private Wealth{% endblock %}
+
+{% block content %}
+
+<style>
+    .reg-page {
+        --reg-bg: #080d18;
+        --reg-panel: #101827;
+        --reg-gold: #d8b777;
+        --reg-gold-light: #f1d9a6;
+        --reg-text: #f4f1e9;
+        --reg-muted: #a2adbd;
+        --reg-border: rgba(216, 183, 119, 0.2);
+        --reg-danger: #ff9292;
+        --reg-success: #8ee0b2;
+
+        min-height: 85vh;
+        padding: 60px 20px 80px;
+        background:
+            radial-gradient(
+                circle at 10% 10%,
+                rgba(216, 183, 119, 0.09),
+                transparent 32%
+            ),
+            radial-gradient(
+                circle at 90% 80%,
+                rgba(59, 130, 246, 0.06),
+                transparent 32%
+            ),
+            var(--reg-bg);
+        color: var(--reg-text);
+        font-family: inherit;
+    }
+
+    .reg-container {
+        width: 100%;
+        max-width: 1060px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        align-items: stretch;
+        overflow: hidden;
+        border: 1px solid var(--reg-border);
+        border-radius: 24px;
+        background: rgba(12, 19, 32, 0.94);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
+    }
+
+    /* Left information panel */
+
+    .reg-aside {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 650px;
+        padding: 44px 36px;
+        overflow: hidden;
+        border-right: 1px solid var(--reg-border);
+        background:
+            linear-gradient(
+                155deg,
+                rgba(216, 183, 119, 0.10),
+                transparent 42%
+            ),
+            #0d1523;
+    }
+
+    .reg-aside::after {
+        content: "";
+        position: absolute;
+        width: 290px;
+        height: 290px;
+        right: -155px;
+        bottom: 60px;
+        border: 1px solid rgba(216, 183, 119, 0.13);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 28px rgba(216, 183, 119, 0.025),
+            0 0 0 58px rgba(216, 183, 119, 0.02);
+        pointer-events: none;
+    }
+
+    .reg-brand {
+        position: relative;
+        z-index: 1;
+        color: var(--reg-gold);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .reg-aside-content {
+        position: relative;
+        z-index: 1;
+        margin: 60px 0;
+    }
+
+    .reg-eyebrow {
+        margin-bottom: 16px;
+        color: var(--reg-gold);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .reg-aside h1 {
+        margin: 0 0 22px;
+        color: var(--reg-text);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(34px, 4vw, 49px);
+        font-weight: 400;
+        line-height: 1.14;
+        letter-spacing: -1px;
+    }
+
+    .reg-aside-description {
+        max-width: 350px;
+        color: var(--reg-muted);
+        font-size: 14px;
+        line-height: 1.9;
+    }
+
+    .reg-benefits {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin: 32px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .reg-benefit {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .reg-benefit-icon {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(216, 183, 119, 0.25);
+        border-radius: 9px;
+        background: rgba(216, 183, 119, 0.07);
+        color: var(--reg-gold-light);
+    }
+
+    .reg-benefit-icon svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .reg-benefit strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--reg-text);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .reg-benefit span {
+        display: block;
+        color: var(--reg-muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .reg-aside-footer {
+        position: relative;
+        z-index: 1;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        color: #78869a;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    /* Registration form */
+
+    .reg-form-panel {
+        padding: 44px 42px;
+    }
+
+    .reg-mobile-brand {
+        display: none;
+        margin-bottom: 26px;
+        color: var(--reg-gold);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .reg-form-header {
+        margin-bottom: 32px;
+    }
+
+    .reg-step {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        padding: 8px 11px;
+        border: 1px solid rgba(216, 183, 119, 0.2);
+        border-radius: 6px;
+        background: rgba(216, 183, 119, 0.06);
+        color: var(--reg-gold-light);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+    }
+
+    .reg-step-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--reg-gold);
+    }
+
+    .reg-form-header h2 {
+        margin: 0 0 11px;
+        color: var(--reg-text);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(27px, 3vw, 35px);
+        font-weight: 400;
+        line-height: 1.25;
+    }
+
+    .reg-form-header p {
+        margin: 0;
+        color: var(--reg-muted);
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .reg-form {
+        display: flex;
+        flex-direction: column;
+        gap: 21px;
+    }
+
+    .reg-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 17px;
+    }
+
+    .reg-field {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .reg-label {
+        color: #e8e5dd;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .reg-required {
+        color: var(--reg-gold);
+    }
+
+    .reg-input-wrap {
+        position: relative;
+    }
+
+    .reg-input {
+        display: block;
+        width: 100%;
+        min-height: 49px;
+        padding: 13px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        outline: none;
+        background: rgba(255, 255, 255, 0.035);
+        color: var(--reg-text);
+        font: inherit;
+        font-size: 13px;
+        box-sizing: border-box;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background 0.2s ease;
+    }
+
+    .reg-input::placeholder {
+        color: #738095;
+    }
+
+    .reg-input:focus {
+        border-color: var(--reg-gold);
+        background: rgba(255, 255, 255, 0.045);
+        box-shadow: 0 0 0 3px rgba(216, 183, 119, 0.09);
+    }
+
+    .reg-input:focus-visible,
+    .reg-toggle:focus-visible,
+    .reg-submit:focus-visible,
+    .reg-login-link:focus-visible {
+        outline: 2px solid var(--reg-gold-light);
+        outline-offset: 3px;
+    }
+
+    .reg-input-wrap .reg-input {
+        padding-right: 62px;
+    }
+
+    .reg-toggle {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        padding: 5px 3px;
+        border: 0;
+        background: transparent;
+        color: var(--reg-muted);
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .reg-toggle:hover {
+        color: var(--reg-gold-light);
+    }
+
+    .reg-help {
+        color: #8794a7;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .reg-error-summary {
+        padding: 15px 17px;
+        border: 1px solid rgba(255, 146, 146, 0.28);
+        border-radius: 9px;
+        background: rgba(255, 80, 80, 0.06);
+        color: var(--reg-danger);
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .reg-error-summary strong {
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .reg-error-summary ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .reg-field-error {
+        color: var(--reg-danger);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .reg-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .reg-message {
+        padding: 12px 14px;
+        border: 1px solid var(--reg-border);
+        border-radius: 8px;
+        background: rgba(216, 183, 119, 0.06);
+        color: var(--reg-text);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .reg-message.error {
+        border-color: rgba(255, 146, 146, 0.3);
+        color: var(--reg-danger);
+    }
+
+    .reg-message.success {
+        border-color: rgba(142, 224, 178, 0.25);
+        color: var(--reg-success);
+    }
+
+    .reg-security-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 14px;
+        border: 1px solid rgba(216, 183, 119, 0.15);
+        border-radius: 9px;
+        background: rgba(216, 183, 119, 0.04);
+    }
+
+    .reg-security-note svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        color: var(--reg-gold);
+    }
+
+    .reg-security-note p {
+        margin: 0;
+        color: var(--reg-muted);
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    .reg-security-note strong {
+        color: var(--reg-text);
+        font-weight: 600;
+    }
+
+    .reg-submit {
+        width: 100%;
+        min-height: 53px;
+        padding: 15px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 11px;
+        border: 1px solid var(--reg-gold);
+        border-radius: 8px;
+        background: var(--reg-gold);
+        color: #101725;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .reg-submit:hover {
+        background: var(--reg-gold-light);
+        transform: translateY(-1px);
+    }
+
+    .reg-submit svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .reg-login {
+        margin-top: 27px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        text-align: center;
+        color: var(--reg-muted);
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .reg-login-link {
+        margin-left: 4px;
+        color: var(--reg-gold);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .reg-login-link:hover {
+        color: var(--reg-gold-light);
+        text-decoration: underline;
+    }
+
+    @media (max-width: 850px) {
+        .reg-container {
+            max-width: 620px;
+            grid-template-columns: 1fr;
+        }
+
+        .reg-aside {
+            min-height: auto;
+            padding: 30px;
+            border-right: 0;
+            border-bottom: 1px solid var(--reg-border);
+        }
+
+        .reg-aside-content {
+            margin: 35px 0 20px;
+        }
+
+        .reg-aside h1 {
+            max-width: 460px;
+            font-size: 39px;
+        }
+
+        .reg-benefits {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .reg-aside-footer {
+            margin-top: 28px;
+        }
+
+        .reg-form-panel {
+            padding: 35px 30px;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .reg-page {
+            padding: 25px 12px 40px;
+        }
+
+        .reg-container {
+            border-radius: 16px;
+        }
+
+        .reg-aside {
+            padding: 25px 22px;
+        }
+
+        .reg-aside-content {
+            margin: 27px 0 15px;
+        }
+
+        .reg-aside h1 {
+            font-size: 35px;
+        }
+
+        .reg-benefits {
+            grid-template-columns: 1fr;
+        }
+
+        .reg-form-panel {
+            padding: 28px 21px;
+        }
+
+        .reg-grid {
+            grid-template-columns: 1fr;
+            gap: 21px;
+        }
+
+        .reg-form-header h2 {
+            font-size: 29px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .reg-input,
+        .reg-submit {
+            transition: none;
+        }
+    }
+</style>
+
+<section class="reg-page">
+    <div class="reg-container">
+
+        <!-- LEFT: BRAND AND VALUE PROPOSITION -->
+        <aside class="reg-aside">
+
+            <div class="reg-brand">
+                Private Wealth
+            </div>
+
+            <div class="reg-aside-content">
+
+                <div class="reg-eyebrow">
+                    A More Informed Perspective
+                </div>
+
+                <h1>
+                    Your wealth.
+                    <br>
+                    Your vision.
+                    <br>
+                    Your future.
+                </h1>
+
+                <p class="reg-aside-description">
+                    Establish your account to begin accessing a
+                    structured view of your assets, portfolios,
+                    and financial records through one dedicated
+                    management platform.
+                </p>
+
+                <ul class="reg-benefits">
+
+                    <li class="reg-benefit">
+                        <div class="reg-benefit-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.7"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </div>
+                        <div>
+                            <strong>Organized oversight</strong>
+                            <span>Keep asset and portfolio information structured.</span>
+                        </div>
+                    </li>
+
+                    <li class="reg-benefit">
+                        <div class="reg-benefit-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.7"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <strong>Security-conscious access</strong>
+                            <span>Use an individual account to access the platform.</span>
+                        </div>
+                    </li>
+
+                    <li class="reg-benefit">
+                        <div class="reg-benefit-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.7"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3v18h18"></path>
+                                <path d="m7 14 4-4 4 3 5-7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <strong>Clearer visibility</strong>
+                            <span>Support more informed portfolio review.</span>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="reg-aside-footer">
+                PRIVATE WEALTH ASSET PORTFOLIO MANAGEMENT SYSTEM
+                <br>
+                Thoughtful access. Structured information. Clear oversight.
+            </div>
+
+        </aside>
+
+        <!-- RIGHT: REGISTRATION FORM -->
+        <div class="reg-form-panel">
+
+            <div class="reg-mobile-brand">
+                Private Wealth
+            </div>
+
+            <header class="reg-form-header">
+
+                <div class="reg-step">
+                    <span class="reg-step-dot"></span>
+                    Application Portal · Step 01
+                </div>
+
+                <h2>Create Your Account</h2>
+
+                <p>
+                    Enter your details below to establish your
+                    account credentials. All fields are required.
+                </p>
+
+            </header>
+
+            <!-- Django messages -->
+            {% if messages %}
+                <div class="reg-messages" role="status" aria-live="polite">
+                    {% for message in messages %}
+                        <div class="reg-message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Form-wide validation errors -->
+            {% if form and form.non_field_errors %}
+                <div class="reg-error-summary" role="alert">
+                    <strong>Please review your information.</strong>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% if form and form.errors %}
+                <div class="reg-error-summary" role="alert">
+                    <strong>Some details need your attention.</strong>
+                    Please review the errors shown below and submit
+                    the form again.
+                </div>
+            {% endif %}
+
+            <form method="post" class="reg-form" autocomplete="on">
+                {% csrf_token %}
+
+                <div class="reg-grid">
+
+                    <div class="reg-field">
+                        <label class="reg-label" for="id_first_name">
+                            First name <span class="reg-required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="first_name"
+                            id="id_first_name"
+                            class="reg-input"
+                            placeholder="Enter first name"
+                            autocomplete="given-name"
+                            maxlength="150"
+                            value="{{ request.POST.first_name|default:'' }}"
+                            required
+                        >
+
+                        {% if form.first_name.errors %}
+                            <div class="reg-field-error" role="alert">
+                                {{ form.first_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="reg-field">
+                        <label class="reg-label" for="id_last_name">
+                            Last name <span class="reg-required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="last_name"
+                            id="id_last_name"
+                            class="reg-input"
+                            placeholder="Enter last name"
+                            autocomplete="family-name"
+                            maxlength="150"
+                            value="{{ request.POST.last_name|default:'' }}"
+                            required
+                        >
+
+                        {% if form.last_name.errors %}
+                            <div class="reg-field-error" role="alert">
+                                {{ form.last_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label" for="id_email">
+                        Email address <span class="reg-required">*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        id="id_email"
+                        class="reg-input"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        maxlength="254"
+                        value="{{ request.POST.email|default:'' }}"
+                        required
+                    >
+
+                    <span class="reg-help">
+                        Use an email address you can access. It may be
+                        needed for account recovery and notifications.
+                    </span>
+
+                    {% if form.email.errors %}
+                        <div class="reg-field-error" role="alert">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label" for="id_password">
+                        Create password <span class="reg-required">*</span>
+                    </label>
+
+                    <div class="reg-input-wrap">
+                        <input
+                            type="password"
+                            name="password"
+                            id="id_password"
+                            class="reg-input"
+                            placeholder="Create a strong password"
+                            autocomplete="new-password"
+                            required
+                            aria-describedby="reg-password-help"
+                        >
+
+                        <button
+                            type="button"
+                            class="reg-toggle"
+                            data-password-toggle="id_password"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                        >
+                            Show
+                        </button>
+                    </div>
+
+                    <span class="reg-help" id="reg-password-help">
+                        Choose a unique password that is difficult
+                        for others to guess.
+                    </span>
+
+                    {% if form.password.errors %}
+                        <div class="reg-field-error" role="alert">
+                            {{ form.password.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="reg-security-note">
+                    <svg viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.7"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"></path>
+                        <path d="M12 8v4"></path>
+                        <path d="M12 16h.01"></path>
+                    </svg>
+
+                    <p>
+                        <strong>Protect your credentials.</strong>
+                        Never share your password. Use a unique
+                        password and only access your account
+                        through a trusted connection.
+                    </p>
+                </div>
+
+                <button type="submit" class="reg-submit">
+                    Create Account &amp; Continue
+
+                    <svg viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </button>
+
+            </form>
+
+            <div class="reg-login">
+                Already have an account?
+                <a href="{% url 'login' %}" class="reg-login-link">
+                    Sign in
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(
+            "[data-password-toggle]"
+        );
+
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const inputId = button.getAttribute(
+                    "data-password-toggle"
+                );
+                const input = document.getElementById(inputId);
+
+                if (!input) {
+                    return;
+                }
+
+                const showPassword = input.type === "password";
+
+                input.type = showPassword ? "text" : "password";
+                button.textContent = showPassword ? "Hide" : "Show";
+                button.setAttribute(
+                    "aria-label",
+                    showPassword ? "Hide password" : "Show password"
+                );
+                button.setAttribute(
+                    "aria-pressed",
+                    showPassword ? "true" : "false"
+                );
+            });
+        });
+    });
+</script>
+
+{% endblock %}

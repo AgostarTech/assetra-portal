@@ -1,0 +1,1067 @@
+```django
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Portfolio | Private Wealth Portal{% endblock %}
+
+{% block content %}
+<div class="client-dashboard" id="clientDashboard">
+
+    <!-- PAGE HEADER -->
+    <header class="dashboard-header">
+        <div class="header-heading">
+            <div class="eyebrow">
+                <i class="fa-solid fa-shield-halved"></i>
+                SECURE CLIENT PORTAL
+            </div>
+
+            <h1>
+                Welcome, {{ request.user.first_name|default:request.user.username }}
+            </h1>
+
+            <p>Monitor your portfolio, manage your assets and access your account services.</p>
+        </div>
+
+        <div class="header-actions">
+            <button type="button" class="btn-outline" id="refreshDashboard">
+                <i class="fa-solid fa-rotate"></i>
+                Refresh
+            </button>
+
+            <button type="button" class="btn-primary" onclick="window.print()">
+                <i class="fa-solid fa-print"></i>
+                Print Overview
+            </button>
+        </div>
+    </header>
+
+    <!-- DJANGO MESSAGES -->
+    {% if messages %}
+    <div class="message-stack" aria-live="polite">
+        {% for message in messages %}
+        <div class="portal-message message-{{ message.tags|default:'info' }}">
+            <span>{{ message }}</span>
+            <button type="button" class="message-close" aria-label="Dismiss message">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- QUICK NAVIGATION -->
+    <nav class="quick-navigation" aria-label="Portfolio sections">
+        <a href="#portfolio-summary"><i class="fa-solid fa-chart-pie"></i> Overview</a>
+        <a href="#my-assets"><i class="fa-solid fa-wallet"></i> My Assets</a>
+        <a href="#asset-distribution"><i class="fa-solid fa-chart-doughnut"></i> Allocation</a>
+        <a href="#my-documents"><i class="fa-solid fa-folder-open"></i> Documents</a>
+        <a href="#support"><i class="fa-solid fa-headset"></i> Support</a>
+    </nav>
+
+    <!-- PORTFOLIO SUMMARY -->
+    <section id="portfolio-summary" class="dashboard-section">
+        <div class="section-heading">
+            <div>
+                <h2>Portfolio Overview</h2>
+                <p>Your current portfolio information.</p>
+            </div>
+
+            <div class="valuation-control">
+                <label for="valuationMode">Display metric</label>
+                <select id="valuationMode">
+                    <option value="current">Current valuation</option>
+                    <option value="invested">Invested capital</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+
+            <article class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-icon gold">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </span>
+                    <span class="metric-label">Portfolio Valuation</span>
+                </div>
+
+                <h3 id="primaryValuation">
+                    ${{ summary.total_current_value|default:0|floatformat:2 }}
+                </h3>
+
+                <p class="metric-caption">Current estimated asset value</p>
+                <span class="metric-footnote">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Based on recorded portfolio data
+                </span>
+            </article>
+
+            <article class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-icon blue">
+                        <i class="fa-solid fa-coins"></i>
+                    </span>
+                    <span class="metric-label">Invested Capital</span>
+                </div>
+
+                <h3>
+                    ${{ summary.total_purchase_value|default:0|floatformat:2 }}
+                </h3>
+
+                <p class="metric-caption">Recorded acquisition value</p>
+                <span class="metric-footnote">Initial recorded investment</span>
+            </article>
+
+            <article class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-icon green">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </span>
+                    <span class="metric-label">Recorded Return</span>
+                </div>
+
+                <h3 class="{% if summary.percentage_change > 0 %}positive-value{% elif summary.percentage_change < 0 %}negative-value{% endif %}">
+                    {{ summary.percentage_change|default:0|floatformat:2 }}%
+                </h3>
+
+                <p class="metric-caption">Portfolio percentage change</p>
+                <span class="metric-footnote">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Based on the portfolio calculation
+                </span>
+            </article>
+
+            <article class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-icon purple">
+                        <i class="fa-solid fa-wallet"></i>
+                    </span>
+                    <span class="metric-label">Liquidity Profile</span>
+                </div>
+
+                <h3>{{ liquidity_ratio|default:"Not available" }}</h3>
+
+                <p class="metric-caption">Portfolio liquidity indicator</p>
+                <span class="metric-footnote">Calculated by the portfolio service</span>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- RISK AND PORTFOLIO STATUS -->
+    <section class="status-grid">
+        <article class="status-card">
+            <div class="status-card-icon">
+                <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div>
+                <span class="status-label">Risk Exposure</span>
+                <h3>{{ risk_exposure|default:"Not available" }}</h3>
+                <p>Portfolio risk indicator</p>
+            </div>
+        </article>
+
+        <article class="status-card">
+            <div class="status-card-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div>
+                <span class="status-label">Registered Holdings</span>
+                <h3>{{ assets|length }}</h3>
+                <p>Assets currently listed below</p>
+            </div>
+        </article>
+
+        <article class="status-card">
+            <div class="status-card-icon">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+                <span class="status-label">Account</span>
+                <h3>Active</h3>
+                <p>Signed in as {{ request.user.username }}</p>
+            </div>
+        </article>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="charts-grid">
+
+        <article class="panel" id="asset-distribution">
+            <div class="panel-header">
+                <div>
+                    <h2>Asset Allocation</h2>
+                    <p>Distribution by asset category</p>
+                </div>
+                <i class="fa-solid fa-chart-pie panel-heading-icon"></i>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="assetDonutChart"
+                        role="img"
+                        aria-label="Chart showing portfolio allocation by asset category">
+                    Asset allocation chart.
+                </canvas>
+                <p class="chart-fallback" id="allocationFallback" hidden>
+                    No allocation data is available yet.
+                </p>
+            </div>
+        </article>
+
+        <article class="panel" id="performance">
+            <div class="panel-header">
+                <div>
+                    <h2>Historical Performance</h2>
+                    <p>Available portfolio valuation history</p>
+                </div>
+                <i class="fa-solid fa-chart-line panel-heading-icon"></i>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="performanceLineChart"
+                        role="img"
+                        aria-label="Chart showing historical portfolio performance">
+                    Historical performance chart.
+                </canvas>
+                <p class="chart-fallback" id="performanceFallback" hidden>
+                    Historical performance data has not been configured.
+                </p>
+            </div>
+        </article>
+
+    </section>
+
+    <!-- REGISTERED ASSETS -->
+    <section class="panel holdings-panel" id="my-assets">
+        <div class="panel-header holdings-header">
+            <div>
+                <h2>My Registered Assets</h2>
+                <p>Review your currently recorded holdings.</p>
+            </div>
+
+            <div class="holdings-actions">
+                <label class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search"
+                           id="assetSearch"
+                           placeholder="Search assets..."
+                           aria-label="Search registered assets">
+                </label>
+
+                <button type="button" class="btn-outline" id="exportAssets">
+                    <i class="fa-solid fa-file-csv"></i>
+                    Export CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="assets-table" id="assetsTable">
+                <thead>
+                    <tr>
+                        <th scope="col">Asset</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Estimated Value</th>
+                        <th scope="col">Last Valuation</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for asset in assets %}
+                    <tr class="asset-row">
+                        <td>
+                            <div class="asset-name">
+                                <span class="asset-table-icon">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </span>
+                                <strong>{{ asset.name|default:"Unnamed asset" }}</strong>
+                            </div>
+                        </td>
+
+                        <td>{{ asset.get_category_display|default:"Unclassified" }}</td>
+
+                        <td>
+                            <span class="status-badge">
+                                {{ asset.get_status_display|default:asset.status|default:"Recorded" }}
+                            </span>
+                        </td>
+
+                        <td class="asset-value">
+                            ${{ asset.current_estimated_value|default:0|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            {% if asset.valuation_date %}
+                                {{ asset.valuation_date|date:"d M Y" }}
+                            {% else %}
+                                <span class="muted-text">Not recorded</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-table">
+                            <i class="fa-solid fa-box-open"></i>
+                            <strong>No assets registered</strong>
+                            <span>Your registered holdings will appear here when available.</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    <tr id="noSearchResults" hidden>
+                        <td colspan="5" class="empty-table">
+                            No assets match your search.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <span id="assetCount">{{ assets|length }} asset(s)</span>
+            <span>Values are based on available recorded data.</span>
+        </div>
+    </section>
+
+    <!-- DOCUMENTS AND STATEMENTS -->
+    <section class="service-grid" id="my-documents">
+
+        <article class="panel service-card">
+            <div class="service-icon">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+
+            <h2>My Documents</h2>
+            <p>Access your account documents and portfolio records.</p>
+
+            <a href="#document-access" class="service-link">
+                Document access
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </article>
+
+        <article class="panel service-card" id="statements">
+            <div class="service-icon">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+
+            <h2>Statements & Reports</h2>
+            <p>Generate or review your available portfolio statement.</p>
+
+            {% url 'portfolio_statement' as statement_url %}
+            {% if statement_url %}
+            <a href="{{ statement_url }}" class="service-link">
+                Open portfolio statement
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            {% else %}
+            <span class="muted-text">Statement service not configured.</span>
+            {% endif %}
+        </article>
+
+        <article class="panel service-card" id="notifications">
+            <div class="service-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+
+            <h2>Notifications</h2>
+            <p>Important account updates and service announcements.</p>
+            <span class="service-note">
+                <i class="fa-solid fa-circle-info"></i>
+                Notification feed requires backend integration.
+            </span>
+        </article>
+
+    </section>
+
+    <!-- SUPPORT -->
+    <section class="panel support-panel" id="support">
+        <div class="support-content">
+            <span class="support-icon">
+                <i class="fa-solid fa-headset"></i>
+            </span>
+
+            <div>
+                <h2>Need Assistance?</h2>
+                <p>Contact the support team for account or portfolio assistance.</p>
+            </div>
+        </div>
+
+        <a href="#support-request" class="btn-primary">
+            <i class="fa-solid fa-life-ring"></i>
+            Get Support
+        </a>
+    </section>
+
+    <!-- PROFILE SUMMARY -->
+    <section class="panel profile-panel" id="profile">
+        <div class="panel-header">
+            <div>
+                <h2>My Account</h2>
+                <p>Your basic account information.</p>
+            </div>
+            <i class="fa-solid fa-user-gear panel-heading-icon"></i>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-field">
+                <span>Full name</span>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+            </div>
+
+            <div class="profile-field">
+                <span>Username</span>
+                <strong>{{ request.user.username }}</strong>
+            </div>
+
+            <div class="profile-field">
+                <span>Email address</span>
+                <strong>{{ request.user.email|default:"Not provided" }}</strong>
+            </div>
+
+            <div class="profile-field">
+                <span>Account status</span>
+                <strong class="positive-value">Active</strong>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="#profile-update" class="btn-outline">
+                <i class="fa-solid fa-user-pen"></i>
+                Update Profile
+            </a>
+
+            <a href="#account-security" class="btn-outline">
+                <i class="fa-solid fa-lock"></i>
+                Account Security
+            </a>
+        </div>
+    </section>
+
+    <!-- INFORMATIONAL PLACEHOLDER -->
+    <section class="integration-notice" id="document-access">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>
+            <strong>Document services</strong>
+            <p>Documents, notifications, profile editing and support requests must be connected to their respective authorized Django views before these services can process requests.</p>
+        </div>
+    </section>
+
+    <footer class="dashboard-footer">
+        <span>Private Wealth Portal</span>
+        <span>Secure client access</span>
+    </footer>
+
+</div>
+
+<!-- External icon and chart libraries -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      referrerpolicy="no-referrer">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<style>
+.client-dashboard {
+    --gold: #c5a059;
+    --gold-light: #f8f0df;
+    --ink: #172033;
+    --muted: #778195;
+    --border: #e7eaf0;
+    --surface: #ffffff;
+    --page: #f5f7fb;
+    --green: #16845b;
+    color: var(--ink);
+    background: var(--page);
+    min-height: 100vh;
+    padding: clamp(16px, 3vw, 34px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.client-dashboard * { box-sizing: border-box; }
+.client-dashboard a { text-decoration: none; }
+.client-dashboard button,
+.client-dashboard input,
+.client-dashboard select { font: inherit; }
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.eyebrow {
+    color: #98743a;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.dashboard-header h1 {
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.25;
+    letter-spacing: -0.7px;
+    font-weight: 750;
+    margin: 0 0 8px;
+    color: #172033;
+}
+
+.dashboard-header p,
+.section-heading p,
+.panel-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.header-actions, .holdings-actions, .profile-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-primary, .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 10px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s ease;
+}
+
+.btn-primary {
+    border: 1px solid var(--gold);
+    color: #211b10;
+    background: var(--gold);
+}
+.btn-primary:hover { background: #d6b574; }
+
+.btn-outline {
+    color: #344054;
+    background: #fff;
+    border: 1px solid #dfe4ec;
+}
+.btn-outline:hover { border-color: var(--gold); color: #8c692e; }
+
+.quick-navigation {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding: 0 0 17px;
+    margin-bottom: 12px;
+}
+.quick-navigation a {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    padding: 10px 13px;
+    color: #4a5568;
+    font-size: 12px;
+    font-weight: 650;
+}
+.quick-navigation a:hover { color: #8c692e; border-color: var(--gold); }
+
+.dashboard-section { margin-bottom: 26px; }
+.section-heading, .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+.section-heading { margin-bottom: 16px; }
+.section-heading h2, .panel-header h2, .support-panel h2 {
+    margin: 0 0 5px;
+    color: #172033;
+    font-size: 17px;
+    font-weight: 750;
+}
+.valuation-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #667085;
+    font-size: 12px;
+}
+.valuation-control select {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px;
+    color: #344054;
+    max-width: 100%;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+}
+.metric-card, .panel, .status-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(20, 32, 55, .025);
+}
+.metric-card { min-width: 0; padding: 20px; }
+.metric-top { display: flex; align-items: center; gap: 10px; }
+.metric-icon {
+    width: 39px; height: 39px;
+    display: grid; place-items: center;
+    border-radius: 10px; flex: 0 0 auto;
+}
+.metric-icon.gold { background: #fbf2df; color: #9a742d; }
+.metric-icon.blue { background: #eaf2ff; color: #376bb7; }
+.metric-icon.green { background: #e5f6ee; color: #16845b; }
+.metric-icon.purple { background: #f0eaff; color: #7653b8; }
+.metric-label { color: #687386; font-size: 11px; font-weight: 700; }
+.metric-card h3 {
+    margin: 17px 0 7px;
+    color: #182235;
+    font-size: clamp(21px, 2vw, 27px);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+.metric-caption { margin: 0 0 12px; color: #657186; font-size: 11px; }
+.metric-footnote { color: #8992a2; font-size: 10px; line-height: 1.5; }
+.metric-footnote i { margin-right: 4px; }
+.positive-value { color: #16845b !important; }
+.negative-value { color: #c24141 !important; }
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 26px;
+}
+.status-card { padding: 17px; display: flex; align-items: center; gap: 14px; }
+.status-card-icon {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    border-radius: 10px; background: #f4f1e9; color: #9a742d;
+}
+.status-label { color: #788295; font-size: 11px; }
+.status-card h3 { margin: 5px 0; font-size: 17px; overflow-wrap: anywhere; }
+.status-card p { margin: 0; color: #8b94a4; font-size: 11px; }
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr);
+    gap: 18px;
+    margin-bottom: 26px;
+}
+.panel { padding: 22px; min-width: 0; }
+.panel-header { margin-bottom: 18px; }
+.panel-heading-icon { color: var(--gold); font-size: 19px; }
+.chart-container { position: relative; height: 285px; width: 100%; }
+.chart-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 12px;
+    background: rgba(255,255,255,.92);
+}
+.chart-fallback[hidden] { display: none; }
+
+.holdings-panel { margin-bottom: 26px; }
+.holdings-header { margin-bottom: 20px; }
+.search-box {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 11px; min-height: 40px;
+    border: 1px solid var(--border); border-radius: 8px;
+    color: #929bad; background: white;
+}
+.search-box input {
+    width: 160px; max-width: 100%;
+    border: 0; outline: none; color: #344054;
+    font-size: 12px; background: transparent;
+}
+.table-wrapper { width: 100%; overflow-x: auto; }
+.assets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.assets-table th {
+    padding: 13px 14px; text-align: left;
+    background: #f8f9fc; color: #758095;
+    font-size: 10px; text-transform: uppercase; letter-spacing: .6px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.assets-table td {
+    padding: 15px 14px; border-bottom: 1px solid #edf0f5;
+    color: #596579; white-space: nowrap;
+}
+.assets-table tbody tr:hover { background: #fbfcfe; }
+.assets-table td strong { color: #273247; }
+.asset-name { display: flex; align-items: center; gap: 10px; }
+.asset-table-icon {
+    width: 34px; height: 34px; display: grid; place-items: center;
+    border-radius: 8px; color: #997638; background: #fbf3e4;
+}
+.status-badge {
+    display: inline-block; padding: 5px 9px; border-radius: 20px;
+    color: #16764f; background: #e9f8f0; font-size: 10px; font-weight: 700;
+}
+.asset-value { font-weight: 750; color: #263247 !important; }
+.muted-text { color: #8b94a4; font-size: 11px; }
+.empty-table { text-align: center !important; padding: 35px 15px !important; }
+.empty-table i { display: block; margin-bottom: 10px; font-size: 25px; color: #c4cad5; }
+.empty-table strong, .empty-table span { display: block; margin: 5px; }
+.table-footer {
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding-top: 15px; color: #8b94a4; font-size: 10px;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px; margin-bottom: 26px;
+}
+.service-card { padding: 22px; }
+.service-icon {
+    width: 43px; height: 43px; display: grid; place-items: center;
+    background: #fbf2df; color: #997638; border-radius: 11px;
+    margin-bottom: 15px; font-size: 17px;
+}
+.service-card h2 { margin: 0 0 9px; font-size: 15px; }
+.service-card p { min-height: 38px; margin: 0 0 16px; color: #778195; font-size: 12px; line-height: 1.6; }
+.service-link {
+    display: inline-flex; gap: 9px; align-items: center;
+    color: #8e6b30; font-size: 12px; font-weight: 750;
+}
+.service-note { color: #778195; font-size: 10px; line-height: 1.5; }
+
+.support-panel {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 26px;
+    background: #182235; color: white; border-color: #182235;
+}
+.support-content { display: flex; align-items: center; gap: 15px; }
+.support-icon {
+    width: 48px; height: 48px; display: grid; place-items: center;
+    border-radius: 12px; background: rgba(197,160,89,.18);
+    color: #e4c27e; font-size: 20px;
+}
+.support-panel h2 { color: white; }
+.support-panel p { margin: 0; color: #c2cad7; font-size: 12px; }
+
+.profile-panel { margin-bottom: 20px; }
+.profile-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 24px;
+}
+.profile-field { padding: 15px 0; border-bottom: 1px solid #edf0f5; min-width: 0; }
+.profile-field span { display: block; margin-bottom: 7px; color: #828c9e; font-size: 11px; }
+.profile-field strong { color: #273247; font-size: 13px; overflow-wrap: anywhere; }
+.profile-actions { margin-top: 18px; }
+
+.integration-notice {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 15px; border: 1px solid #e7e0cf; border-radius: 10px;
+    color: #79633a; background: #fffdf8; margin-bottom: 20px;
+}
+.integration-notice > i { margin-top: 3px; }
+.integration-notice strong { font-size: 12px; }
+.integration-notice p { margin: 5px 0 0; font-size: 11px; line-height: 1.7; }
+
+.dashboard-footer {
+    display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    padding: 14px 0; color: #8a94a5; font-size: 10px;
+}
+.message-stack { margin-bottom: 18px; }
+.portal-message {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px 14px; margin-bottom: 8px; border-radius: 8px;
+    background: white; border: 1px solid var(--border); font-size: 12px;
+}
+.message-success { border-left: 4px solid #16845b; }
+.message-error { border-left: 4px solid #c24141; }
+.message-warning { border-left: 4px solid #c58b28; }
+.message-info { border-left: 4px solid #376bb7; }
+.message-close { border: 0; background: transparent; cursor: pointer; color: #667085; }
+
+@media (max-width: 1100px) {
+    .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 650px) {
+    .client-dashboard { padding: 16px 12px; }
+    .dashboard-header { align-items: flex-start; }
+    .header-actions { width: 100%; }
+    .header-actions > * { flex: 1; }
+    .metrics-grid, .status-grid, .service-grid, .profile-grid { grid-template-columns: 1fr; }
+    .metric-card { padding: 17px; }
+    .panel { padding: 16px; }
+    .section-heading { align-items: flex-start; }
+    .valuation-control { width: 100%; justify-content: space-between; }
+    .valuation-control select { flex: 1; }
+    .holdings-actions { width: 100%; }
+    .search-box { flex: 1; min-width: 0; }
+    .search-box input { width: 100%; min-width: 0; }
+    .holdings-actions .btn-outline { flex-shrink: 0; }
+    .chart-container { height: 250px; }
+    .support-panel .btn-primary { width: 100%; }
+    .support-content { align-items: flex-start; }
+}
+
+@media print {
+    .client-dashboard { padding: 0; background: white; }
+    .header-actions, .quick-navigation, .holdings-actions,
+    .profile-actions, .support-panel .btn-primary { display: none !important; }
+    .panel, .metric-card, .status-card { box-shadow: none; break-inside: avoid; }
+    .charts-grid { grid-template-columns: 1fr 1fr; }
+    body { padding-left: 0 !important; }
+}
+</style>
+
+<script>
+(function () {
+    "use strict";
+
+    const dashboard = document.getElementById("clientDashboard");
+    if (!dashboard) return;
+
+    // Parse JSON strings supplied by the Django dashboard view.
+    function parseJson(value, fallback) {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    const distributionLabels = parseJson(
+        '{{ chart_dist_labels|default:"[]"|escapejs }}',
+        []
+    );
+    const distributionValues = parseJson(
+        '{{ chart_dist_data|default:"[]"|escapejs }}',
+        []
+    );
+    const historyLabels = parseJson(
+        '{{ chart_hist_labels|default:"[]"|escapejs }}',
+        []
+    );
+    const historyValues = parseJson(
+        '{{ chart_hist_data|default:"[]"|escapejs }}',
+        []
+    );
+
+    const donutCanvas = document.getElementById("assetDonutChart");
+    const lineCanvas = document.getElementById("performanceLineChart");
+
+    // Allocation chart: show a useful empty state instead of a misleading chart.
+    if (window.Chart && donutCanvas) {
+        const hasAllocation = distributionLabels.length > 0 &&
+            distributionValues.length > 0 &&
+            distributionValues.some(value => Number(value) > 0);
+
+        if (hasAllocation) {
+            new Chart(donutCanvas, {
+                type: "doughnut",
+                data: {
+                    labels: distributionLabels,
+                    datasets: [{
+                        data: distributionValues,
+                        backgroundColor: [
+                            "#C5A059", "#263247", "#4B78A8",
+                            "#5D9B82", "#9878BE", "#D6DCE5"
+                        ],
+                        borderColor: "#ffffff",
+                        borderWidth: 3,
+                        hoverOffset: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "66%",
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: { usePointStyle: true, boxWidth: 8, padding: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return " " + context.label + ": " +
+                                        Number(context.raw).toLocaleString(undefined, {
+                                            maximumFractionDigits: 2
+                                        });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            donutCanvas.hidden = true;
+            document.getElementById("allocationFallback").hidden = false;
+        }
+    } else if (donutCanvas) {
+        donutCanvas.hidden = true;
+        document.getElementById("allocationFallback").hidden = false;
+    }
+
+    // Historical chart: only draw when actual historical points are available.
+    if (window.Chart && lineCanvas &&
+        historyLabels.length > 0 &&
+        historyValues.length > 0) {
+
+        new Chart(lineCanvas, {
+            type: "line",
+            data: {
+                labels: historyLabels,
+                datasets: [{
+                    label: "Portfolio valuation",
+                    data: historyValues,
+                    borderColor: "#C5A059",
+                    backgroundColor: "rgba(197,160,89,.13)",
+                    borderWidth: 2,
+                    fill: true,
+                    tension: .3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: "index" },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: "#eef1f5" },
+                        ticks: {
+                            callback: value => Number(value).toLocaleString()
+                        }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    } else if (lineCanvas) {
+        lineCanvas.hidden = true;
+        document.getElementById("performanceFallback").hidden = false;
+    }
+
+    // Switch the main metric between two real values already supplied by Django.
+    const valuationMode = document.getElementById("valuationMode");
+    const primaryValuation = document.getElementById("primaryValuation");
+
+    const valuationValues = {
+        current: Number("{{ summary.total_current_value|default:0 }}"),
+        invested: Number("{{ summary.total_purchase_value|default:0 }}")
+    };
+
+    function updateValuation() {
+        const value = valuationValues[valuationMode.value];
+        primaryValuation.textContent = "$" + (
+            Number.isFinite(value) ? value : 0
+        ).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    valuationMode.addEventListener("change", updateValuation);
+
+    // Search the visible asset rows.
+    const searchInput = document.getElementById("assetSearch");
+    const assetRows = Array.from(
+        document.querySelectorAll("#assetsTable .asset-row")
+    );
+    const noResults = document.getElementById("noSearchResults");
+    const assetCount = document.getElementById("assetCount");
+
+    function filterAssets() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+
+        assetRows.forEach(row => {
+            const matches = row.textContent.toLowerCase().includes(query);
+            row.hidden = !matches;
+            if (matches) visible++;
+        });
+
+        noResults.hidden = visible !== 0 || assetRows.length === 0;
+        assetCount.textContent = visible + " matching asset(s)";
+    }
+
+    searchInput.addEventListener("input", filterAssets);
+
+    // Export only the currently visible table rows, with CSV escaping.
+    document.getElementById("exportAssets").addEventListener("click", function () {
+        const visibleRows = assetRows.filter(row => !row.hidden);
+
+        if (!visibleRows.length) {
+            alert("There are no visible assets to export.");
+            return;
+        }
+
+        function csvEscape(value) {
+            return '"' + String(value).replace(/"/g, '""') + '"';
+        }
+
+        const table = document.getElementById("assetsTable");
+        const headings = Array.from(table.querySelectorAll("thead th"))
+            .map(cell => csvEscape(cell.innerText.trim()));
+
+        const rows = visibleRows.map(row =>
+            Array.from(row.querySelectorAll("td"))
+                .map(cell => csvEscape(cell.innerText.trim()))
+                .join(",")
+        );
+
+        const csv = "\uFEFF" + [headings.join(","), ...rows].join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "my_registered_assets.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
+
+    // Refresh the page to retrieve the latest server-side information.
+    document.getElementById("refreshDashboard").addEventListener("click", function () {
+        window.location.reload();
+    });
+
+    // Dismiss individual Django messages.
+    document.querySelectorAll(".message-close").forEach(button => {
+        button.addEventListener("click", function () {
+            button.closest(".portal-message").remove();
+        });
+    });
+})();
+</script>
+{% endblock %}
+```

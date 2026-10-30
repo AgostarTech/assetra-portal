@@ -1,0 +1,34 @@
+﻿import os
+
+canned_path = "templates/support/canned_responses.html"
+os.makedirs("templates/support", exist_ok=True)
+
+html_content = """{% extends "base.html" %}
+{% block title %}Canned Responses - Asset Portal{% endblock %}
+{% block page_title %}Help Desk Canned Response Templates{% endblock %}
+
+{% block content %}
+<div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; color: #1a1a1a;">Predefined Agent Reply Templates</h3>
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Quickly and uniformly answer common ticket queries using standardized enterprise templates[cite: 1].</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+        <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 20px; border-radius: 6px;">
+            <h4 style="margin: 0 0 8px 0; color: #1a1a1a;">KYC Document Resubmission</h4>
+            <p style="font-size: 13px; color: #666; margin: 0 0 15px 0;">"Dear Client, your submitted identity document was blurry. Please upload a high-resolution color scan (PDF or PNG) to proceed."</p>
+            <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); alert('Template copied to clipboard!');" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px;">Copy Template</button>
+        </div>
+        <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 20px; border-radius: 6px;">
+            <h4 style="margin: 0 0 8px 0; color: #1a1a1a;">Asset Valuation Audit</h4>
+            <p style="font-size: 13px; color: #666; margin: 0 0 15px 0;">"Dear Client, your asset valuation requires an independent appraisal certificate to satisfy annual compliance standards."</p>
+            <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); alert('Template copied to clipboard!');" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px;">Copy Template</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+"""
+
+with open(canned_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("SUCCESS: Help Desk Canned Responses template created successfully!")

@@ -1,0 +1,10 @@
+asgiref==3.12.1
+colorama==0.4.6
+Django==4.2.30
+djangorestframework==3.18.3
+mysqlclient==2.3.0
+PyOTP==2.10.0
+python-decouple==3.8
+qrcode==8.2
+sqlparse==0.6.0
+tzdata==2026.5

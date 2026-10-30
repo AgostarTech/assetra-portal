@@ -1,0 +1,852 @@
+
+{% extends 'base_public.html' %}
+
+{% block title %}About Our Firm | Private Wealth{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --about-bg: #080d16;
+        --about-panel: #101827;
+        --about-panel-light: #141f30;
+        --about-gold: #d8b46a;
+        --about-gold-light: #f0d69b;
+        --about-text: #f5f2eb;
+        --about-muted: #a5afbf;
+        --about-border: rgba(216, 180, 106, 0.19);
+    }
+
+    .about-page {
+        background: var(--about-bg);
+        color: var(--about-text);
+        overflow: hidden;
+        font-family: Inter, "Segoe UI", sans-serif;
+    }
+
+    .about-page * {
+        box-sizing: border-box;
+    }
+
+    .about-container {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+    }
+
+    .about-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--about-gold);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .about-eyebrow::before {
+        content: "";
+        display: block;
+        width: 28px;
+        height: 1px;
+        background: var(--about-gold);
+    }
+
+    .about-gold {
+        color: var(--about-gold-light);
+    }
+
+    .about-hero {
+        position: relative;
+        padding: 110px 0 100px;
+        background:
+            radial-gradient(ellipse at 82% 25%, rgba(216,180,106,.11), transparent 32%),
+            radial-gradient(ellipse at 8% 90%, rgba(42,75,117,.18), transparent 38%),
+            var(--about-bg);
+        border-bottom: 1px solid var(--about-border);
+    }
+
+    .about-hero-grid {
+        display: grid;
+        grid-template-columns: 1.1fr .9fr;
+        align-items: center;
+        gap: 70px;
+    }
+
+    .about-hero h1 {
+        max-width: 760px;
+        margin: 25px 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(43px, 6vw, 76px);
+        line-height: 1.08;
+        font-weight: 400;
+        letter-spacing: -2px;
+    }
+
+    .about-hero h1 span {
+        color: var(--about-gold-light);
+        font-style: italic;
+    }
+
+    .about-lead {
+        max-width: 620px;
+        color: var(--about-muted);
+        font-size: 16px;
+        line-height: 1.95;
+    }
+
+    .about-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 32px;
+    }
+
+    .about-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 49px;
+        padding: 0 23px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .7px;
+        transition: .25s ease;
+    }
+
+    .about-btn-primary {
+        background: var(--about-gold);
+        color: #11151c;
+        border: 1px solid var(--about-gold);
+    }
+
+    .about-btn-primary:hover {
+        background: var(--about-gold-light);
+        transform: translateY(-2px);
+    }
+
+    .about-btn-secondary {
+        color: var(--about-text);
+        border: 1px solid rgba(255,255,255,.19);
+    }
+
+    .about-btn-secondary:hover {
+        border-color: var(--about-gold);
+        color: var(--about-gold-light);
+    }
+
+    .about-visual {
+        position: relative;
+        min-height: 390px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .about-orbit {
+        position: absolute;
+        width: 330px;
+        height: 330px;
+        border: 1px solid rgba(216,180,106,.22);
+        border-radius: 50%;
+    }
+
+    .about-orbit::before,
+    .about-orbit::after {
+        content: "";
+        position: absolute;
+        border: 1px solid rgba(216,180,106,.12);
+        border-radius: 50%;
+    }
+
+    .about-orbit::before {
+        inset: 25px;
+    }
+
+    .about-orbit::after {
+        inset: 55px;
+    }
+
+    .about-emblem {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 205px;
+        height: 245px;
+        border: 1px solid rgba(216,180,106,.45);
+        background: linear-gradient(145deg, #172337, #0c121e);
+        box-shadow: 0 25px 80px rgba(0,0,0,.3);
+        text-align: center;
+    }
+
+    .about-emblem-mark {
+        color: var(--about-gold-light);
+        font-family: Georgia, serif;
+        font-size: 67px;
+        line-height: 1;
+    }
+
+    .about-emblem-rule {
+        width: 55px;
+        height: 1px;
+        margin: 20px 0 15px;
+        background: var(--about-gold);
+    }
+
+    .about-emblem-label {
+        color: var(--about-muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        line-height: 1.8;
+        text-transform: uppercase;
+    }
+
+    .about-float-card {
+        position: absolute;
+        right: 0;
+        bottom: 35px;
+        max-width: 195px;
+        padding: 17px 19px;
+        border: 1px solid var(--about-border);
+        background: rgba(16,24,39,.95);
+    }
+
+    .about-float-card strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--about-gold-light);
+        font-family: Georgia, serif;
+        font-size: 19px;
+        font-weight: 400;
+    }
+
+    .about-float-card span {
+        color: var(--about-muted);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .about-section {
+        padding: 90px 0;
+    }
+
+    .about-section-heading {
+        max-width: 730px;
+        margin: 0 auto 48px;
+        text-align: center;
+    }
+
+    .about-section-heading .about-eyebrow {
+        justify-content: center;
+    }
+
+    .about-section-heading h2,
+    .about-story-copy h2,
+    .about-closing h2 {
+        margin: 19px 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(33px, 4vw, 49px);
+        font-weight: 400;
+        line-height: 1.2;
+        letter-spacing: -1px;
+    }
+
+    .about-section-heading p,
+    .about-story-copy p {
+        color: var(--about-muted);
+        font-size: 14px;
+        line-height: 1.95;
+    }
+
+    .about-principles {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .about-principle {
+        position: relative;
+        min-height: 245px;
+        padding: 30px;
+        border: 1px solid var(--about-border);
+        background: linear-gradient(145deg, var(--about-panel-light), var(--about-panel));
+        transition: transform .25s ease, border-color .25s ease;
+    }
+
+    .about-principle:hover {
+        transform: translateY(-5px);
+        border-color: rgba(216,180,106,.55);
+    }
+
+    .about-principle-number {
+        color: var(--about-gold);
+        font-family: Georgia, serif;
+        font-size: 30px;
+    }
+
+    .about-principle h3 {
+        margin: 22px 0 12px;
+        color: var(--about-text);
+        font-family: Georgia, serif;
+        font-size: 23px;
+        font-weight: 400;
+    }
+
+    .about-principle p {
+        margin: 0;
+        color: var(--about-muted);
+        font-size: 13px;
+        line-height: 1.85;
+    }
+
+    .about-story {
+        background: #0c1320;
+        border-top: 1px solid rgba(255,255,255,.05);
+        border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .about-story-grid {
+        display: grid;
+        grid-template-columns: .9fr 1.1fr;
+        gap: 75px;
+        align-items: center;
+    }
+
+    .about-story-art {
+        position: relative;
+        min-height: 355px;
+        padding: 35px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background:
+            linear-gradient(180deg, rgba(8,13,22,.1), rgba(8,13,22,.96)),
+            radial-gradient(ellipse at 45% 20%, rgba(216,180,106,.24), transparent 48%),
+            linear-gradient(135deg, #1b2b41, #101827);
+        border: 1px solid var(--about-border);
+    }
+
+    .about-story-art::before {
+        content: "";
+        position: absolute;
+        top: 35px;
+        left: 35px;
+        right: 35px;
+        height: 150px;
+        border: 1px solid rgba(216,180,106,.24);
+        background:
+            linear-gradient(135deg, transparent 49.7%, rgba(216,180,106,.16) 50%, transparent 50.4%),
+            linear-gradient(45deg, transparent 49.7%, rgba(216,180,106,.12) 50%, transparent 50.4%);
+    }
+
+    .about-story-art small {
+        position: relative;
+        z-index: 1;
+        color: var(--about-gold);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .about-story-art strong {
+        position: relative;
+        z-index: 1;
+        display: block;
+        margin-top: 13px;
+        font-family: Georgia, serif;
+        font-size: 29px;
+        font-weight: 400;
+        line-height: 1.3;
+    }
+
+    .about-story-copy .about-eyebrow {
+        margin-bottom: 5px;
+    }
+
+    .about-story-copy h2 {
+        margin-bottom: 20px;
+    }
+
+    .about-story-copy p {
+        margin: 0 0 17px;
+    }
+
+    .about-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 26px;
+    }
+
+    .about-value {
+        padding: 10px 13px;
+        border: 1px solid var(--about-border);
+        color: var(--about-gold-light);
+        font-size: 11px;
+        letter-spacing: .4px;
+    }
+
+    .about-pillars {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border: 1px solid var(--about-border);
+    }
+
+    .about-pillar {
+        padding: 28px 22px;
+        border-right: 1px solid var(--about-border);
+    }
+
+    .about-pillar:last-child {
+        border-right: 0;
+    }
+
+    .about-pillar h3 {
+        margin: 0 0 11px;
+        color: var(--about-gold-light);
+        font-family: Georgia, serif;
+        font-size: 20px;
+        font-weight: 400;
+    }
+
+    .about-pillar p {
+        margin: 0;
+        color: var(--about-muted);
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .about-closing {
+        padding: 80px 20px;
+        border-top: 1px solid var(--about-border);
+        background:
+            radial-gradient(ellipse at 50% 100%, rgba(216,180,106,.12), transparent 55%),
+            #0b111c;
+        text-align: center;
+    }
+
+    .about-closing h2 {
+        max-width: 760px;
+        margin: 20px auto;
+    }
+
+    .about-closing p {
+        max-width: 620px;
+        margin: 0 auto;
+        color: var(--about-muted);
+        font-size: 14px;
+        line-height: 1.9;
+    }
+
+    .about-closing .about-actions {
+        justify-content: center;
+    }
+
+    @media (max-width: 900px) {
+        .about-hero-grid,
+        .about-story-grid {
+            grid-template-columns: 1fr;
+            gap: 35px;
+        }
+
+        .about-hero {
+            padding: 75px 0;
+        }
+
+        .about-visual {
+            min-height: 340px;
+        }
+
+        .about-principles {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .about-pillars {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .about-pillar:nth-child(2) {
+            border-right: 0;
+        }
+
+        .about-pillar:nth-child(-n+2) {
+            border-bottom: 1px solid var(--about-border);
+        }
+    }
+
+    @media (max-width: 560px) {
+        .about-container {
+            width: min(100% - 30px, 1180px);
+        }
+
+        .about-hero h1 {
+            letter-spacing: -1px;
+        }
+
+        .about-principles {
+            grid-template-columns: 1fr;
+        }
+
+        .about-pillars {
+            grid-template-columns: 1fr;
+        }
+
+        .about-pillar,
+        .about-pillar:nth-child(2) {
+            border-right: 0;
+            border-bottom: 1px solid var(--about-border);
+        }
+
+        .about-pillar:last-child {
+            border-bottom: 0;
+        }
+
+        .about-orbit {
+            width: 275px;
+            height: 275px;
+        }
+
+        .about-emblem {
+            width: 175px;
+            height: 215px;
+        }
+
+        .about-float-card {
+            right: 0;
+            bottom: 5px;
+        }
+
+        .about-section {
+            padding: 65px 0;
+        }
+
+        .about-story-art {
+            min-height: 300px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .about-page *,
+        .about-page *::before,
+        .about-page *::after {
+            transition: none !important;
+            animation: none !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+
+<div class="about-page">
+
+    <!-- HERO -->
+    <section class="about-hero">
+        <div class="about-container about-hero-grid">
+
+            <div>
+                <div class="about-eyebrow">About Our Firm</div>
+
+                <h1>
+                    A clearer view of wealth.
+                    <span>A more considered future.</span>
+                </h1>
+
+                <p class="about-lead">
+                    Private Wealth is designed to bring structure, visibility,
+                    and accountability to asset and portfolio management.
+                    Our platform helps authorized users organize financial
+                    information, oversee portfolios, manage documents, and
+                    make more informed decisions from one connected workspace.
+                </p>
+
+                <div class="about-actions">
+                    <a href="{% url 'signup' %}"
+                       class="about-btn about-btn-primary">
+                        EXPLORE THE PLATFORM
+                    </a>
+
+                    <a href="{% url 'login' %}"
+                       class="about-btn about-btn-secondary">
+                        SIGN IN
+                    </a>
+                </div>
+            </div>
+
+            <div class="about-visual" aria-label="Private Wealth brand illustration">
+                <div class="about-orbit"></div>
+
+                <div class="about-emblem">
+                    <div class="about-emblem-mark">P</div>
+                    <div class="about-emblem-rule"></div>
+                    <div class="about-emblem-label">
+                        Private<br>Wealth
+                    </div>
+                </div>
+
+                <div class="about-float-card">
+                    <strong>Clarity by design</strong>
+                    <span>
+                        Organized information. Defined responsibilities.
+                        Greater visibility.
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- INTRODUCTION -->
+    <section class="about-section">
+        <div class="about-container">
+
+            <div class="about-section-heading">
+                <div class="about-eyebrow">Who We Are</div>
+
+                <h2>
+                    Built around the principles of
+                    <span class="about-gold">responsible oversight.</span>
+                </h2>
+
+                <p>
+                    Managing assets requires more than keeping records.
+                    It requires a consistent approach to information,
+                    controlled access, documentation, and review.
+                    Private Wealth brings these important activities
+                    into a structured digital environment.
+                </p>
+            </div>
+
+            <div class="about-principles">
+
+                <article class="about-principle">
+                    <div class="about-principle-number">01</div>
+                    <h3>Clarity</h3>
+                    <p>
+                        Present portfolio and asset information in an
+                        organized format so authorized users can understand
+                        records, review details, and follow relevant activity.
+                    </p>
+                </article>
+
+                <article class="about-principle">
+                    <div class="about-principle-number">02</div>
+                    <h3>Accountability</h3>
+                    <p>
+                        Support defined user responsibilities, documented
+                        processes, and appropriate oversight of activities
+                        within the platform.
+                    </p>
+                </article>
+
+                <article class="about-principle">
+                    <div class="about-principle-number">03</div>
+                    <h3>Organization</h3>
+                    <p>
+                        Keep asset records, supporting documents, and
+                        portfolio information within a more consistent
+                        management workflow.
+                    </p>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- OUR APPROACH -->
+    <section class="about-section about-story">
+        <div class="about-container about-story-grid">
+
+            <div class="about-story-art">
+                <small>Our approach</small>
+                <strong>
+                    Thoughtful systems.<br>
+                    Structured information.<br>
+                    Informed decisions.
+                </strong>
+            </div>
+
+            <div class="about-story-copy">
+                <div class="about-eyebrow">How We Work</div>
+
+                <h2>
+                    Turning complexity into
+                    <span class="about-gold">a clearer process.</span>
+                </h2>
+
+                <p>
+                    Asset management information can become difficult to
+                    coordinate when records, documents, and responsibilities
+                    are spread across disconnected processes. A structured
+                    platform can help bring these elements together.
+                </p>
+
+                <p>
+                    Private Wealth is built around a practical workflow:
+                    maintain records, organize supporting documents,
+                    provide role-appropriate access, and make relevant
+                    information available to the people responsible for it.
+                </p>
+
+                <p>
+                    The objective is to support better organization and
+                    oversight while keeping access to information aligned
+                    with assigned responsibilities.
+                </p>
+
+                <div class="about-values">
+                    <span class="about-value">Structured Records</span>
+                    <span class="about-value">Access Control</span>
+                    <span class="about-value">Document Management</span>
+                    <span class="about-value">Portfolio Visibility</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PLATFORM PILLARS -->
+    <section class="about-section">
+        <div class="about-container">
+
+            <div class="about-section-heading">
+                <div class="about-eyebrow">Our Foundations</div>
+
+                <h2>
+                    The foundations of a
+                    <span class="about-gold">well-managed portfolio.</span>
+                </h2>
+
+                <p>
+                    The platform is organized around four connected areas
+                    that support day-to-day asset and portfolio administration.
+                </p>
+            </div>
+
+            <div class="about-pillars">
+
+                <article class="about-pillar">
+                    <h3>Asset Records</h3>
+                    <p>
+                        Maintain consistent records of assets and their
+                        associated information.
+                    </p>
+                </article>
+
+                <article class="about-pillar">
+                    <h3>Portfolio Oversight</h3>
+                    <p>
+                        Review portfolio information through a centralized
+                        management interface.
+                    </p>
+                </article>
+
+                <article class="about-pillar">
+                    <h3>Document Governance</h3>
+                    <p>
+                        Organize supporting documents and apply appropriate
+                        access permissions.
+                    </p>
+                </article>
+
+                <article class="about-pillar">
+                    <h3>Controlled Access</h3>
+                    <p>
+                        Align platform permissions with defined user roles
+                        and responsibilities.
+                    </p>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SECURITY AND TRUST -->
+    <section class="about-section about-story">
+        <div class="about-container">
+
+            <div class="about-section-heading">
+                <div class="about-eyebrow">Trust & Governance</div>
+
+                <h2>
+                    Access should be
+                    <span class="about-gold">intentional.</span>
+                </h2>
+
+                <p>
+                    Financial and portfolio information should be handled
+                    through carefully defined procedures. The platform's
+                    implementation should support appropriate permissions,
+                    secure authentication, responsible document handling,
+                    and reviewable administrative activity.
+                </p>
+            </div>
+
+            <div class="about-principles">
+
+                <article class="about-principle">
+                    <div class="about-principle-number">A</div>
+                    <h3>Role-Based Permissions</h3>
+                    <p>
+                        Give users access according to their assigned
+                        responsibilities and the requirements of their role.
+                    </p>
+                </article>
+
+                <article class="about-principle">
+                    <div class="about-principle-number">B</div>
+                    <h3>Responsible Data Handling</h3>
+                    <p>
+                        Apply suitable controls to protect sensitive records
+                        and limit unnecessary exposure of information.
+                    </p>
+                </article>
+
+                <article class="about-principle">
+                    <div class="about-principle-number">C</div>
+                    <h3>Reviewable Activity</h3>
+                    <p>
+                        Where implemented, maintain appropriate audit records
+                        to support reviews of important system activities.
+                    </p>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CLOSING CTA -->
+    <section class="about-closing">
+        <div class="about-eyebrow">Private Wealth</div>
+
+        <h2>
+            A more structured way to
+            <span class="about-gold">manage what matters.</span>
+        </h2>
+
+        <p>
+            Explore a centralized environment for asset records,
+            portfolio information, and document administration.
+            Begin by accessing your account or creating one.
+        </p>
+
+        <div class="about-actions">
+            <a href="{% url 'signup' %}"
+               class="about-btn about-btn-primary">
+                GET STARTED
+            </a>
+
+            <a href="{% url 'login' %}"
+               class="about-btn about-btn-secondary">
+                ACCESS YOUR ACCOUNT
+            </a>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

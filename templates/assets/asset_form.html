@@ -1,0 +1,136 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Asset Portal{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #cfa76e;">
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if asset_form.errors or specific_form.errors or document_form.errors or asset_form.non_field_errors or specific_form.non_field_errors or document_form.non_field_errors %}
+            <div style="background: #fff0f0; color: #8b1e1e; border: 1px solid #efb6b6; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <strong>Please correct the following errors:</strong>
+
+                {% for error in asset_form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+
+                {% for error in specific_form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+
+                {% for error in document_form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+
+                {% for field in asset_form %}
+                    {% for error in field.errors %}
+                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+
+                {% for field in specific_form %}
+                    {% for error in field.errors %}
+                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+
+                {% for field in document_form %}
+                    {% for error in field.errors %}
+                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- GENERAL ASSET DETAILS -->
+        <h3 style="color: #1a1a1a; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            General Financial Details
+        </h3>
+
+        {{ asset_form.as_p }}
+
+        <!-- CATEGORY-SPECIFIC DETAILS -->
+        <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            Specific Category Details
+        </h3>
+
+        {{ specific_form.as_p }}
+
+        <!-- SUPPORTING DOCUMENT UPLOAD -->
+        <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            Supporting Documents
+        </h3>
+
+        <p style="color: #666; font-size: 14px; line-height: 1.6;">
+            Upload a document associated with this asset, such as a title deed,
+            purchase agreement, valuation report, registration certificate,
+            share certificate, or bond certificate.
+        </p>
+
+        <div style="background: #faf8f4; border: 1px solid #eee2d0; padding: 18px; border-radius: 6px; margin-bottom: 20px;">
+            {{ document_form.as_p }}
+
+            <p style="color: #666; font-size: 13px; margin-bottom: 0;">
+                Accepted formats: PDF, JPG, JPEG, PNG. Maximum file size: 10 MB per document.
+                Leave the file field empty if you do not want to upload a document.
+            </p>
+        </div>
+
+        <!-- EXISTING DOCUMENTS -->
+        {% if asset %}
+            <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                Previously Uploaded Documents
+            </h3>
+
+            {% for document in asset.supporting_documents.all %}
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border: 1px solid #eee; padding: 14px; margin-bottom: 10px; border-radius: 6px;">
+
+                    <div>
+                        <strong style="color: #1a1a1a;">
+                            {{ document.title }}
+                        </strong>
+
+                        <p style="color: #666; font-size: 13px; margin: 5px 0;">
+                            {{ document.get_document_type_display }}
+                        </p>
+
+                        <p style="color: #777; font-size: 12px; margin: 0;">
+                            Uploaded: {{ document.uploaded_at|date:"d M Y, H:i" }}
+                        </p>
+                    </div>
+
+                    <span style="font-size: 12px; color: #8a6a35;">
+                        Document saved
+                    </span>
+                </div>
+            {% empty %}
+                <p style="color: #777;">
+                    No supporting documents have been uploaded for this asset yet.
+                </p>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ACTION BUTTONS -->
+        <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+
+            <button
+                type="submit"
+                style="background-color: #1a1a1a; color: #cfa76e; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                Save Asset
+            </button>
+
+            <a
+                href="{% url 'assets:asset_list' %}"
+                style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                Cancel
+            </a>
+
+        </div>
+    </form>
+
+</div>
+{% endblock %}

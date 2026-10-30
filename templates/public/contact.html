@@ -1,0 +1,711 @@
+
+{% extends "base_public.html" %}
+{% block title %}Contact Support | Private Wealth{% endblock %}
+{% block content %}
+
+<style>
+    .cs-page {
+        --cs-bg: #080d17;
+        --cs-panel: #101827;
+        --cs-gold: #d7b77a;
+        --cs-gold-light: #f0d9a5;
+        --cs-text: #f5f4ef;
+        --cs-muted: #a2adbd;
+        --cs-border: rgba(215,183,122,.20);
+        background: var(--cs-bg);
+        color: var(--cs-text);
+        font-family: inherit;
+        overflow: hidden;
+    }
+
+    .cs-page * { box-sizing: border-box; }
+
+    .cs-container {
+        width: min(1120px, calc(100% - 36px));
+        margin: auto;
+    }
+
+    .cs-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--cs-gold);
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+    }
+
+    .cs-eyebrow::before {
+        content: "";
+        width: 25px;
+        height: 1px;
+        background: var(--cs-gold);
+    }
+
+    .cs-hero {
+        position: relative;
+        padding: 85px 0 75px;
+        text-align: center;
+        border-bottom: 1px solid var(--cs-border);
+        background:
+            radial-gradient(ellipse at 50% 0,
+                rgba(215,183,122,.12), transparent 60%),
+            linear-gradient(145deg, #0d1523, var(--cs-bg));
+    }
+
+    .cs-hero h1 {
+        margin: 22px auto 18px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.8rem, 6vw, 5rem);
+        font-weight: 400;
+        line-height: 1.05;
+        letter-spacing: -.045em;
+    }
+
+    .cs-hero h1 span { color: var(--cs-gold); }
+
+    .cs-hero p {
+        max-width: 650px;
+        margin: auto;
+        color: var(--cs-muted);
+        font-size: 1rem;
+        line-height: 1.9;
+    }
+
+    .cs-breadcrumb {
+        margin-bottom: 28px;
+        color: #9ba7b7;
+        font-size: .75rem;
+        letter-spacing: .08em;
+    }
+
+    .cs-breadcrumb a {
+        color: var(--cs-gold);
+        text-decoration: none;
+    }
+
+    .cs-section { padding: 75px 0; }
+
+    .cs-contact-grid {
+        display: grid;
+        grid-template-columns: .85fr 1.15fr;
+        gap: 28px;
+        align-items: start;
+    }
+
+    .cs-intro h2,
+    .cs-form-heading h2 {
+        margin: 18px 0 14px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 3.5vw, 3rem);
+        font-weight: 400;
+        line-height: 1.15;
+    }
+
+    .cs-intro > p,
+    .cs-form-heading p {
+        color: var(--cs-muted);
+        line-height: 1.9;
+        font-size: .91rem;
+    }
+
+    .cs-info-list {
+        display: grid;
+        gap: 14px;
+        margin-top: 30px;
+    }
+
+    .cs-info-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 5px;
+        background: linear-gradient(145deg,
+            rgba(255,255,255,.035), rgba(255,255,255,.01));
+    }
+
+    .cs-icon {
+        width: 45px;
+        height: 45px;
+        flex: 0 0 45px;
+        display: grid;
+        place-items: center;
+        color: var(--cs-gold);
+        border: 1px solid var(--cs-border);
+        border-radius: 4px;
+        background: rgba(215,183,122,.06);
+    }
+
+    .cs-info-card h3 {
+        margin: 2px 0 7px;
+        font-size: .9rem;
+        font-weight: 700;
+    }
+
+    .cs-info-card p {
+        margin: 0;
+        color: var(--cs-muted);
+        font-size: .82rem;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+    }
+
+    .cs-info-card a {
+        color: var(--cs-gold-light);
+        text-decoration: none;
+    }
+
+    .cs-info-card a:hover { text-decoration: underline; }
+
+    .cs-form-panel {
+        padding: clamp(22px, 4vw, 38px);
+        border: 1px solid var(--cs-border);
+        border-radius: 6px;
+        background:
+            radial-gradient(ellipse at 100% 0,
+                rgba(215,183,122,.06), transparent 45%),
+            var(--cs-panel);
+        box-shadow: 0 24px 65px rgba(0,0,0,.18);
+    }
+
+    .cs-form-heading { margin-bottom: 28px; }
+
+    .cs-form-heading h2 { font-size: 2rem; }
+
+    .cs-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 19px;
+    }
+
+    .cs-field { min-width: 0; }
+
+    .cs-field-full { grid-column: 1 / -1; }
+
+    .cs-field label {
+        display: block;
+        margin-bottom: 9px;
+        color: #e6e8ed;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    .cs-field input,
+    .cs-field select,
+    .cs-field textarea {
+        width: 100%;
+        min-height: 49px;
+        padding: 13px 14px;
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 3px;
+        outline: none;
+        color: var(--cs-text);
+        background: #0a111e;
+        font: inherit;
+        font-size: .84rem;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .cs-field textarea {
+        min-height: 145px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    .cs-field select option {
+        color: var(--cs-text);
+        background: #0a111e;
+    }
+
+    .cs-field input::placeholder,
+    .cs-field textarea::placeholder {
+        color: #758195;
+    }
+
+    .cs-field input:focus,
+    .cs-field select:focus,
+    .cs-field textarea:focus {
+        border-color: var(--cs-gold);
+        box-shadow: 0 0 0 3px rgba(215,183,122,.09);
+    }
+
+    .cs-submit {
+        width: 100%;
+        min-height: 52px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 22px;
+        padding: 14px 20px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        color: #15120b;
+        background: linear-gradient(120deg,
+            var(--cs-gold-light), var(--cs-gold));
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform .2s, background .2s;
+    }
+
+    .cs-submit:hover {
+        transform: translateY(-2px);
+        background: #f3dfb3;
+    }
+
+    .cs-form-note {
+        margin: 15px 0 0;
+        color: #8793a5;
+        font-size: .72rem;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    .cs-security-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 25px;
+        padding: 16px;
+        border: 1px solid rgba(215,183,122,.13);
+        background: rgba(215,183,122,.035);
+        color: var(--cs-muted);
+        font-size: .78rem;
+        line-height: 1.8;
+    }
+
+    .cs-security-note strong { color: var(--cs-gold-light); }
+
+    .cs-faq {
+        padding: 70px 0 85px;
+        border-top: 1px solid rgba(255,255,255,.07);
+        background: #0b111d;
+    }
+
+    .cs-faq-heading {
+        max-width: 660px;
+        margin: 0 auto 38px;
+        text-align: center;
+    }
+
+    .cs-faq-heading h2 {
+        margin: 17px 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 400;
+    }
+
+    .cs-faq-heading p {
+        color: var(--cs-muted);
+        line-height: 1.8;
+    }
+
+    .cs-faq-list {
+        max-width: 800px;
+        margin: auto;
+        border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    .cs-faq-item {
+        border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+
+    .cs-faq-item summary {
+        position: relative;
+        padding: 22px 35px 22px 0;
+        color: #eef0f4;
+        font-size: .92rem;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .cs-faq-item summary::-webkit-details-marker { display: none; }
+
+    .cs-faq-item summary::after {
+        content: "+";
+        position: absolute;
+        top: 17px;
+        right: 3px;
+        color: var(--cs-gold);
+        font-size: 1.5rem;
+        font-weight: 400;
+    }
+
+    .cs-faq-item[open] summary::after { content: "−"; }
+
+    .cs-faq-item p {
+        max-width: 700px;
+        margin: 0;
+        padding: 0 20px 22px 0;
+        color: var(--cs-muted);
+        font-size: .86rem;
+        line-height: 1.9;
+    }
+
+    .cs-bottom-cta {
+        padding: 65px 0;
+        text-align: center;
+        border-top: 1px solid var(--cs-border);
+        background:
+            radial-gradient(ellipse at 50% 100%,
+                rgba(215,183,122,.08), transparent 65%),
+            var(--cs-bg);
+    }
+
+    .cs-bottom-cta h2 {
+        margin: 15px 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 400;
+    }
+
+    .cs-bottom-cta p {
+        margin: 0 auto 25px;
+        max-width: 600px;
+        color: var(--cs-muted);
+        line-height: 1.8;
+    }
+
+    .cs-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 49px;
+        padding: 13px 23px;
+        border: 1px solid var(--cs-gold);
+        border-radius: 3px;
+        color: var(--cs-gold-light);
+        text-decoration: none;
+        font-size: .77rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        transition: background .2s, color .2s;
+    }
+
+    .cs-button:hover {
+        color: #15120b;
+        background: var(--cs-gold);
+    }
+
+    @media (max-width: 850px) {
+        .cs-contact-grid { grid-template-columns: 1fr; }
+        .cs-info-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+        .cs-container { width: calc(100% - 28px); }
+        .cs-hero { padding: 60px 0; }
+        .cs-section { padding: 52px 0; }
+        .cs-info-list { grid-template-columns: 1fr; }
+        .cs-form-grid { grid-template-columns: 1fr; }
+        .cs-field-full { grid-column: auto; }
+        .cs-button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cs-page * { transition-duration: .01ms !important; }
+    }
+</style>
+
+<main class="cs-page">
+
+    <!-- HERO -->
+    <section class="cs-hero">
+        <div class="cs-container">
+            <div class="cs-breadcrumb">
+                <a href="/">Home</a> / Support
+            </div>
+
+            <span class="cs-eyebrow">Dedicated assistance</span>
+
+            <h1>We're here to help.<br><span>Every step of the way.</span></h1>
+
+            <p>
+                Questions about your account, portfolio records, or
+                using the platform? Reach out to our support team for
+                assistance with your experience.
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTACT DETAILS AND FORM -->
+    <section class="cs-section">
+        <div class="cs-container cs-contact-grid">
+
+            <div class="cs-intro">
+                <span class="cs-eyebrow">Contact our team</span>
+
+                <h2>Clear answers.<br>Considered support.</h2>
+
+                <p>
+                    Tell us what you need help with. Include enough
+                    information for the support team to understand the
+                    issue, but do not include passwords or sensitive
+                    financial account details.
+                </p>
+
+                <div class="cs-info-list">
+
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <path d="m3 7 9 6 9-6"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Email Support</h3>
+                            <p>
+                                Use your organization's verified support
+                                email address.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 7v5l3 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Support Hours</h3>
+                            <p>
+                                Contact the team through the approved
+                                support channel for current availability.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4z"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Account Assistance</h3>
+                            <p>
+                                Get guidance with access issues and
+                                platform functionality.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M4 4h16v12H8l-4 4z"/>
+                                <path d="M8 8h8M8 11h5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Technical Questions</h3>
+                            <p>
+                                Describe errors, unexpected behavior,
+                                or difficulties using the system.
+                            </p>
+                        </div>
+                    </article>
+
+                </div>
+
+                <div class="cs-security-note">
+                    <span class="cs-check" aria-hidden="true">◆</span>
+                    <div>
+                        <strong>Protect your information.</strong>
+                        Never send your password, authentication codes,
+                        full payment credentials, or confidential
+                        portfolio documents through an unverified channel.
+                    </div>
+                </div>
+            </div>
+
+            <!--
+                FRONT-END FORM DESIGN.
+                Connect this form to a Django view before using it
+                to collect or send support requests.
+            -->
+            <div class="cs-form-panel">
+                <div class="cs-form-heading">
+                    <span class="cs-eyebrow">Send an enquiry</span>
+                    <h2>How can we assist?</h2>
+                    <p>
+                        Complete the fields below to describe your
+                        question or technical issue.
+                    </p>
+                </div>
+
+                <form method="post" action="#" id="support-contact-form">
+                    {% csrf_token %}
+
+                    <div class="cs-form-grid">
+
+                        <div class="cs-field">
+                            <label for="cs-name">Full name</label>
+                            <input
+                                type="text"
+                                id="cs-name"
+                                name="name"
+                                placeholder="Your full name"
+                                autocomplete="name"
+                                maxlength="120"
+                                required>
+                        </div>
+
+                        <div class="cs-field">
+                            <label for="cs-email">Email address</label>
+                            <input
+                                type="email"
+                                id="cs-email"
+                                name="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                maxlength="254"
+                                required>
+                        </div>
+
+                        <div class="cs-field cs-field-full">
+                            <label for="cs-category">Type of enquiry</label>
+                            <select id="cs-category" name="category" required>
+                                <option value="" selected disabled>
+                                    Select a support category
+                                </option>
+                                <option value="account">Account access</option>
+                                <option value="portfolio">Portfolio management</option>
+                                <option value="documents">Documents and records</option>
+                                <option value="technical">Technical issue</option>
+                                <option value="permissions">Permissions and access</option>
+                                <option value="other">Other enquiry</option>
+                            </select>
+                        </div>
+
+                        <div class="cs-field cs-field-full">
+                            <label for="cs-subject">Subject</label>
+                            <input
+                                type="text"
+                                id="cs-subject"
+                                name="subject"
+                                placeholder="Briefly describe your issue"
+                                maxlength="160"
+                                required>
+                        </div>
+
+                        <div class="cs-field cs-field-full">
+                            <label for="cs-message">Message</label>
+                            <textarea
+                                id="cs-message"
+                                name="message"
+                                placeholder="Describe what happened and what assistance you need..."
+                                maxlength="5000"
+                                required></textarea>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="cs-submit">
+                        Submit support request
+                        <span aria-hidden="true">↗</span>
+                    </button>
+
+                    <p class="cs-form-note">
+                        Please avoid including passwords, security codes,
+                        or unnecessary sensitive financial information.
+                    </p>
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="cs-faq">
+        <div class="cs-container">
+            <div class="cs-faq-heading">
+                <span class="cs-eyebrow">Quick guidance</span>
+                <h2>Frequently asked questions</h2>
+                <p>
+                    Find a starting point for common account and
+                    platform questions.
+                </p>
+            </div>
+
+            <div class="cs-faq-list">
+
+                <details class="cs-faq-item">
+                    <summary>What should I do if I cannot access my account?</summary>
+                    <p>
+                        Use the official account recovery process if one
+                        is available. If you remain unable to sign in,
+                        contact support through a verified channel.
+                        Never share your password or one-time codes.
+                    </p>
+                </details>
+
+                <details class="cs-faq-item">
+                    <summary>How can I report a technical problem?</summary>
+                    <p>
+                        Describe the page or feature involved, the action
+                        you took, the error message shown, and approximately
+                        when the problem occurred. Do not include private
+                        account data in screenshots or messages.
+                    </p>
+                </details>
+
+                <details class="cs-faq-item">
+                    <summary>Can I request help with portfolio records?</summary>
+                    <p>
+                        Yes. Select the portfolio management category
+                        and explain which type of record needs attention.
+                        Avoid submitting confidential documents until
+                        support confirms an approved secure channel.
+                    </p>
+                </details>
+
+                <details class="cs-faq-item">
+                    <summary>How do I request a change to account access?</summary>
+                    <p>
+                        Explain the access issue and the type of change
+                        requested. Any change should be verified and
+                        authorized according to the organization's
+                        account-management procedures.
+                    </p>
+                </details>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CLOSING CTA -->
+    <section class="cs-bottom-cta">
+        <div class="cs-container">
+            <span class="cs-eyebrow">Client access</span>
+            <h2>Need help with your account?</h2>
+            <p>
+                Return to your secure sign-in page to continue using
+                the platform.
+            </p>
+            <a href="{% url 'login' %}" class="cs-button">
+                Go to client sign in <span aria-hidden="true">→</span>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+{% endblock %}

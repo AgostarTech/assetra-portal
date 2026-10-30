@@ -1,0 +1,3640 @@
+
+
+========== config\urls.py ==========
+
+
+from django.contrib import admin
+from django.urls import path, include
+from django.views.generic import RedirectView, TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
+
+from accounts import views as accounts_views
+
+
+urlpatterns = [
+    # --------------------------------------------------
+    # PUBLIC WEBSITE
+    # --------------------------------------------------
+    path(
+        "",
+        TemplateView.as_view(template_name="public/home.html"),
+        name="home",
+    ),
+    path(
+        "about/",
+        TemplateView.as_view(template_name="public/about.html"),
+        name="about",
+    ),
+    path(
+        "solutions/",
+        TemplateView.as_view(template_name="public/solutions.html"),
+        name="solutions",
+    ),
+    path(
+        "contact/",
+        TemplateView.as_view(template_name="public/contact.html"),
+        name="contact",
+    ),
+
+    # --------------------------------------------------
+    # AUTHENTICATION AND REGISTRATION
+    # --------------------------------------------------
+    path("signup/", accounts_views.signup_view, name="signup"),
+    path("accounts/", include("django.contrib.auth.urls")),
+
+    # --------------------------------------------------
+    # DJANGO ADMIN
+    # --------------------------------------------------
+    path("admin/", admin.site.urls),
+
+    # --------------------------------------------------
+    # DASHBOARD AND PORTAL
+    # --------------------------------------------------
+    path("dashboard/", include("dashboards.urls")),
+    path(
+        "portal/",
+        RedirectView.as_view(
+            url="/dashboard/router/",
+            permanent=False,
+        ),
+        name="portal_redirect",
+    ),
+
+    # --------------------------------------------------
+    # ASSET MANAGEMENT
+    # --------------------------------------------------
+    path("assets/", include("assets.urls")),
+
+    # --------------------------------------------------
+    # OTHER SYSTEM APPS
+    # --------------------------------------------------
+    path("documents/", include("documents.urls")),
+    path("support/", include("support.urls")),
+    path("portfolios/", include("portfolios.urls")),
+    path("audit/", include("audit.urls")),
+]
+
+# Serve uploaded media files during development only.
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )
+
+
+========== config\settings.py ==========
+
+
+import os
+from pathlib import Path
+from decouple import config
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# --------------------------------------------------
+# SECURITY
+# --------------------------------------------------
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in config("ALLOWED_HOSTS", default="127.0.0.1,localhost").split(",")
+    if host.strip()
+]
+
+# --------------------------------------------------
+# APPLICATIONS
+# --------------------------------------------------
+INSTALLED_APPS = [
+    "jazzmin",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Project applications
+    "accounts",
+    "assets",
+    "portfolios",
+    "documents",
+    "dashboards",
+    "support",
+    "audit.apps.AuditConfig",
+]
+
+# --------------------------------------------------
+# MIDDLEWARE
+# --------------------------------------------------
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+# --------------------------------------------------
+# TEMPLATES
+# --------------------------------------------------
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+
+# --------------------------------------------------
+# DATABASE - MYSQL
+# --------------------------------------------------
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "apt_db",
+        "USER": "root",
+        "PASSWORD": "",
+        "HOST": "127.0.0.1",
+        "PORT": "3306",
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
+
+# --------------------------------------------------
+# CUSTOM USER MODEL
+# --------------------------------------------------
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+# --------------------------------------------------
+# AUTHENTICATION AND REDIRECTS
+# --------------------------------------------------
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "dashboards:role_router"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+# --------------------------------------------------
+# STATIC FILES
+# --------------------------------------------------
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# --------------------------------------------------
+# MEDIA FILES
+# --------------------------------------------------
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# --------------------------------------------------
+# DEFAULT PRIMARY KEY
+# --------------------------------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --------------------------------------------------
+# JAZZMIN ADMIN THEME
+# --------------------------------------------------
+JAZZMIN_SETTINGS = {
+    "site_title": "Asset Portal Admin",
+    "site_header": "Asset Portal",
+    "site_brand": "Enterprise Portfolio",
+    "welcome_sign": "Welcome to the Secure Admin Hub",
+    "copyright": "Asset Portal Enterprise",
+    "show_ui_builder": True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
+    "navbar": "navbar-dark",
+    "sidebar": "sidebar-dark-warning",
+    "accent": "accent-warning",
+}
+
+
+========== accounts\models.py ==========
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+class CustomUser(AbstractUser):
+    # Ensure unique email addresses for secure signups
+    email = models.EmailField(_('email address'), unique=True)
+    
+    class RoleChoices(models.TextChoices):
+        USER = 'USER', _('Normal User')
+        ADMIN = 'ADMIN', _('Admin')
+
+    role = models.CharField(
+        max_length=20,
+        choices=RoleChoices.choices,
+        default=RoleChoices.USER,
+        help_text=_("Designates the user's primary access level.")
+    )
+    
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+
+    @property
+    def is_admin(self):
+        return self.role == self.RoleChoices.ADMIN or self.is_superuser
+
+
+========== accounts\admin.py ==========
+
+from django.contrib import admin
+
+# Register your models here.
+
+
+========== accounts\views.py ==========
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.forms import AuthenticationForm
+
+User = get_user_model()
+
+
+def signup_view(request):
+    """Handles standard user registration and defaults to USER role."""
+    if request.user.is_authenticated:
+        return redirect("role_router")
+
+    if request.method == "POST":
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password")
+
+        # Basic input validation
+        if not email or not password:
+            messages.error(request, "Email and password are required to register.")
+            return render(request, "registration/signup.html")
+
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "An account with this email address already exists.")
+            return render(request, "registration/signup.html")
+
+        # Derive a unique username safely
+        base_username = email.split('@')[0]
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        # Create user and explicitly assign USER role
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        user.role = "USER"
+        user.save()
+
+        # Log user in directly upon registration
+        login(request, user)
+        messages.success(request, f"Welcome to the portal, {user.first_name or user.username}!")
+        return redirect("role_router")
+
+    return render(request, "registration/signup.html")
+
+
+def login_view(request):
+    """Direct login view bypassing MFA and routing based on role."""
+    if request.user.is_authenticated:
+        return redirect("role_router")
+
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name or user.username}!")
+            return redirect('role_router')
+        else:
+            messages.error(request, "Invalid credentials. Please check your username/email and password.")
+    else:
+        form = AuthenticationForm()
+
+    return render(request, "registration/login.html", {"form": form})
+
+
+========== assets\models.py ==========
+
+
+import os
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+# ============================================================
+# FILE VALIDATION
+# ============================================================
+
+def validate_asset_document_size(uploaded_file):
+    """Limit each uploaded document to 10 MB."""
+    max_size = 10 * 1024 * 1024
+
+    if uploaded_file.size > max_size:
+        raise ValidationError(
+            "Each supporting document must be 10 MB or smaller."
+        )
+
+
+def validate_asset_document_filename(uploaded_file):
+    """Reject filenames containing path separators."""
+    filename = os.path.basename(uploaded_file.name)
+
+    if filename != uploaded_file.name or filename in ("", ".", ".."):
+        raise ValidationError("Invalid document filename.")
+
+
+# ============================================================
+# MAIN ASSET MODEL
+# ============================================================
+
+class Asset(models.Model):
+
+    class CategoryChoices(models.TextChoices):
+        VEHICLE = "VEHICLE", _("Vehicle")
+        LAND = "LAND", _("Land")
+        HOUSE = "HOUSE", _("House")
+        STOCK = "STOCK", _("Stock")
+        BOND = "BOND", _("Government Bond")
+
+    class StatusChoices(models.TextChoices):
+        ACTIVE = "ACTIVE", _("Active")
+        ARCHIVED = "ARCHIVED", _("Archived")
+        SOLD = "SOLD", _("Sold")
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="assets",
+    )
+
+    category = models.CharField(
+        max_length=20,
+        choices=CategoryChoices.choices,
+    )
+
+    name = models.CharField(max_length=255)
+
+    unique_reference = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True,
+    )
+
+    # Financial details
+    purchase_price = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+    )
+
+    purchase_date = models.DateField()
+
+    liability_amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=0.00,
+    )
+
+    current_estimated_value = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+    )
+
+    valuation_date = models.DateField()
+
+    currency = models.CharField(
+        max_length=3,
+        default="USD",
+        help_text="Three-letter currency code, e.g. USD or TZS.",
+    )
+
+    description = models.TextField(blank=True, null=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.ACTIVE,
+    )
+
+    # Audit timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_category_display()})"
+
+
+# ============================================================
+# VEHICLE DETAILS
+# ============================================================
+
+class Vehicle(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="vehicle_details",
+    )
+
+    registration_number = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+
+    make = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+    year = models.PositiveIntegerField()
+
+    def __str__(self):
+        return (
+            f"{self.make} {self.model} "
+            f"({self.registration_number})"
+        )
+
+
+# ============================================================
+# LAND DETAILS
+# ============================================================
+
+class Land(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="land_details",
+    )
+
+    location = models.CharField(max_length=255)
+
+    plot_reference = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    size = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+
+    measurement_unit = models.CharField(
+        max_length=50,
+        default="Square Meters",
+    )
+
+    def __str__(self):
+        return f"Plot {self.plot_reference} at {self.location}"
+
+
+# ============================================================
+# HOUSE DETAILS
+# ============================================================
+
+class House(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="house_details",
+    )
+
+    location = models.CharField(max_length=255)
+
+    property_identification = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    building_information = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return (
+            f"House {self.property_identification} "
+            f"at {self.location}"
+        )
+
+
+# ============================================================
+# STOCK DETAILS
+# ============================================================
+
+class Stock(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="stock_details",
+    )
+
+    company = models.CharField(max_length=255)
+    ticker = models.CharField(max_length=20)
+
+    units = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+    )
+
+    def __str__(self):
+        return f"{self.units} shares of {self.ticker}"
+
+
+# ============================================================
+# GOVERNMENT BOND DETAILS
+# ============================================================
+
+class GovernmentBond(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="bond_details",
+    )
+
+    issuer = models.CharField(max_length=255)
+
+    face_value = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+    )
+
+    coupon_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="Percentage, e.g. 5.50.",
+    )
+
+    maturity_date = models.DateField()
+
+    def __str__(self):
+        return f"{self.issuer} Bond maturing {self.maturity_date}"
+
+
+# ============================================================
+# ASSET DOCUMENTS
+# ============================================================
+
+class AssetDocument(models.Model):
+
+    class DocumentType(models.TextChoices):
+        OWNERSHIP = "OWNERSHIP", _("Ownership Certificate")
+        PURCHASE = "PURCHASE", _("Purchase Receipt or Agreement")
+        VALUATION = "VALUATION", _("Valuation Report")
+        REGISTRATION = "REGISTRATION", _("Registration Document")
+        INSURANCE = "INSURANCE", _("Insurance Document")
+        LEGAL = "LEGAL", _("Legal Document")
+        FINANCIAL = "FINANCIAL", _("Financial Statement")
+        TITLE_DEED = "TITLE_DEED", _("Title Deed")
+        SHARE_CERTIFICATE = "SHARE_CERTIFICATE", _("Share Certificate")
+        BOND_CERTIFICATE = "BOND_CERTIFICATE", _("Bond Certificate")
+        OTHER = "OTHER", _("Other Supporting Document")
+
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="supporting_documents",
+    )
+
+    title = models.CharField(
+        max_length=255,
+        help_text="A descriptive name for the document.",
+    )
+
+    document_type = models.CharField(
+        max_length=30,
+        choices=DocumentType.choices,
+        default=DocumentType.OTHER,
+    )
+
+    file = models.FileField(
+        upload_to="asset_documents/%Y/%m/",
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=["pdf", "jpg", "jpeg", "png"]
+            ),
+            validate_asset_document_size,
+            validate_asset_document_filename,
+        ],
+    )
+
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="uploaded_asset_documents",
+    )
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = "Asset Document"
+        verbose_name_plural = "Asset Documents"
+
+    def __str__(self):
+        return f"{self.title} - {self.asset.name}"
+
+
+# ============================================================
+# ASSET VALUATION HISTORY
+# ============================================================
+
+class AssetValuationHistory(models.Model):
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="valuation_history",
+    )
+
+    estimated_value = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+    )
+
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-recorded_at"]
+        verbose_name = "Asset Valuation History"
+        verbose_name_plural = "Asset Valuation History"
+
+    def __str__(self):
+        return (
+            f"{self.asset.name} - "
+            f"{self.estimated_value} on "
+            f"{self.recorded_at.strftime('%Y-%m-%d')}"
+        )
+
+
+# ============================================================
+# ASSET TAGS
+# ============================================================
+
+class AssetTag(models.Model):
+    name = models.CharField(max_length=50)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="asset_tags",
+    )
+
+    assets = models.ManyToManyField(
+        Asset,
+        related_name="custom_tags",
+        blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "user"],
+                name="unique_asset_tag_name_per_user",
+            )
+        ]
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+========== assets\admin.py ==========
+
+from django.contrib import admin
+from .models import Asset, Vehicle, Land, House, Stock, GovernmentBond
+
+class AssetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'owner', 'current_estimated_value', 'currency', 'status')
+    list_filter = ('category', 'status', 'currency')
+    search_fields = ('name', 'unique_reference', 'owner__username')
+
+admin.site.register(Asset, AssetAdmin)
+admin.site.register(Vehicle)
+admin.site.register(Land)
+admin.site.register(House)
+admin.site.register(Stock)
+admin.site.register(GovernmentBond)
+
+
+========== documents\models.py ==========
+
+from django.db import models
+from django.conf import settings
+from assets.models import Asset
+
+class Document(models.Model):
+    class StatusChoices(models.TextChoices):
+        DRAFT = 'DRAFT', 'Draft'
+        SUBMITTED = 'SUBMITTED', 'Submitted'
+        UNDER_REVIEW = 'UNDER_REVIEW', 'Under Review'
+        APPROVED = 'APPROVED', 'Approved'
+        REJECTED = 'REJECTED', 'Rejected'
+
+    class CategoryChoices(models.TextChoices):
+        IDENTITY = 'IDENTITY', 'Identity Proof'
+        OWNERSHIP = 'OWNERSHIP', 'Ownership Certificate'
+        VALUATION = 'VALUATION', 'Valuation Report'
+        OTHER = 'OTHER', 'Other'
+
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_documents')
+    asset = models.ForeignKey(Asset, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', help_text="Optional: Associate with a specific asset")
+    
+    category = models.CharField(max_length=50, choices=CategoryChoices.choices)
+    # Files are stored in year/month directories. In production, this should be restricted storage.
+    file = models.FileField(upload_to='secure_documents/%Y/%m/')
+    
+    status = models.CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.DRAFT)
+    
+    # Verification Workflow Fields
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_documents')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True, null=True, help_text="Reason for rejection or general review notes.")
+    
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.uploader.username} ({self.get_status_display()})"
+
+
+
+class DocumentVersion(models.Model):
+    document = models.ForeignKey('Document', on_delete=models.CASCADE, related_name='versions')
+    version_number = models.PositiveIntegerField(default=1)
+    file = models.FileField(upload_to='document_versions/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.document.title} - v{self.version_number}"
+
+
+========== documents\admin.py ==========
+
+from django.contrib import admin
+from django.utils import timezone
+from django.contrib import messages
+from .models import Document
+
+# Define the custom action
+@admin.action(description='Mark selected documents as APPROVED')
+def bulk_approve_documents(modeladmin, request, queryset):
+    updated = queryset.update(
+        status='APPROVED',
+        reviewed_by=request.user,
+        reviewed_at=timezone.now()
+    )
+    modeladmin.message_user(
+        request, 
+        f'{updated} documents were successfully verified and approved.', 
+        messages.SUCCESS
+    )
+
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = ('category', 'uploader', 'asset', 'status', 'uploaded_at', 'reviewed_by')
+    list_filter = ('status', 'category', 'uploaded_at')
+    search_fields = ('uploader__username', 'asset__name')
+    readonly_fields = ('uploaded_at', 'updated_at')
+    
+    # Register the custom action
+    actions = [bulk_approve_documents]
+    
+    # Define fieldsets to logically group the document data vs the review workflow data
+    fieldsets = (
+        ('Document Information', {
+            'fields': ('uploader', 'asset', 'category', 'file', 'uploaded_at')
+        }),
+        ('Verification Workflow', {
+            'fields': ('status', 'reviewed_by', 'reviewed_at', 'review_notes')
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        # Automatically record reviewer and timestamp if status changes to Approved/Rejected
+        if change and 'status' in form.changed_data:
+            if obj.status in [Document.StatusChoices.APPROVED, Document.StatusChoices.REJECTED]:
+                obj.reviewed_by = request.user
+                obj.reviewed_at = timezone.now()
+        super().save_model(request, obj, form, change)
+        
+    # Restrict who can use this panel (Functional override)
+    def has_module_permission(self, request):
+        # Only allow Managers and Admins to see this in the sidebar
+        return request.user.is_authenticated and (request.user.role in ['ROLE_MANAGER', 'ROLE_ADMIN'] or request.user.is_superuser)
+
+admin.site.register(Document, DocumentAdmin)
+
+
+========== audit\models.py ==========
+
+from django.db import models
+from django.conf import settings
+
+class AuditLog(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_logs")
+    action = models.CharField(max_length=100)
+    path = models.CharField(max_length=255, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    details = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "Audit Log"
+        verbose_name_plural = "Audit Logs"
+
+    def __str__(self):
+        username = self.user.username if self.user else "Anonymous"
+        return f"[{self.timestamp}] {username} - {self.action} ({self.ip_address})"
+
+    fn_locked = False
+
+    def save(self, *args, **kwargs):
+        if self.pk and not self.fn_locked:
+            raise Exception("Audit logs are strictly immutable and cannot be modified.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise Exception("Audit logs are strictly immutable and cannot be deleted.")
+
+
+
+========== audit\admin.py ==========
+
+from django.contrib import admin
+from .models import AuditLog
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ("timestamp", "user", "action", "ip_address", "path")
+    list_filter = ("action", "timestamp", "ip_address")
+    search_fields = ("user__username", "path", "details", "ip_address")
+    readonly_fields = ("user", "action", "path", "ip_address", "details", "timestamp")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+
+========== portfolios\models.py ==========
+
+from django.db import models
+
+# Create your models here.
+
+
+========== portfolios\admin.py ==========
+
+from django.contrib import admin
+
+# Register your models here.
+
+
+========== support\models.py ==========
+
+from django.db import models
+from django.conf import settings
+
+class Ticket(models.Model):
+    class PriorityChoices(models.TextChoices):
+        LOW = 'LOW', 'Low'
+        MEDIUM = 'MEDIUM', 'Medium'
+        HIGH = 'HIGH', 'High'
+        CRITICAL = 'CRITICAL', 'Critical'
+
+    class StatusChoices(models.TextChoices):
+        OPEN = 'OPEN', 'Open'
+        IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+        RESOLVED = 'RESOLVED', 'Resolved'
+        CLOSED = 'CLOSED', 'Closed'
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tickets")
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+    priority = models.CharField(max_length=20, choices=PriorityChoices.choices, default=PriorityChoices.MEDIUM)
+    status = models.CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.OPEN)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"[{self.get_priority_display()}] {self.subject} - {self.user.username}"
+
+
+from django.conf import settings
+from django.db import models
+
+class ClientMessage(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    is_encrypted = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.sender} to {self.recipient}: {self.subject}"
+
+
+========== support\admin.py ==========
+
+from django.contrib import admin
+from .models import Ticket
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'user', 'priority', 'status', 'created_at')
+    list_filter = ('status', 'priority', 'created_at')
+    search_fields = ('subject', 'user__username')
+
+
+========== dashboards\models.py ==========
+
+from django.db import models
+
+# Create your models here.
+
+
+========== dashboards\admin.py ==========
+
+from django.contrib import admin
+
+# Register your models here.
+
+
+========== dashboards\urls.py ==========
+
+
+from django.urls import path
+from . import views
+
+app_name = "dashboards"
+
+urlpatterns = [
+    path("", views.role_router, name="role_router"),
+    path("user/", views.user_dashboard, name="user_dashboard"),
+    path("admin-hub/", views.admin_dashboard, name="admin_dashboard"),
+    path(
+        "admin-hub/users/",
+        views.admin_manage_users,
+        name="admin_manage_users",
+    ),
+]
+
+
+========== dashboards\views.py ==========
+
+
+import json
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction
+from django.db.models import Count, Sum
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_http_methods
+
+from assets.models import Asset
+from audit.models import AuditLog
+from documents.models import Document
+from portfolios.services import PortfolioEngine
+from support.models import Ticket
+
+User = get_user_model()
+
+ADMIN_LOGIN_URL = "/dashboard/"
+
+
+# ============================================================
+# ACCESS CONTROL
+# ============================================================
+
+def admin_check(user):
+    """Allow only authenticated administrators and superusers."""
+    return (
+        user.is_authenticated
+        and (
+            user.is_superuser
+            or getattr(user, "is_admin", False)
+        )
+    )
+
+
+admin_required = user_passes_test(
+    admin_check,
+    login_url=ADMIN_LOGIN_URL,
+)
+
+
+def get_client_ip(request):
+    """Return the direct client IP address when available."""
+    return request.META.get("REMOTE_ADDR")
+
+
+def record_admin_action(request, action, details=""):
+    """Record administrative actions without modifying existing logs."""
+    AuditLog.objects.create(
+        user=request.user,
+        action=action,
+        path=request.path[:255],
+        ip_address=get_client_ip(request),
+        details=details,
+    )
+
+
+# ============================================================
+# DASHBOARD ROUTING
+# ============================================================
+
+@login_required
+def role_router(request):
+    """Send authenticated users to the appropriate dashboard."""
+    if admin_check(request.user):
+        return redirect("dashboards:admin_dashboard")
+
+    return redirect("dashboards:user_dashboard")
+
+
+# ============================================================
+# CLIENT DASHBOARD
+# ============================================================
+
+@login_required
+def user_dashboard(request):
+    """Client dashboard showing only the current user's portfolio."""
+    engine = PortfolioEngine(request.user)
+    summary = engine.get_portfolio_summary()
+
+    distribution = summary.get("distribution", [])
+
+    dist_labels = (
+        [item["category"] for item in distribution]
+        if distribution
+        else ["No Assets"]
+    )
+
+    dist_data = (
+        [float(item["total_value"]) for item in distribution]
+        if distribution
+        else [0]
+    )
+
+    hist_labels = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ]
+
+    hist_data = [0] * 12
+    hist_data[timezone.localdate().month - 1] = float(
+        summary.get("total_current_value") or 0
+    )
+
+    context = {
+        "summary": summary,
+        "user": request.user,
+        "assets": Asset.objects.filter(
+            owner=request.user,
+            status=Asset.StatusChoices.ACTIVE,
+        ),
+        "liquidity_ratio": engine.get_liquidity_profile(),
+        "risk_exposure": engine.get_risk_exposure(),
+        "chart_dist_labels": json.dumps(
+            dist_labels, cls=DjangoJSONEncoder
+        ),
+        "chart_dist_data": json.dumps(
+            dist_data, cls=DjangoJSONEncoder
+        ),
+        "chart_hist_labels": json.dumps(
+            hist_labels, cls=DjangoJSONEncoder
+        ),
+        "chart_hist_data": json.dumps(
+            hist_data, cls=DjangoJSONEncoder
+        ),
+    }
+
+    return render(
+        request,
+        "dashboards/client_dashboard.html",
+        context,
+    )
+
+
+# ============================================================
+# ADMIN DASHBOARD
+# ============================================================
+
+@login_required
+@admin_required
+def admin_dashboard(request):
+    """System-wide administrative overview."""
+
+    active_assets = Asset.objects.filter(
+        status=Asset.StatusChoices.ACTIVE
+    )
+
+    pending_documents = (
+        Document.objects.filter(
+            status__in=[
+                Document.StatusChoices.SUBMITTED,
+                Document.StatusChoices.UNDER_REVIEW,
+            ]
+        )
+        .select_related("uploader", "asset")
+        .order_by("uploaded_at")[:8]
+    )
+
+    open_tickets = (
+        Ticket.objects.filter(
+            status__in=[
+                Ticket.StatusChoices.OPEN,
+                Ticket.StatusChoices.IN_PROGRESS,
+            ]
+        )
+        .select_related("user")
+        .order_by("-priority", "created_at")[:8]
+    )
+
+    category_stats = list(
+        active_assets.values("category")
+        .annotate(
+            asset_count=Count("id"),
+            total_value=Sum("current_estimated_value"),
+        )
+        .order_by("-total_value")
+    )
+
+    total_asset_value = (
+        active_assets.aggregate(
+            total=Sum("current_estimated_value")
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    recent_assets = (
+        Asset.objects.select_related("owner")
+        .order_by("-created_at")[:8]
+    )
+
+    recent_audit_logs = (
+        AuditLog.objects.select_related("user")
+        .order_by("-timestamp")[:10]
+    )
+
+    active_users = User.objects.filter(is_active=True).count()
+
+    pending_count = Document.objects.filter(
+        status__in=[
+            Document.StatusChoices.SUBMITTED,
+            Document.StatusChoices.UNDER_REVIEW,
+        ]
+    ).count()
+
+    open_ticket_count = Ticket.objects.filter(
+        status__in=[
+            Ticket.StatusChoices.OPEN,
+            Ticket.StatusChoices.IN_PROGRESS,
+        ]
+    ).count()
+
+    for item in category_stats:
+        item["label"] = dict(
+            Asset.CategoryChoices.choices
+        ).get(item["category"], item["category"])
+
+        item["total_value"] = (
+            item["total_value"] or Decimal("0.00")
+        )
+
+        if total_asset_value > 0:
+            item["percentage"] = round(
+                float(item["total_value"] / total_asset_value * 100),
+                1,
+            )
+        else:
+            item["percentage"] = 0
+
+    context = {
+        "total_system_assets": Asset.objects.count(),
+        "active_asset_count": active_assets.count(),
+        "total_asset_value": total_asset_value,
+        "active_users": active_users,
+        "inactive_users": User.objects.filter(
+            is_active=False
+        ).count(),
+        "total_users": User.objects.count(),
+        "total_clients": User.objects.filter(role="USER").count(),
+        "admin_users": User.objects.filter(role="ADMIN").count(),
+        "pending_count": pending_count,
+        "open_ticket_count": open_ticket_count,
+        "documents": pending_documents,
+        "tickets": open_tickets,
+        "category_stats": category_stats,
+        "recent_assets": recent_assets,
+        "recent_audit_logs": recent_audit_logs,
+    }
+
+    return render(
+        request,
+        "dashboards/admin_dashboard.html",
+        context,
+    )
+
+
+# ============================================================
+# ADMIN USER MANAGEMENT
+# ============================================================
+
+@login_required
+@admin_required
+@require_http_methods(["GET", "POST"])
+def admin_manage_users(request):
+    """Search and update user access using validated POST requests."""
+
+    if request.method == "POST":
+        user_id = request.POST.get("user_id", "").strip()
+        new_role = request.POST.get("role", "").strip()
+        new_is_active = request.POST.get("is_active") == "on"
+
+        valid_roles = {
+            User.RoleChoices.USER,
+            User.RoleChoices.ADMIN,
+        }
+
+        if not user_id.isdigit():
+            messages.error(request, "Invalid user account.")
+            return redirect("dashboards:admin_manage_users")
+
+        if new_role not in valid_roles:
+            messages.error(request, "The selected role is invalid.")
+            return redirect("dashboards:admin_manage_users")
+
+        with transaction.atomic():
+            target_user = get_object_or_404(
+                User.objects.select_for_update(),
+                pk=int(user_id),
+            )
+
+            if target_user.pk == request.user.pk:
+                messages.error(
+                    request,
+                    "You cannot change your own role or account status here.",
+                )
+                return redirect("dashboards:admin_manage_users")
+
+            if target_user.is_superuser:
+                messages.error(
+                    request,
+                    "Superuser accounts cannot be modified through this page.",
+                )
+                return redirect("dashboards:admin_manage_users")
+
+            currently_active_admin = (
+                target_user.is_active
+                and target_user.role == User.RoleChoices.ADMIN
+            )
+
+            will_remain_active_admin = (
+                new_is_active
+                and new_role == User.RoleChoices.ADMIN
+            )
+
+            if currently_active_admin and not will_remain_active_admin:
+                other_active_admins = User.objects.filter(
+                    is_active=True,
+                    role=User.RoleChoices.ADMIN,
+                ).exclude(pk=target_user.pk).count()
+
+                active_superusers = User.objects.filter(
+                    is_active=True,
+                    is_superuser=True,
+                ).count()
+
+                if other_active_admins + active_superusers == 0:
+                    messages.error(
+                        request,
+                        "You cannot deactivate or demote the last active administrator.",
+                    )
+                    return redirect("dashboards:admin_manage_users")
+
+            old_role = target_user.role
+            old_is_active = target_user.is_active
+
+            target_user.role = new_role
+            target_user.is_active = new_is_active
+            target_user.save(
+                update_fields=["role", "is_active"]
+            )
+
+            if (
+                old_role != new_role
+                or old_is_active != new_is_active
+            ):
+                record_admin_action(
+                    request,
+                    "USER_ACCESS_UPDATED",
+                    (
+                        f"Target user ID: {target_user.pk}; "
+                        f"role: {old_role} -> {new_role}; "
+                        f"active: {old_is_active} -> {new_is_active}"
+                    ),
+                )
+
+        messages.success(
+            request,
+            f"Access settings updated for {target_user.username}.",
+        )
+
+        return redirect("dashboards:admin_manage_users")
+
+    search = request.GET.get("q", "").strip()
+
+    users = User.objects.all().order_by("-date_joined")
+
+    if search:
+        from django.db.models import Q
+
+        users = users.filter(
+            Q(username__icontains=search)
+            | Q(email__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+        )
+    context = {
+        "users": users,
+        "search": search,
+        "total_users": users.count(),
+        "active_users_count": User.objects.filter(
+            is_active=True
+        ).count(),
+        "admin_users_count": User.objects.filter(
+            role=User.RoleChoices.ADMIN
+        ).count(),
+    }
+
+    return render(
+        request,
+        "dashboards/admin_manage_users.html",
+        context,
+    )
+    
+
+
+========== templates\dashboards\admin_dashboard.html ==========
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* ==========================================
+       PRIVATE WEALTH — ADMIN CONTROL HUB
+       Shared light theme with User Management
+       ========================================== */
+
+    .pwh-dashboard {
+        --pwh-gold: #C5A059;
+        --pwh-gold-dark: #B48D43;
+        --pwh-bg: #F3F4F6;
+        --pwh-card: #FFFFFF;
+        --pwh-border: #E0E3E8;
+        --pwh-muted: #707B8F;
+        --pwh-text: #202633;
+        --pwh-green: #22B96B;
+        --pwh-red: #DC4545;
+
+        color: var(--pwh-text);
+        background: var(--pwh-bg);
+        min-height: 100vh;
+        padding: 30px;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.6;
+    }
+
+    .pwh-dashboard *,
+    .pwh-dashboard *::before,
+    .pwh-dashboard *::after {
+        box-sizing: border-box;
+    }
+
+    .pwh-dashboard a {
+        transition: background .18s ease, border-color .18s ease,
+                    color .18s ease, box-shadow .18s ease;
+    }
+
+    .pwh-dashboard a:focus-visible {
+        outline: 3px solid rgba(197,160,89,.55);
+        outline-offset: 3px;
+    }
+
+    /* PAGE HEADER */
+
+    .pwh-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 22px;
+        margin-bottom: 30px;
+    }
+
+    .pwh-eyebrow {
+        color: var(--pwh-gold-dark);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0 0 12px;
+    }
+
+    .pwh-title {
+        color: var(--pwh-text);
+        font-size: clamp(27px, 3vw, 40px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .pwh-subtitle {
+        color: var(--pwh-muted);
+        font-size: 14px;
+        line-height: 1.8;
+        margin: 12px 0 0;
+        max-width: 760px;
+    }
+
+    .pwh-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .pwh-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 11px 17px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .pwh-button-primary {
+        background: var(--pwh-gold);
+        border: 1px solid var(--pwh-gold);
+        color: #171717;
+    }
+
+    .pwh-button-primary:hover {
+        background: #D7B574;
+        border-color: #D7B574;
+        color: #171717;
+        box-shadow: 0 4px 12px rgba(197,160,89,.18);
+    }
+
+    .pwh-button-secondary {
+        border: 1px solid var(--pwh-border);
+        color: var(--pwh-text);
+        background: #FFFFFF;
+    }
+
+    .pwh-button-secondary:hover {
+        background: #F8F4EB;
+        border-color: var(--pwh-gold);
+        color: #8A6A2E;
+    }
+
+    /* GRID AND CARDS */
+
+    .pwh-grid {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .pwh-kpis {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .pwh-card {
+        background: var(--pwh-card);
+        border: 1px solid var(--pwh-border);
+        border-radius: 19px;
+        min-width: 0;
+        box-shadow: 0 3px 12px rgba(32,38,51,.025);
+    }
+
+    /* STATISTIC CARDS */
+
+    .pwh-kpi {
+        position: relative;
+        overflow: hidden;
+        padding: 25px;
+    }
+
+    .pwh-kpi::after {
+        content: "";
+        position: absolute;
+        right: -30px;
+        top: -38px;
+        width: 105px;
+        height: 105px;
+        border: 1px solid rgba(197,160,89,.15);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .pwh-kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .pwh-kpi-label {
+        color: #687386;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        line-height: 1.7;
+    }
+
+    .pwh-kpi-icon {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: #F8F4EB;
+        border: 1px solid #F0E6D2;
+        color: var(--pwh-gold-dark);
+        font-size: 21px;
+    }
+
+    .pwh-kpi-value {
+        overflow-wrap: anywhere;
+        color: var(--pwh-text);
+        font-size: clamp(27px, 2.2vw, 36px);
+        font-weight: 800;
+        letter-spacing: -.8px;
+        line-height: 1.3;
+        margin: 23px 0 9px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .pwh-kpi-foot {
+        color: var(--pwh-muted);
+        font-size: 12px;
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    .pwh-warning-value {
+        color: #B48D43;
+    }
+
+    .pwh-notice {
+        margin-top: 14px;
+        padding: 11px 13px;
+        border-radius: 10px;
+        background: #FAF6ED;
+        border: 1px solid #F0E6D2;
+        color: #8A6A2E;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    /* PANELS */
+
+    .pwh-panel {
+        padding: 25px;
+    }
+
+    .pwh-panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .pwh-panel-title {
+        color: var(--pwh-text);
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1.5;
+        margin: 0;
+        letter-spacing: -.3px;
+    }
+
+    .pwh-panel-subtitle {
+        color: var(--pwh-muted);
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 5px 0 0;
+    }
+
+    .pwh-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 11px;
+        border: 1px solid var(--pwh-border);
+        border-radius: 10px;
+        color: #596579;
+        background: #F8F9FB;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .pwh-main-grid {
+        grid-template-columns: minmax(0, 1.8fr) minmax(270px, 1fr);
+    }
+
+    /* PORTFOLIO OVERVIEW */
+
+    .pwh-category {
+        margin-bottom: 25px;
+    }
+
+    .pwh-category:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .pwh-category-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 11px;
+        font-size: 13px;
+    }
+
+    .pwh-category-name {
+        color: var(--pwh-text);
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .pwh-category-count {
+        color: var(--pwh-muted);
+        text-align: right;
+        font-size: 11px;
+        line-height: 1.7;
+        flex-shrink: 0;
+    }
+
+    .pwh-progress {
+        height: 8px;
+        width: 100%;
+        background: #E9ECF1;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .pwh-progress-fill {
+        height: 100%;
+        min-width: 0;
+        max-width: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #B48D43, #D6B46E);
+    }
+
+    .pwh-category-value {
+        color: var(--pwh-muted);
+        font-size: 11px;
+        margin: 9px 0 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* ACCOUNT OVERVIEW */
+
+    .pwh-account-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 0;
+        border-bottom: 1px solid #E8EBF0;
+    }
+
+    .pwh-account-row:last-of-type {
+        border-bottom: 0;
+    }
+
+    .pwh-account-label {
+        color: #707B8F;
+        font-size: 13px;
+    }
+
+    .pwh-account-value {
+        color: var(--pwh-text);
+        font-size: 15px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .pwh-gold-text {
+        color: #B48D43;
+    }
+
+    .pwh-green-text {
+        color: #22B96B;
+    }
+
+    .pwh-red-text {
+        color: #DC4545;
+    }
+
+    .pwh-full-link {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        padding: 13px;
+        border: 1px solid #DDE1E7;
+        border-radius: 10px;
+        color: var(--pwh-text);
+        background: #FFFFFF;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .pwh-full-link:hover {
+        border-color: var(--pwh-gold);
+        color: #8A6A2E;
+        background: #F8F4EB;
+    }
+
+    /* TABLES */
+
+    .pwh-table-wrap {
+        overflow-x: auto;
+        width: 100%;
+        border: 1px solid var(--pwh-border);
+        border-radius: 12px;
+        background: #FFFFFF;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .pwh-table {
+        width: 100%;
+        min-width: 720px;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 12px;
+    }
+
+    .pwh-table th {
+        padding: 15px;
+        color: #687386;
+        background: #F1F2F4;
+        border-bottom: 1px solid #D9DDE4;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .9px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .pwh-table td {
+        padding: 16px 15px;
+        color: #596579;
+        border-bottom: 1px solid #E8EBF0;
+        vertical-align: middle;
+        line-height: 1.7;
+    }
+
+    .pwh-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .pwh-table tbody tr:hover {
+        background: #FAF8F3;
+    }
+
+    .pwh-table-primary {
+        color: var(--pwh-text);
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .pwh-table-muted {
+        display: block;
+        color: #7A8495;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    /* STATUS BADGES */
+
+    .pwh-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border: 1px solid #E1E5EA;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .pwh-badge-pending {
+        color: #98742F;
+        background: #FBF5E8;
+        border-color: #F0E2C3;
+    }
+
+    .pwh-badge-danger {
+        color: #C43D45;
+        background: #FFF0F0;
+        border-color: #F5D3D5;
+    }
+
+    .pwh-badge-success {
+        color: #188B50;
+        background: #EAF9F0;
+        border-color: #C9EED8;
+    }
+
+    .pwh-badge-neutral {
+        color: #5F697A;
+        background: #F1F3F6;
+        border-color: #E1E5EA;
+    }
+
+    .pwh-review-link {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 14px;
+        border: 1px solid var(--pwh-gold);
+        border-radius: 9px;
+        background: var(--pwh-gold);
+        color: #171717;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .pwh-review-link:hover {
+        background: #D7B574;
+        border-color: #D7B574;
+        color: #171717;
+    }
+
+    /* EMPTY STATES AND AUDIT */
+
+    .pwh-empty {
+        padding: 36px 18px !important;
+        color: var(--pwh-muted) !important;
+        text-align: center;
+        line-height: 1.8;
+    }
+
+    .pwh-audit-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 0;
+        border-bottom: 1px solid #E8EBF0;
+    }
+
+    .pwh-audit-row:last-child {
+        border-bottom: 0;
+    }
+
+    .pwh-audit-action {
+        color: var(--pwh-text);
+        font-size: 13px;
+        font-weight: 750;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .pwh-audit-details {
+        color: var(--pwh-muted);
+        font-size: 12px;
+        line-height: 1.8;
+        margin-top: 5px;
+        overflow-wrap: anywhere;
+    }
+
+    .pwh-audit-time {
+        color: var(--pwh-muted);
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .pwh-footnote {
+        margin: 20px 0 0;
+        color: #7A8495;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1400px) {
+        .pwh-kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .pwh-main-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 700px) {
+        .pwh-dashboard {
+            padding: 20px 14px;
+        }
+
+        .pwh-header {
+            margin-bottom: 23px;
+        }
+
+        .pwh-title {
+            font-size: 29px;
+        }
+
+        .pwh-kpis {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 13px;
+        }
+
+        .pwh-kpi {
+            padding: 20px;
+        }
+
+        .pwh-panel {
+            padding: 17px;
+        }
+
+        .pwh-header-actions {
+            width: 100%;
+        }
+
+        .pwh-header-actions .pwh-button {
+            flex: 1;
+        }
+
+        .pwh-panel-header {
+            margin-bottom: 18px;
+        }
+
+        .pwh-audit-row {
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .pwh-audit-time {
+            white-space: normal;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pwh-dashboard a {
+            transition: none;
+        }
+    }
+</style>
+
+<div class="pwh-dashboard">
+
+    <!-- PAGE HEADER -->
+    <header class="pwh-header">
+        <div>
+            <p class="pwh-eyebrow">Private Wealth / Administration</p>
+
+            <h1 class="pwh-title">Admin Control Hub</h1>
+
+            <p class="pwh-subtitle">
+                Welcome, {{ request.user.get_full_name|default:request.user.username }}.
+                Review portfolio records, account activity, document verification
+                and support operations from one workspace.
+            </p>
+        </div>
+
+        <div class="pwh-header-actions">
+            <a href="{% url 'dashboards:admin_manage_users' %}"
+               class="pwh-button pwh-button-primary">
+                <span aria-hidden="true">＋</span>
+                Manage Users
+            </a>
+
+            {% if request.user.is_staff %}
+                <a href="{% url 'admin:index' %}"
+                   class="pwh-button pwh-button-secondary">
+                    Django Admin <span aria-hidden="true">↗</span>
+                </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- KEY PERFORMANCE INDICATORS -->
+    <section class="pwh-grid pwh-kpis" aria-label="System summary">
+
+        <article class="pwh-card pwh-kpi">
+            <div class="pwh-kpi-top">
+                <span class="pwh-kpi-label">Total Assets</span>
+                <span class="pwh-kpi-icon" aria-hidden="true">◈</span>
+            </div>
+
+            <p class="pwh-kpi-value">{{ total_system_assets|default:0 }}</p>
+
+            <p class="pwh-kpi-foot">
+                {{ active_asset_count|default:0 }} active asset records
+            </p>
+        </article>
+
+        <article class="pwh-card pwh-kpi">
+            <div class="pwh-kpi-top">
+                <span class="pwh-kpi-label">Registered Users</span>
+                <span class="pwh-kpi-icon" aria-hidden="true">◎</span>
+            </div>
+
+            <p class="pwh-kpi-value">{{ total_users|default:0 }}</p>
+
+            <p class="pwh-kpi-foot">
+                {{ active_users|default:0 }} active ·
+                {{ inactive_users|default:0 }} inactive
+            </p>
+        </article>
+
+        <article class="pwh-card pwh-kpi">
+            <div class="pwh-kpi-top">
+                <span class="pwh-kpi-label">Active Asset Value</span>
+                <span class="pwh-kpi-icon" aria-hidden="true">↗</span>
+            </div>
+
+            <p class="pwh-kpi-value">
+                {{ total_asset_value|default:0|floatformat:2 }}
+            </p>
+
+            <p class="pwh-kpi-foot">
+                Combined recorded values of active assets
+            </p>
+
+            <div class="pwh-notice">
+                Values may use different currencies and are not converted.
+            </div>
+        </article>
+
+        <article class="pwh-card pwh-kpi">
+            <div class="pwh-kpi-top">
+                <span class="pwh-kpi-label">Items Requiring Attention</span>
+                <span class="pwh-kpi-icon" aria-hidden="true">!</span>
+            </div>
+
+            <p class="pwh-kpi-value pwh-warning-value">
+                {{ pending_count|default:0|add:open_ticket_count|default:0 }}
+            </p>
+
+            <p class="pwh-kpi-foot">
+                {{ pending_count|default:0 }} pending reviews ·
+                {{ open_ticket_count|default:0 }} open tickets
+            </p>
+        </article>
+
+    </section>
+
+    <!-- PORTFOLIO AND ACCOUNTS -->
+    <section class="pwh-grid pwh-main-grid">
+
+        <article class="pwh-card pwh-panel">
+            <div class="pwh-panel-header">
+                <div>
+                    <h2 class="pwh-panel-title">Portfolio Overview</h2>
+                    <p class="pwh-panel-subtitle">
+                        Active assets grouped by category
+                    </p>
+                </div>
+
+                <span class="pwh-count">
+                    {{ active_asset_count|default:0 }} active assets
+                </span>
+            </div>
+
+            {% for item in category_stats %}
+                <div class="pwh-category">
+                    <div class="pwh-category-top">
+                        <span class="pwh-category-name">{{ item.label }}</span>
+
+                        <span class="pwh-category-count">
+                            {{ item.asset_count }} assets · {{ item.percentage }}%
+                        </span>
+                    </div>
+
+                    <div class="pwh-progress"
+                         role="progressbar"
+                         aria-label="{{ item.label }} share of active asset value"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         aria-valuenow="{{ item.percentage }}">
+                        <div class="pwh-progress-fill"
+                             style="width: {{ item.percentage }}%;"></div>
+                    </div>
+
+                    <p class="pwh-category-value">
+                        Recorded value: {{ item.total_value|floatformat:2 }}
+                    </p>
+                </div>
+            {% empty %}
+                <div class="pwh-empty">
+                    No active assets are registered yet.
+                </div>
+            {% endfor %}
+
+            <p class="pwh-footnote">
+                Category values are shown in their recorded currencies.
+                Percentages and totals depend on the figures supplied by the
+                dashboard view; different currencies should not be treated
+                as a single converted portfolio valuation.
+            </p>
+        </article>
+
+        <article class="pwh-card pwh-panel">
+            <div class="pwh-panel-header">
+                <div>
+                    <h2 class="pwh-panel-title">Account Overview</h2>
+                    <p class="pwh-panel-subtitle">Current account counts</p>
+                </div>
+            </div>
+
+            <div class="pwh-account-row">
+                <span class="pwh-account-label">Normal users</span>
+                <span class="pwh-account-value">
+                    {{ total_clients|default:0 }}
+                </span>
+            </div>
+
+            <div class="pwh-account-row">
+                <span class="pwh-account-label">Administrators</span>
+                <span class="pwh-account-value pwh-gold-text">
+                    {{ admin_users|default:0 }}
+                </span>
+            </div>
+
+            <div class="pwh-account-row">
+                <span class="pwh-account-label">Active accounts</span>
+                <span class="pwh-account-value pwh-green-text">
+                    {{ active_users|default:0 }}
+                </span>
+            </div>
+
+            <div class="pwh-account-row">
+                <span class="pwh-account-label">Inactive accounts</span>
+                <span class="pwh-account-value pwh-red-text">
+                    {{ inactive_users|default:0 }}
+                </span>
+            </div>
+
+            <a href="{% url 'dashboards:admin_manage_users' %}"
+               class="pwh-full-link">
+                Open User Management <span aria-hidden="true">→</span>
+            </a>
+        </article>
+
+    </section>
+
+    <!-- DOCUMENT VERIFICATION -->
+    <section class="pwh-card pwh-panel" style="margin-bottom:24px;">
+        <div class="pwh-panel-header">
+            <div>
+                <h2 class="pwh-panel-title">Document Verification Queue</h2>
+                <p class="pwh-panel-subtitle">
+                    Documents awaiting review and verification
+                </p>
+            </div>
+
+            <span class="pwh-badge pwh-badge-pending">
+                {{ pending_count|default:0 }} pending
+            </span>
+        </div>
+
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Uploader</th>
+                        <th>Category</th>
+                        <th>Related Asset</th>
+                        <th>Status</th>
+                        <th>Uploaded</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for doc in documents %}
+                        <tr>
+                            <td>
+                                <span class="pwh-table-primary">
+                                    {{ doc.uploader.username }}
+                                </span>
+                            </td>
+
+                            <td>{{ doc.get_category_display }}</td>
+
+                            <td>
+                                {% if doc.asset %}
+                                    {{ doc.asset.name }}
+                                {% else %}
+                                    General document
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="pwh-badge pwh-badge-pending">
+                                    {{ doc.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>{{ doc.uploaded_at|date:"Y-m-d H:i" }}</td>
+
+                            <td>
+                                <a href="{% url 'review_document' doc.id %}"
+                                   class="pwh-review-link">
+                                    Review
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="pwh-empty">
+                                No documents are awaiting review.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- SUPPORT OPERATIONS -->
+    <section class="pwh-card pwh-panel" style="margin-bottom:24px;">
+        <div class="pwh-panel-header">
+            <div>
+                <h2 class="pwh-panel-title">Support Operations</h2>
+                <p class="pwh-panel-subtitle">
+                    Open and in-progress client support tickets
+                </p>
+            </div>
+
+            <span class="pwh-count">
+                {{ open_ticket_count|default:0 }} active tickets
+            </span>
+        </div>
+
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Subject</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for ticket in tickets %}
+                        <tr>
+                            <td>
+                                <span class="pwh-table-primary">
+                                    {{ ticket.user.username }}
+                                </span>
+                            </td>
+
+                            <td>{{ ticket.subject }}</td>
+
+                            <td>
+                                {% if ticket.priority == 'CRITICAL' or ticket.priority == 'HIGH' %}
+                                    <span class="pwh-badge pwh-badge-danger">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
+                                {% elif ticket.priority == 'MEDIUM' %}
+                                    <span class="pwh-badge pwh-badge-pending">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
+                                {% else %}
+                                    <span class="pwh-badge pwh-badge-neutral">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="pwh-badge pwh-badge-neutral">
+                                    {{ ticket.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>{{ ticket.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="pwh-empty">
+                                No open support tickets.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- RECENT ASSETS -->
+    <section class="pwh-card pwh-panel" style="margin-bottom:24px;">
+        <div class="pwh-panel-header">
+            <div>
+                <h2 class="pwh-panel-title">Recently Registered Assets</h2>
+                <p class="pwh-panel-subtitle">
+                    Latest asset records across client portfolios
+                </p>
+            </div>
+        </div>
+
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Owner</th>
+                        <th>Category</th>
+                        <th>Estimated Value</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for asset in recent_assets %}
+                        <tr>
+                            <td>
+                                <span class="pwh-table-primary">
+                                    {{ asset.name }}
+                                </span>
+                            </td>
+
+                            <td>{{ asset.owner.username }}</td>
+                            <td>{{ asset.get_category_display }}</td>
+
+                            <td>
+                                <span class="pwh-table-primary">
+                                    {{ asset.currency }}
+                                    {{ asset.current_estimated_value|floatformat:2 }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="pwh-badge pwh-badge-neutral">
+                                    {{ asset.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>{{ asset.created_at|date:"Y-m-d" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="pwh-empty">
+                                No asset records have been created.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- AUDIT ACTIVITY -->
+    <section class="pwh-card pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2 class="pwh-panel-title">Recent Audit Activity</h2>
+                <p class="pwh-panel-subtitle">
+                    Latest events recorded by the application
+                </p>
+            </div>
+
+            <span class="pwh-count">Latest 10 events</span>
+        </div>
+
+        <div>
+            {% for log in recent_audit_logs %}
+                <article class="pwh-audit-row">
+                    <div style="min-width:0;flex:1;">
+                        <div class="pwh-audit-action">
+                            {{ log.action }}
+                        </div>
+
+                        <div class="pwh-audit-details">
+                            {% if log.user %}
+                                {{ log.user.username }}
+                            {% else %}
+                                System or anonymous user
+                            {% endif %}
+
+                            {% if log.details %}
+                                · {{ log.details|truncatechars:160 }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <time class="pwh-audit-time">
+                        {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                    </time>
+                </article>
+            {% empty %}
+                <div class="pwh-empty">
+                    No audit events have been recorded yet.
+                </div>
+            {% endfor %}
+        </div>
+
+        <p class="pwh-footnote">
+            Audit entries shown here reflect existing application records.
+            Their presence alone does not verify log integrity, backups,
+            server health or security monitoring.
+        </p>
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+========== templates\dashboards\admin_manage_users.html ==========
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Management | Private Wealth{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   PRIVATE WEALTH — USER MANAGEMENT
+========================================================= */
+
+.pw-users {
+    --pw-gold: #c5a059;
+    --pw-gold-light: #e0c184;
+    --pw-bg: var(--app-bg, #111318);
+    --pw-card: var(--app-surface, #191c23);
+    --pw-text: var(--app-text, #f4f5f7);
+    --pw-muted: var(--app-muted, #9298a5);
+    --pw-border: var(--app-border, rgba(255,255,255,.09));
+
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2.5vw, 32px);
+    color: var(--pw-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pw-users *,
+.pw-users *::before,
+.pw-users *::after {
+    box-sizing: border-box;
+}
+
+.pw-users button,
+.pw-users input,
+.pw-users select {
+    font: inherit;
+}
+
+.pw-users button,
+.pw-users a,
+.pw-users input,
+.pw-users select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pw-users a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.pw-users button:focus-visible,
+.pw-users a:focus-visible,
+.pw-users input:focus-visible,
+.pw-users select:focus-visible {
+    outline: 2px solid var(--pw-gold);
+    outline-offset: 3px;
+}
+
+.pw-users .pw-muted {
+    color: var(--pw-muted);
+}
+
+.pw-users .pw-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 10px;
+    color: var(--pw-gold);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.pw-users .pw-eyebrow::before {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: var(--pw-gold);
+    content: "";
+    box-shadow: 0 0 12px rgba(197,160,89,.4);
+}
+
+.pw-users .pw-page-heading {
+    margin: 0;
+    color: var(--pw-text);
+    font-size: clamp(25px, 3vw, 35px);
+    font-weight: 800;
+    letter-spacing: -.8px;
+    line-height: 1.2;
+}
+
+.pw-users .pw-description {
+    max-width: 680px;
+    margin: 10px 0 0;
+    color: var(--pw-muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.pw-users .pw-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 22px;
+    margin-bottom: 28px;
+}
+
+.pw-users .pw-back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 10px 15px;
+    color: var(--pw-text);
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: border-color .18s ease, transform .18s ease;
+}
+
+.pw-users .pw-back-link:hover {
+    border-color: var(--pw-gold);
+    transform: translateY(-1px);
+}
+
+/* Notifications */
+
+.pw-users .pw-messages {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.pw-users .pw-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--pw-border);
+    border-radius: 12px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.pw-users .pw-alert-success {
+    color: #86efac;
+    background: rgba(22,101,52,.15);
+    border-color: rgba(34,197,94,.25);
+}
+
+.pw-users .pw-alert-error {
+    color: #fca5a5;
+    background: rgba(127,29,29,.18);
+    border-color: rgba(239,68,68,.3);
+}
+
+.pw-users .pw-alert-info {
+    color: var(--pw-text);
+    background: var(--pw-card);
+}
+
+/* Summary cards */
+
+.pw-users .pw-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pw-users .pw-stat {
+    position: relative;
+    min-width: 0;
+    padding: 22px;
+    overflow: hidden;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.025), transparent 70%),
+        var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 16px;
+    transition: border-color .2s ease, transform .2s ease;
+}
+
+.pw-users .pw-stat:hover {
+    border-color: rgba(197,160,89,.42);
+    transform: translateY(-2px);
+}
+
+.pw-users .pw-stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pw-users .pw-stat-label {
+    margin: 0;
+    color: var(--pw-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    line-height: 1.7;
+    text-transform: uppercase;
+}
+
+.pw-users .pw-stat-value {
+    margin: 12px 0 0;
+    color: var(--pw-text);
+    font-size: clamp(27px, 3vw, 36px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.pw-users .pw-stat-note {
+    margin: 10px 0 0;
+    color: var(--pw-muted);
+    font-size: 11px;
+}
+
+.pw-users .pw-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    color: var(--pw-gold);
+    background: rgba(197,160,89,.11);
+    border: 1px solid rgba(197,160,89,.15);
+    border-radius: 13px;
+}
+
+.pw-users .pw-stat-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+.pw-users .pw-stat-icon.pw-green {
+    color: #4ade80;
+    background: rgba(34,197,94,.09);
+    border-color: rgba(34,197,94,.15);
+}
+
+.pw-users .pw-stat-icon.pw-purple {
+    color: #c4b5fd;
+    background: rgba(139,92,246,.1);
+    border-color: rgba(139,92,246,.17);
+}
+
+.pw-users .pw-gold {
+    color: var(--pw-gold);
+}
+
+.pw-users .pw-green-text {
+    color: #4ade80;
+}
+
+/* Main panel */
+
+.pw-users .pw-panel {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 17px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.09);
+}
+
+.pw-users .pw-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 23px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.pw-users .pw-panel-title {
+    margin: 0;
+    color: var(--pw-text);
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.pw-users .pw-panel-subtitle {
+    margin: 6px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.pw-users .pw-search-form {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: min(100%, 510px);
+}
+
+.pw-users .pw-search-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 10px 13px;
+    color: var(--pw-text);
+    background: var(--pw-bg);
+    border: 1px solid var(--pw-border);
+    border-radius: 9px;
+    font-size: 12px;
+    transition: border-color .18s ease;
+}
+
+.pw-users .pw-search-input::placeholder {
+    color: var(--pw-muted);
+    opacity: .8;
+}
+
+.pw-users .pw-search-input:focus {
+    border-color: var(--pw-gold);
+    outline: none;
+}
+
+.pw-users .pw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: background .18s ease, border-color .18s ease, opacity .18s ease;
+}
+
+.pw-users .pw-btn-gold {
+    color: #171717;
+    background: var(--pw-gold);
+}
+
+.pw-users .pw-btn-gold:hover {
+    background: var(--pw-gold-light);
+}
+
+.pw-users .pw-btn-outline {
+    color: var(--pw-text);
+    background: transparent;
+    border-color: var(--pw-border);
+}
+
+.pw-users .pw-btn-outline:hover {
+    border-color: var(--pw-gold);
+}
+
+.pw-users .pw-search-result {
+    margin: 15px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+.pw-users .pw-search-result strong {
+    color: var(--pw-text);
+}
+
+/* Table */
+
+.pw-users .pw-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.pw-users .pw-table {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    font-size: 12px;
+}
+
+.pw-users .pw-table thead th {
+    padding: 15px 18px;
+    color: var(--pw-muted);
+    background: rgba(0,0,0,.12);
+    border-bottom: 1px solid var(--pw-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pw-users .pw-table tbody td {
+    padding: 18px;
+    color: var(--pw-text);
+    border-bottom: 1px solid var(--pw-border);
+    vertical-align: middle;
+}
+
+.pw-users .pw-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.pw-users .pw-table tbody tr {
+    transition: background .15s ease;
+}
+
+.pw-users .pw-table tbody tr:hover {
+    background: rgba(197,160,89,.035);
+}
+
+.pw-users .pw-account-name {
+    color: var(--pw-text);
+    font-size: 13px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.pw-users .pw-account-email {
+    display: block;
+    margin-top: 5px;
+    color: var(--pw-muted);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.pw-users .pw-account-tag {
+    display: inline-flex;
+    margin-top: 8px;
+    padding: 4px 7px;
+    color: var(--pw-muted);
+    background: rgba(255,255,255,.035);
+    border: 1px solid var(--pw-border);
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.pw-users .pw-account-tag.pw-superuser {
+    color: #c4b5fd;
+    background: rgba(139,92,246,.09);
+    border-color: rgba(139,92,246,.25);
+}
+
+.pw-users .pw-role,
+.pw-users .pw-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.pw-users .pw-role {
+    padding: 6px 9px;
+    border: 1px solid;
+    border-radius: 30px;
+}
+
+.pw-users .pw-role-admin {
+    color: var(--pw-gold-light);
+    background: rgba(197,160,89,.08);
+    border-color: rgba(197,160,89,.25);
+}
+
+.pw-users .pw-role-user {
+    color: #93c5fd;
+    background: rgba(59,130,246,.08);
+    border-color: rgba(59,130,246,.22);
+}
+
+.pw-users .pw-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.pw-users .pw-status-active {
+    color: #4ade80;
+}
+
+.pw-users .pw-status-inactive {
+    color: #f87171;
+}
+
+.pw-users .pw-date {
+    color: var(--pw-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.pw-users .pw-account-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    min-width: 360px;
+}
+
+.pw-users .pw-field {
+    display: grid;
+    gap: 6px;
+    min-width: 110px;
+}
+
+.pw-users .pw-field-label {
+    color: var(--pw-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+}
+
+.pw-users .pw-select {
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 26px 7px 9px;
+    color: var(--pw-text);
+    background: var(--pw-bg);
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+.pw-users .pw-select:focus {
+    border-color: var(--pw-gold);
+}
+
+.pw-users .pw-active-control {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    color: var(--pw-text);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.pw-users .pw-checkbox {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--pw-gold);
+    cursor: pointer;
+}
+
+.pw-users .pw-protected {
+    min-width: 150px;
+    color: var(--pw-muted);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.pw-users .pw-protected strong {
+    display: block;
+    color: var(--pw-gold);
+    font-size: 11px;
+}
+
+.pw-users .pw-empty {
+    padding: 55px 20px !important;
+    text-align: center;
+}
+
+.pw-users .pw-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    color: var(--pw-gold);
+    background: rgba(197,160,89,.09);
+    border: 1px solid rgba(197,160,89,.17);
+    border-radius: 15px;
+    font-size: 22px;
+}
+
+.pw-users .pw-empty-title {
+    margin: 0;
+    color: var(--pw-text);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.pw-users .pw-empty-text {
+    margin: 7px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+.pw-users .pw-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 15px 22px;
+    border-top: 1px solid var(--pw-border);
+}
+
+.pw-users .pw-footer-text {
+    margin: 0;
+    color: var(--pw-muted);
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+/* Security notice */
+
+.pw-users .pw-security {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin-top: 20px;
+    padding: 17px 19px;
+    background: rgba(197,160,89,.045);
+    border: 1px solid rgba(197,160,89,.2);
+    border-radius: 13px;
+}
+
+.pw-users .pw-security-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    color: var(--pw-gold);
+    background: rgba(197,160,89,.1);
+    border-radius: 10px;
+}
+
+.pw-users .pw-security-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+.pw-users .pw-security-title {
+    margin: 0;
+    color: var(--pw-gold-light);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.pw-users .pw-security-text {
+    margin: 5px 0 0;
+    color: var(--pw-muted);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+/* Responsive */
+
+@media (max-width: 1000px) {
+    .pw-users .pw-panel-head {
+        flex-direction: column;
+    }
+
+    .pw-users .pw-search-form {
+        width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .pw-users .pw-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pw-users .pw-back-link {
+        align-self: flex-start;
+    }
+
+    .pw-users .pw-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .pw-users .pw-stat {
+        padding: 18px;
+    }
+
+    .pw-users .pw-stat-value {
+        font-size: 29px;
+    }
+
+    .pw-users .pw-panel-head {
+        padding: 18px;
+    }
+
+    .pw-users .pw-search-form {
+        flex-wrap: wrap;
+    }
+
+    .pw-users .pw-search-input {
+        flex: 1 1 100%;
+    }
+
+    .pw-users .pw-panel-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 15px 18px;
+    }
+}
+
+@media (max-width: 420px) {
+    .pw-users {
+        padding: 13px;
+    }
+
+    .pw-users .pw-search-form .pw-btn {
+        flex: 1;
+    }
+
+    .pw-users .pw-page-heading {
+        font-size: 25px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pw-users *,
+    .pw-users *::before,
+    .pw-users *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pw-users">
+
+    <!-- PAGE HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <p class="pw-eyebrow">Administration / Access Control</p>
+            <h1 class="pw-page-heading">User Management Hub</h1>
+            <p class="pw-description">
+                Manage registered accounts, review access roles, and control account status.
+                Changes should follow your organisation's access approval policy.
+            </p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-back-link">
+            <span aria-hidden="true">&larr;</span>
+            Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- DJANGO MESSAGES -->
+    {% if messages %}
+        <div class="pw-messages" aria-live="polite" aria-atomic="true">
+            {% for message in messages %}
+                <div class="pw-alert
+                    {% if 'success' in message.tags %}
+                        pw-alert-success
+                    {% elif 'error' in message.tags %}
+                        pw-alert-error
+                    {% else %}
+                        pw-alert-info
+                    {% endif %}">
+                    <span aria-hidden="true">
+                        {% if 'success' in message.tags %}&#10003;
+                        {% elif 'error' in message.tags %}!{% else %}i{% endif %}
+                    </span>
+                    <div>{{ message }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ACCOUNT STATISTICS -->
+    <section class="pw-stats" aria-label="User account statistics">
+
+        <article class="pw-stat">
+            <div class="pw-stat-top">
+                <div>
+                    <p class="pw-stat-label">Registered Accounts</p>
+                    <p class="pw-stat-value">
+                        {{ total_users|default:users.count|default:0 }}
+                    </p>
+                    <p class="pw-stat-note">Accounts matching the current view</p>
+                </div>
+                <div class="pw-stat-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="10" cy="7" r="4"/>
+                        <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+            </div>
+        </article>
+
+        <article class="pw-stat">
+            <div class="pw-stat-top">
+                <div>
+                    <p class="pw-stat-label">Active Accounts</p>
+                    <p class="pw-stat-value pw-green-text">
+                        {{ active_users_count|default:0 }}
+                    </p>
+                    <p class="pw-stat-note">Accounts currently enabled</p>
+                </div>
+                <div class="pw-stat-icon pw-green" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 2.5 2.5L16 9"/>
+                    </svg>
+                </div>
+            </div>
+        </article>
+
+        <article class="pw-stat">
+            <div class="pw-stat-top">
+                <div>
+                    <p class="pw-stat-label">Administrator Accounts</p>
+                    <p class="pw-stat-value pw-gold">
+                        {{ admin_users_count|default:0 }}
+                    </p>
+                    <p class="pw-stat-note">Accounts with administrator role</p>
+                </div>
+                <div class="pw-stat-icon pw-purple" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </div>
+            </div>
+        </article>
+
+    </section>
+
+    <!-- USER MANAGEMENT TABLE -->
+    <section class="pw-panel" aria-labelledby="pw-accounts-heading">
+
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title" id="pw-accounts-heading">
+                    All Registered Accounts
+                </h2>
+                <p class="pw-panel-subtitle">
+                    Review each account before applying role or status changes.
+                </p>
+            </div>
+
+            <form method="get"
+                  action="{% url 'dashboards:admin_manage_users' %}"
+                  class="pw-search-form"
+                  role="search">
+
+                <label for="pw-user-search" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+                    Search user accounts
+                </label>
+
+                <input
+                    id="pw-user-search"
+                    class="pw-search-input"
+                    type="search"
+                    name="q"
+                    value="{{ request.GET.q|default:'' }}"
+                    placeholder="Search username, name or email..."
+                    maxlength="150"
+                    autocomplete="off"
+                >
+
+                <button class="pw-btn pw-btn-gold" type="submit">
+                    Search
+                </button>
+
+                {% if request.GET.q %}
+                    <a class="pw-btn pw-btn-outline"
+                       href="{% url 'dashboards:admin_manage_users' %}">
+                        Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if request.GET.q %}
+            <div style="padding:0 23px 16px;">
+                <p class="pw-search-result">
+                    Search results for:
+                    <strong>{{ request.GET.q }}</strong>
+                </p>
+            </div>
+        {% endif %}
+
+        <div class="pw-table-wrap" role="region"
+             aria-label="Registered user accounts table" tabindex="0">
+
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Account</th>
+                        <th scope="col">Full Name</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date Joined</th>
+                        <th scope="col">Account Controls</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                <div class="pw-account-name">{{ u.username }}</div>
+                                <span class="pw-account-email">
+                                    {{ u.email|default:"No email provided" }}
+                                </span>
+
+                                {% if u.is_superuser %}
+                                    <span class="pw-account-tag pw-superuser">
+                                        Superuser
+                                    </span>
+                                {% endif %}
+
+                                {% if u.id == request.user.id %}
+                                    <span class="pw-account-tag">Your account</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% with full_name=u.get_full_name %}
+                                    {% if full_name %}
+                                        {{ full_name }}
+                                    {% else %}
+                                        <span class="pw-muted">Not provided</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+
+                            <td>
+                                {% if u.is_admin or u.is_superuser %}
+                                    <span class="pw-role pw-role-admin">
+                                        <span class="pw-dot" aria-hidden="true"></span>
+                                        Administrator
+                                    </span>
+                                {% else %}
+                                    <span class="pw-role pw-role-user">
+                                        <span class="pw-dot" aria-hidden="true"></span>
+                                        Normal User
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if u.is_active %}
+                                    <span class="pw-status pw-status-active">
+                                        <span class="pw-dot" aria-hidden="true"></span>
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="pw-status pw-status-inactive">
+                                        <span class="pw-dot" aria-hidden="true"></span>
+                                        Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="pw-date">
+                                {{ u.date_joined|date:"d M Y, H:i" }}
+                            </td>
+
+                            <td>
+                                {% if u.is_superuser or u.id == request.user.id %}
+                                    <div class="pw-protected">
+                                        <strong>Protected account</strong>
+                                        Role and status controls are unavailable here.
+                                    </div>
+                                {% else %}
+                                    <form
+                                        method="post"
+                                        action="{% url 'dashboards:admin_manage_users' %}{% if request.GET.q %}?q={{ request.GET.q|urlencode }}{% endif %}"
+                                        class="pw-account-form"
+                                    >
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ u.pk }}">
+
+                                        <div class="pw-field">
+                                            <label class="pw-field-label"
+                                                   for="pw-role-{{ u.pk }}">
+                                                Access Role
+                                            </label>
+                                            <select
+                                                class="pw-select"
+                                                id="pw-role-{{ u.pk }}"
+                                                name="role"
+                                                required
+                                            >
+                                                <option value="USER"
+                                                    {% if u.role == 'USER' %}selected{% endif %}>
+                                                    Normal User
+                                                </option>
+                                                <option value="ADMIN"
+                                                    {% if u.role == 'ADMIN' %}selected{% endif %}>
+                                                    Administrator
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="pw-field">
+                                            <span class="pw-field-label">Account</span>
+                                            <label class="pw-active-control"
+                                                   for="pw-active-{{ u.pk }}">
+                                                <input
+                                                    class="pw-checkbox"
+                                                    id="pw-active-{{ u.pk }}"
+                                                    type="checkbox"
+                                                    name="is_active"
+                                                    value="on"
+                                                    {% if u.is_active %}checked{% endif %}
+                                                >
+                                                Active
+                                            </label>
+                                        </div>
+
+                                        <button
+                                            class="pw-btn pw-btn-gold"
+                                            type="submit"
+                                            aria-label="Save role and status for {{ u.username }}"
+                                        >
+                                            Save
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="pw-empty">
+                                <div class="pw-empty-icon" aria-hidden="true">
+                                    &#8981;
+                                </div>
+                                <h3 class="pw-empty-title">No matching accounts found</h3>
+                                <p class="pw-empty-text">
+                                    Try another search term or clear the search filter.
+                                </p>
+                                {% if request.GET.q %}
+                                    <a href="{% url 'dashboards:admin_manage_users' %}"
+                                       class="pw-btn pw-btn-outline"
+                                       style="margin-top:16px;">
+                                        View all accounts
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="pw-panel-footer">
+            <p class="pw-footer-text">
+                Changes are subject to server-side access validation.
+            </p>
+            <p class="pw-footer-text">
+                Private Wealth &middot; Access Management
+            </p>
+        </footer>
+
+    </section>
+
+    <!-- SECURITY NOTICE -->
+    <aside class="pw-security" aria-labelledby="pw-security-heading">
+        <div class="pw-security-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 9v4"/>
+                <path d="M12 17h.01"/>
+                <path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="pw-security-title" id="pw-security-heading">
+                Access Control Reminder
+            </h2>
+            <p class="pw-security-text">
+                Administrator access may expose sensitive client and financial information.
+                Grant it only to authorised personnel. The Django view must validate the
+                submitted role, prevent unauthorised account changes, and enforce permissions
+                on every request. Hiding controls in this template is not a security boundary.
+            </p>
+        </div>
+    </aside>
+
+</div>
+{% endblock %}

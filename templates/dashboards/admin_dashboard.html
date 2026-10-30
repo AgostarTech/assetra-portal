@@ -1,0 +1,760 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Control Hub | Private Wealth{% endblock %}
+
+{% block extra_css %}
+<style>
+.pwh-dashboard {
+    --pwh-gold: #c5a059;
+    --pwh-border: var(--app-border, #e5e7eb);
+    --pwh-card: var(--app-surface, #ffffff);
+    --pwh-text: var(--app-text, #202632);
+    --pwh-muted: var(--app-muted, #687181);
+    color: var(--pwh-text);
+    width: 100%;
+    min-width: 0;
+}
+
+.pwh-dashboard *,
+.pwh-dashboard *::before,
+.pwh-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.pwh-dashboard .pwh-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.pwh-dashboard .pwh-eyebrow {
+    color: var(--pwh-gold);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.pwh-dashboard h1 {
+    margin: 8px 0;
+    font-size: clamp(24px, 3vw, 33px);
+    line-height: 1.25;
+}
+
+.pwh-dashboard h2 {
+    margin: 0 0 6px;
+    font-size: 17px;
+}
+
+.pwh-dashboard p {
+    color: var(--pwh-muted);
+}
+
+.pwh-dashboard .pwh-subtitle {
+    margin: 0;
+    color: var(--pwh-muted);
+    font-size: 13px;
+}
+
+.pwh-dashboard .pwh-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pwh-dashboard .pwh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 15px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 8px;
+    background: var(--pwh-card);
+    color: var(--pwh-text);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pwh-dashboard .pwh-btn-primary {
+    background: var(--pwh-gold);
+    border-color: var(--pwh-gold);
+    color: #171717;
+}
+
+.pwh-dashboard .pwh-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding: 0 14px;
+    min-height: 46px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 9px;
+    background: var(--pwh-card);
+}
+
+.pwh-dashboard .pwh-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--pwh-text);
+    font-size: 13px;
+}
+
+.pwh-dashboard .pwh-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.pwh-dashboard .pwh-card {
+    min-width: 0;
+    padding: 21px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 12px;
+    background: var(--pwh-card);
+    box-shadow: 0 3px 12px rgba(0,0,0,.025);
+}
+
+.pwh-dashboard .pwh-kpi-label {
+    color: var(--pwh-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.pwh-dashboard .pwh-kpi-value {
+    margin: 15px 0 8px;
+    font-size: clamp(23px, 2.5vw, 31px);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.pwh-dashboard .pwh-kpi-detail {
+    color: var(--pwh-muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.pwh-dashboard .pwh-panel {
+    margin-bottom: 22px;
+    padding: 22px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 12px;
+    background: var(--pwh-card);
+}
+
+.pwh-dashboard .pwh-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.pwh-dashboard .pwh-panel-header p {
+    margin: 0;
+    font-size: 12px;
+}
+
+.pwh-dashboard .pwh-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 20px;
+    color: var(--pwh-muted);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pwh-dashboard .pwh-category {
+    margin-bottom: 22px;
+}
+
+.pwh-dashboard .pwh-category:last-child {
+    margin-bottom: 0;
+}
+
+.pwh-dashboard .pwh-category-heading,
+.pwh-dashboard .pwh-category-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pwh-dashboard .pwh-category-heading {
+    margin-bottom: 9px;
+    font-size: 12px;
+}
+
+.pwh-dashboard .pwh-category-footer {
+    margin-top: 8px;
+    color: var(--pwh-muted);
+    font-size: 11px;
+}
+
+.pwh-dashboard .pwh-progress {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--app-surface-alt, #edf0f5);
+}
+
+.pwh-dashboard .pwh-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pwh-gold);
+}
+
+.pwh-dashboard .pwh-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.pwh-dashboard .pwh-summary-item {
+    padding: 15px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 9px;
+    background: var(--app-surface-alt, #f7f8fa);
+}
+
+.pwh-dashboard .pwh-summary-item span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--pwh-muted);
+    font-size: 11px;
+}
+
+.pwh-dashboard .pwh-summary-item strong {
+    font-size: 23px;
+}
+
+.pwh-dashboard .pwh-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pwh-dashboard .pwh-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.pwh-dashboard .pwh-table th {
+    padding: 12px;
+    border-bottom: 1px solid var(--pwh-border);
+    color: var(--pwh-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    white-space: nowrap;
+}
+
+.pwh-dashboard .pwh-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--pwh-border);
+    font-size: 12px;
+    vertical-align: top;
+}
+
+.pwh-dashboard .pwh-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.pwh-dashboard .pwh-table tbody tr:hover {
+    background: var(--app-surface-alt, #f7f8fa);
+}
+
+.pwh-dashboard .pwh-table td strong {
+    overflow-wrap: anywhere;
+}
+
+.pwh-dashboard .pwh-status {
+    display: inline-block;
+    padding: 5px 8px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 20px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.pwh-dashboard .pwh-audit-item {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--pwh-border);
+}
+
+.pwh-dashboard .pwh-audit-item:first-child {
+    padding-top: 0;
+}
+
+.pwh-dashboard .pwh-audit-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.pwh-dashboard .pwh-audit-title {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.pwh-dashboard .pwh-audit-item p {
+    margin: 7px 0;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.pwh-dashboard .pwh-muted {
+    color: var(--pwh-muted);
+    font-size: 11px;
+}
+
+.pwh-dashboard .pwh-empty {
+    padding: 25px 12px;
+    border: 1px dashed var(--pwh-border);
+    border-radius: 8px;
+    color: var(--pwh-muted);
+    text-align: center;
+    font-size: 12px;
+}
+
+.pwh-dashboard .pwh-hidden {
+    display: none !important;
+}
+
+.pwh-dashboard .pwh-footnote {
+    margin-top: 18px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+    .pwh-dashboard .pwh-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pwh-dashboard .pwh-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .pwh-dashboard .pwh-kpis,
+    .pwh-dashboard .pwh-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pwh-dashboard .pwh-panel {
+        padding: 16px 12px;
+    }
+
+    .pwh-dashboard .pwh-card {
+        padding: 17px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pwh-dashboard">
+
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">PRIVATE WEALTH / ADMINISTRATION</div>
+            <h1>Admin Control Hub</h1>
+            <p class="pwh-subtitle">
+                Monitor assets, accounts, documents and operational activity.
+            </p>
+        </div>
+
+        <div class="pwh-actions">
+            <button type="button" class="pwh-btn"
+                    onclick="window.location.reload()">
+                Refresh Dashboard
+            </button>
+
+            <a href="{% url 'dashboards:admin_manage_users' %}"
+               class="pwh-btn pwh-btn-primary">
+                Manage Users
+            </a>
+        </div>
+    </header>
+
+    <div class="pwh-search">
+        <span aria-hidden="true">&#9906;</span>
+        <input id="pwhDashboardSearch" type="search"
+               placeholder="Search visible dashboard records..."
+               aria-label="Search dashboard records">
+    </div>
+
+    <!-- Key performance indicators -->
+    <section class="pwh-kpis">
+
+        <article class="pwh-card">
+            <div class="pwh-kpi-label">TOTAL ASSETS</div>
+            <div class="pwh-kpi-value">{{ total_system_assets|default:0 }}</div>
+            <div class="pwh-kpi-detail">
+                {{ active_asset_count|default:0 }} active assets
+            </div>
+        </article>
+
+        <article class="pwh-card">
+            <div class="pwh-kpi-label">REGISTERED USERS</div>
+            <div class="pwh-kpi-value">{{ total_users|default:0 }}</div>
+            <div class="pwh-kpi-detail">
+                {{ active_users|default:0 }} active ·
+                {{ inactive_users|default:0 }} inactive
+            </div>
+        </article>
+
+        <article class="pwh-card">
+            <div class="pwh-kpi-label">REPORTED ASSET VALUE</div>
+            <div class="pwh-kpi-value">
+                {{ total_asset_value|default:0|floatformat:2 }}
+            </div>
+            <div class="pwh-kpi-detail">
+                Aggregate as supplied by the dashboard
+            </div>
+        </article>
+
+        <article class="pwh-card">
+            <div class="pwh-kpi-label">PENDING DOCUMENTS</div>
+            <div class="pwh-kpi-value">{{ pending_count|default:0 }}</div>
+            <div class="pwh-kpi-detail">Awaiting review</div>
+        </article>
+
+    </section>
+
+    <!-- Portfolio overview -->
+    <section class="pwh-panel" id="portfolio">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Portfolio Overview</h2>
+                <p>Asset distribution by category</p>
+            </div>
+            <span class="pwh-badge">ASSETS</span>
+        </div>
+
+        {% if category_stats %}
+            {% for category in category_stats %}
+            <div class="pwh-category pwh-searchable">
+                <div class="pwh-category-heading">
+                    <strong>{{ category.label }}</strong>
+                    <span class="pwh-muted">
+                        {{ category.asset_count }} assets
+                    </span>
+                </div>
+
+                <div class="pwh-progress">
+                    <div class="pwh-progress-fill"
+                         style="width:{% if category.percentage > 100 %}100{% elif category.percentage < 0 %}0{% else %}{{ category.percentage|default:0 }}{% endif %}%;">
+                    </div>
+                </div>
+
+                <div class="pwh-category-footer">
+                    <span>{{ category.percentage|default:0|floatformat:1 }}% reported share</span>
+                    <span>{{ category.total_value|default:0|floatformat:2 }}</span>
+                </div>
+            </div>
+            {% endfor %}
+
+            <p class="pwh-footnote pwh-muted">
+                Currency values are displayed as supplied. Do not interpret
+                their aggregate as a consolidated valuation unless currencies
+                have been converted consistently.
+            </p>
+        {% else %}
+            <div class="pwh-empty">No category statistics are available.</div>
+        {% endif %}
+    </section>
+
+    <!-- Accounts -->
+    <section class="pwh-panel" id="accounts">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Account Overview</h2>
+                <p>Account totals and administrator access</p>
+            </div>
+            <a class="pwh-btn"
+               href="{% url 'dashboards:admin_manage_users' %}">
+                Open User Management
+            </a>
+        </div>
+
+        <div class="pwh-summary-grid">
+            <div class="pwh-summary-item">
+                <span>Total users</span>
+                <strong>{{ total_users|default:0 }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Active users</span>
+                <strong>{{ active_users|default:0 }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Inactive users</span>
+                <strong>{{ inactive_users|default:0 }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Administrator accounts</span>
+                <strong>{{ admin_users|default:0 }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- Document verification -->
+    <section class="pwh-panel" id="documents">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Document Verification Queue</h2>
+                <p>Recently uploaded documents</p>
+            </div>
+            <span class="pwh-badge">{{ pending_count|default:0 }} pending</span>
+        </div>
+
+        {% if documents %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Uploaded By</th>
+                        <th>Asset</th>
+                        <th>Status</th>
+                        <th>Date Uploaded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                    <tr class="pwh-searchable">
+                        <td>
+                            {{ document.get_category_display|default:document.category|default:"Document" }}
+                        </td>
+                        <td>
+                            {% if document.uploader %}
+                                {{ document.uploader.get_full_name|default:document.uploader.username }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if document.asset %}{{ document.asset }}{% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                {{ document.get_status_display|default:document.status|default:"Unknown" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if document.uploaded_at %}
+                                {{ document.uploaded_at|date:"d M Y" }}
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">No documents are available.</div>
+        {% endif %}
+    </section>
+
+    <!-- Support operations -->
+    <section class="pwh-panel" id="support">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Support Operations</h2>
+                <p>Ticket activity and service requests</p>
+            </div>
+            <span class="pwh-badge">{{ open_ticket_count|default:0 }} open</span>
+        </div>
+
+        {% if tickets %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Requested By</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr class="pwh-searchable">
+                        <td><strong>{{ ticket.subject|default:"Support request" }}</strong></td>
+                        <td>
+                            {% if ticket.user %}
+                                {{ ticket.user.get_full_name|default:ticket.user.username }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                {{ ticket.get_priority_display|default:ticket.priority|default:"Normal" }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                {{ ticket.get_status_display|default:ticket.status|default:"Unknown" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if ticket.created_at %}
+                                {{ ticket.created_at|date:"d M Y, H:i" }}
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">No support tickets are available.</div>
+        {% endif %}
+    </section>
+
+    <!-- Recent assets -->
+    <section class="pwh-panel" id="recent-assets">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Recently Registered Assets</h2>
+                <p>Latest asset records</p>
+            </div>
+        </div>
+
+        {% if recent_assets %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Owner</th>
+                        <th>Category</th>
+                        <th>Estimated Value</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in recent_assets %}
+                    <tr class="pwh-searchable">
+                        <td><strong>{{ asset.name|default:"Unnamed asset" }}</strong></td>
+                        <td>
+                            {% if asset.owner %}
+                                {{ asset.owner.get_full_name|default:asset.owner.username }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ asset.category|default:"—" }}</td>
+                        <td>
+                            {{ asset.currency|default:"" }}
+                            {{ asset.current_estimated_value|default:0|floatformat:2 }}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                {{ asset.get_status_display|default:asset.status|default:"Unknown" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if asset.created_at %}
+                                {{ asset.created_at|date:"d M Y" }}
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">No recent assets are available.</div>
+        {% endif %}
+    </section>
+
+    <!-- Audit activity -->
+    <section class="pwh-panel" id="audit">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Recent Audit Activity</h2>
+                <p>Events recorded by the application</p>
+            </div>
+            <span class="pwh-badge">AUDIT LOG</span>
+        </div>
+
+        {% if recent_audit_logs %}
+            {% for log in recent_audit_logs %}
+            <article class="pwh-audit-item pwh-searchable">
+                <div class="pwh-audit-title">
+                    <strong>{{ log.action|default:"System activity" }}</strong>
+                    <span class="pwh-muted">
+                        {% if log.timestamp %}
+                            {{ log.timestamp|date:"d M Y, H:i" }}
+                        {% endif %}
+                    </span>
+                </div>
+                <p>{{ log.details|default:"No additional details recorded." }}</p>
+                <span class="pwh-muted">
+                    {% if log.user %}
+                        User: {{ log.user.get_full_name|default:log.user.username }}
+                    {% else %}
+                        System event
+                    {% endif %}
+                </span>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="pwh-empty">No recent audit activity is available.</div>
+        {% endif %}
+    </section>
+
+    <footer class="pwh-footnote">
+        Private Wealth · Administration
+    </footer>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    "use strict";
+
+    const search = document.getElementById("pwhDashboardSearch");
+    if (!search) return;
+
+    const rows = document.querySelectorAll(
+        ".pwh-dashboard .pwh-searchable"
+    );
+
+    search.addEventListener("input", function () {
+        const query = this.value.trim().toLowerCase();
+
+        rows.forEach(function (row) {
+            const text = (row.innerText || row.textContent || "").toLowerCase();
+            row.classList.toggle(
+                "pwh-hidden",
+                query !== "" && !text.includes(query)
+            );
+        });
+    });
+})();
+</script>
+{% endblock %}

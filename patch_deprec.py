@@ -1,0 +1,67 @@
+﻿import os
+
+calc_path = "templates/portfolios/depreciation_calculator.html"
+os.makedirs("templates/portfolios", exist_ok=True)
+
+html_content = """{% extends "base.html" %}
+{% block title %}Asset Depreciation Calculator - Asset Portal{% endblock %}
+{% block page_title %}Fixed Asset Depreciation & Amortization Calculator{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; color: #1a1a1a;">Straight-Line Depreciation & Amortization Engine</h3>
+    <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Calculate annual write-downs and residual book values for enterprise equipment, real estate, and capital holdings.</p>
+
+    <form id="deprec-form" onsubmit="calculateDepreciation(event)">
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px; color: #333;">Initial Asset Acquisition Cost ($):</label>
+            <input type="number" id="cost" value="100000" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px; color: #333;">Estimated Salvage / Residual Value ($):</label>
+            <input type="number" id="salvage" value="10000" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px; color: #333;">Useful Life (Years):</label>
+            <input type="number" id="life" value="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
+        </div>
+
+        <button type="submit" style="width: 100%; background: #1a1a1a; color: #cfa76e; border: none; padding: 12px; font-weight: bold; border-radius: 4px; cursor: pointer;">Compute Depreciation Schedule</button>
+    </form>
+
+    <div id="deprec-result-box" style="display: none; margin-top: 25px; padding: 20px; background: #fdfbf7; border: 1px solid #cfa76e; border-radius: 6px;">
+        <h4 style="margin: 0 0 10px 0; color: #1a1a1a;">Calculation Summary:</h4>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Annual Depreciation Expense:</strong> <span id="annual-dep" style="color: #cfa76e; font-weight: bold;"></span></p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Total Depreciable Amount:</strong> <span id="total-dep"></span></p>
+    </div>
+</div>
+
+<script>
+    function calculateDepreciation(e) {
+        e.preventDefault();
+        const cost = parseFloat(document.getElementById("cost").value);
+        const salvage = parseFloat(document.getElementById("salvage").value);
+        const life = parseInt(document.getElementById("life").value);
+
+        if (life <= 0) {
+            alert("Useful life must be greater than zero.");
+            return;
+        }
+
+        const depreciableAmount = cost - salvage;
+        const annualExpense = depreciableAmount / life;
+
+        document.getElementById("annual-dep").innerText = "$" + annualExpense.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById("total-dep").innerText = "$" + depreciableAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById("deprec-result-box").style.display = "block";
+    }
+</script>
+{% endblock %}
+"""
+
+with open(calc_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("SUCCESS: Asset Depreciation Calculator template created successfully!")

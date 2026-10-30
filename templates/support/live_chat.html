@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Live Support Chat - Asset Portal{% endblock %}
+{% block page_title %}Real-Time Help Desk Live Chat{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 20px auto; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 500px;">
+    <div style="background: #1a1a1a; color: #cfa76e; padding: 15px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px; font-weight: bold;">
+        Enterprise Support Live Channel (Powered by WebSockets)[cite: 1]
+    </div>
+    
+    <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; background: #fdfbf7; display: flex; flex-direction: column; gap: 12px;">
+        <div style="align-self: flex-start; background: #fff; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; max-width: 70%;">
+            <strong style="color: #1a1a1a; display: block; font-size: 12px;">Support Agent (James)</strong>
+            <span style="font-size: 14px; color: #333;">Hello Agola. How can our wealth support team assist your portfolio operations today?</span>
+        </div>
+    </div>
+    
+    <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+        <input type="text" id="chat-input" placeholder="Type your support message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" onkeypress="if(event.key === 'Enter') sendChatMessage();">
+        <button onclick="sendChatMessage()" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Send</button>
+    </div>
+</div>
+
+<script>
+    function sendChatMessage() {
+        const input = document.getElementById("chat-input");
+        const msg = input.value.trim();
+        if(!msg) return;
+        
+        const chatContainer = document.getElementById("chat-messages");
+        
+        // Append user message
+        const userDiv = document.createElement("div");
+        userDiv.style.cssText = "align-self: flex-end; background: #1a1a1a; color: #fff; padding: 10px 15px; border-radius: 6px; max-width: 70%;";
+        userDiv.innerHTML = `<strong style="color: #cfa76e; display: block; font-size: 12px;">You</strong><span style="font-size: 14px;">${msg}</span>`;
+        chatContainer.appendChild(userDiv);
+        
+        input.value = "";
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // Simulated automated agent response
+        setTimeout(() => {
+            const agentDiv = document.createElement("div");
+            agentDiv.style.cssText = "align-self: flex-start; background: #fff; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; max-width: 70%;";
+            agentDiv.innerHTML = `<strong style="color: #1a1a1a; display: block; font-size: 12px;">Support Agent (James)</strong><span style="font-size: 14px; color: #333;">Thank you for your message. A compliance specialist has been notified.</span>`;
+            chatContainer.appendChild(agentDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 1000);
+    }
+</script>
+{% endblock %}

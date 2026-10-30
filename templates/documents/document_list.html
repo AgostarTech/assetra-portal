@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}My Documents - Asset Portal{% endblock %}
+{% block page_title %}My Documents{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1a1a1a;">Verification Documents</h2>
+        <a href="{% url 'upload_document' %}" style="background-color: #1a1a1a; color: #cfa76e; padding: 10px 15px; text-decoration: none; border-radius: 6px; font-weight: bold;">+ Upload Document</a>
+    </div>
+
+    {% if documents %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f4f6f9; text-align: left;">
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Category</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Associated Asset</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Status</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Uploaded On</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Review Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px; font-weight: bold; color: #333;">{{ doc.get_category_display }}</td>
+                    <td style="padding: 12px;">{{ doc.asset.name|default:"--" }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;
+                            {% if doc.status == 'APPROVED' %}background: #d4edda; color: #155724;
+                            {% elif doc.status == 'REJECTED' %}background: #f8d7da; color: #721c24;
+                            {% elif doc.status == 'SUBMITTED' or doc.status == 'UNDER_REVIEW' %}background: #fff3cd; color: #856404;
+                            {% else %}background: #e2e3e5; color: #383d41;{% endif %}">
+                            {{ doc.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">{{ doc.uploaded_at|date:"M d, Y" }}</td>
+                    <td style="padding: 12px; color: #666; font-size: 13px;">{{ doc.review_notes|default:"--" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: #666; text-align: center; padding: 40px 0;">No documents uploaded yet. Click the button above to upload verification files.</p>
+    {% endif %}
+</div>
+{% endblock %}

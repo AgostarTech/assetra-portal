@@ -1,0 +1,270 @@
+
+{% load static %}
+
+<aside class="manager-sidebar">
+
+    <!-- Brand -->
+    <div class="manager-brand">
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="manager-brand-link">
+            <div class="manager-logo">PW</div>
+            <div>
+                <div class="manager-brand-name">PRIVATE WEALTH</div>
+                <div class="manager-brand-subtitle">ADMINISTRATION</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Administrator identity -->
+    <div class="manager-identity">
+        <div class="manager-label">SIGNED IN AS</div>
+
+        <div class="manager-username">
+            {{ request.user.get_full_name|default:request.user.username }}
+        </div>
+
+        <span class="manager-role">
+            {% if request.user.is_superuser %}
+                SUPERUSER
+            {% else %}
+                SYSTEM ADMIN
+            {% endif %}
+        </span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="manager-navigation">
+
+        <div class="manager-section-label">MAIN MENU</div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}"
+           class="manager-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            <span class="manager-nav-icon">&#9635;</span>
+            <span>Admin Dashboard</span>
+        </a>
+
+        <a href="{% url 'dashboards:admin_manage_users' %}"
+           class="manager-nav-link {% if request.resolver_match.url_name == 'admin_manage_users' %}active{% endif %}">
+            <span class="manager-nav-icon">&#9787;</span>
+            <span>User Management</span>
+        </a>
+
+        <div class="manager-section-label manager-section-spaced">
+            CLIENT SERVICES
+        </div>
+
+        <div class="manager-sidebar-note">
+            Manage users and monitor system activity from your administration dashboard.
+        </div>
+
+        <div class="manager-divider"></div>
+
+        <a href="{% url 'dashboards:role_router' %}" class="manager-nav-link">
+            <span class="manager-nav-icon">&#8592;</span>
+            <span>Role Home</span>
+        </a>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="manager-sidebar-footer">
+        <div class="manager-footer-caption">Secure Management Portal</div>
+
+        {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="manager-logout-button">
+                    <span>&#10140;</span>
+                    Sign Out
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+</aside>
+
+<style>
+.manager-sidebar {
+    box-sizing: border-box;
+    width: 250px;
+    min-width: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #151515;
+    color: #F4F6F9;
+    border-right: 1px solid #2b2b2b;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.manager-brand {
+    padding: 25px 18px;
+    border-bottom: 1px solid #2b2b2b;
+}
+
+.manager-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.manager-logo {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #C5A059;
+    color: #121212;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.manager-brand-name {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.manager-brand-subtitle {
+    margin-top: 4px;
+    color: #C5A059;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.manager-identity {
+    padding: 20px;
+    border-bottom: 1px solid #2b2b2b;
+}
+
+.manager-label,
+.manager-section-label {
+    color: #888;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+}
+
+.manager-label {
+    margin-bottom: 10px;
+}
+
+.manager-username {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.manager-role {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 4px 9px;
+    border: 1px solid #594626;
+    border-radius: 20px;
+    background: #302719;
+    color: #D8B66C;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.manager-navigation {
+    flex: 1;
+    padding: 20px 12px;
+}
+
+.manager-section-label {
+    padding: 0 10px 12px;
+}
+
+.manager-section-spaced {
+    padding-top: 24px;
+}
+
+.manager-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    color: #B8B8B8;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background .2s ease, color .2s ease;
+}
+
+.manager-nav-link:hover {
+    background: #252525;
+    color: #C5A059;
+}
+
+.manager-nav-link.active {
+    background: #29251D;
+    color: #C5A059;
+    font-weight: 600;
+}
+
+.manager-nav-icon {
+    width: 20px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 17px;
+}
+
+.manager-sidebar-note {
+    padding: 0 10px;
+    color: #777;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.manager-divider {
+    margin: 22px 10px;
+    border-top: 1px solid #2b2b2b;
+}
+
+.manager-sidebar-footer {
+    padding: 18px 20px;
+    border-top: 1px solid #2b2b2b;
+}
+
+.manager-footer-caption {
+    margin-bottom: 14px;
+    color: #777;
+    font-size: 11px;
+}
+
+.manager-logout-button {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #503131;
+    border-radius: 9px;
+    background: #281919;
+    color: #FCA5A5;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s ease;
+}
+
+.manager-logout-button:hover {
+    background: #3a2020;
+}
+
+@media (max-width: 768px) {
+    .manager-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+    }
+
+    .manager-navigation {
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+}
+</style>

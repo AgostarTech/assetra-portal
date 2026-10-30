@@ -1,0 +1,346 @@
+﻿
+{% load static %}
+
+<style>
+    .pw-admin-sidebar,
+    .pw-admin-sidebar * {
+        box-sizing: border-box;
+    }
+
+    .pw-admin-sidebar {
+        --pw-gold: #C5A059;
+        --pw-bg: #111318;
+        --pw-surface: #191C23;
+        --pw-border: rgba(255, 255, 255, 0.08);
+        --pw-muted: #9298A5;
+        width: 260px;
+        min-width: 260px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--pw-bg);
+        color: #F4F5F7;
+        border-right: 1px solid var(--pw-border);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        padding: 24px 16px 18px;
+    }
+
+    .pw-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px 8px 26px;
+        border-bottom: 1px solid var(--pw-border);
+    }
+
+    .pw-brand-mark {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(197, 160, 89, 0.6);
+        border-radius: 12px;
+        color: var(--pw-gold);
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .pw-brand-name {
+        margin: 0;
+        color: #F7F5EF;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+    }
+
+    .pw-brand-caption {
+        margin: 5px 0 0;
+        color: var(--pw-gold);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    .pw-section-label {
+        margin: 26px 10px 12px;
+        color: var(--pw-muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+    }
+
+    .pw-profile {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 11px;
+        margin-top: 20px;
+        background: var(--pw-surface);
+        border: 1px solid var(--pw-border);
+        border-radius: 12px;
+        min-width: 0;
+    }
+
+    .pw-avatar {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(197, 160, 89, 0.14);
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        color: var(--pw-gold);
+        font-size: 15px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .pw-profile-info {
+        min-width: 0;
+    }
+
+    .pw-profile-name {
+        margin: 0;
+        overflow-wrap: anywhere;
+        color: #F4F5F7;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .pw-profile-role {
+        display: inline-block;
+        margin-top: 6px;
+        color: var(--pw-gold);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .pw-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .pw-nav-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 45px;
+        padding: 11px 12px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        color: #B8BDC7;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.2s ease, color 0.2s ease,
+                    border-color 0.2s ease;
+    }
+
+    .pw-nav-icon {
+        width: 20px;
+        flex-shrink: 0;
+        color: #9298A5;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .pw-nav-link:hover {
+        background: rgba(255, 255, 255, 0.045);
+        color: #FFFFFF;
+        border-color: var(--pw-border);
+    }
+
+    .pw-nav-link:hover .pw-nav-icon {
+        color: var(--pw-gold);
+    }
+
+    .pw-nav-link.active {
+        background: rgba(197, 160, 89, 0.12);
+        color: var(--pw-gold);
+        border-color: rgba(197, 160, 89, 0.2);
+    }
+
+    .pw-nav-link.active .pw-nav-icon {
+        color: var(--pw-gold);
+    }
+
+    .pw-sidebar-spacer {
+        flex: 1;
+        min-height: 28px;
+    }
+
+    .pw-system-status {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px;
+        margin-bottom: 16px;
+        border: 1px solid var(--pw-border);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pw-status-dot {
+        width: 8px;
+        height: 8px;
+        flex-shrink: 0;
+        background: #43C98B;
+        border-radius: 50%;
+        box-shadow: 0 0 9px rgba(67, 201, 139, 0.3);
+    }
+
+    .pw-status-text {
+        color: #C4C9D2;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .pw-status-caption {
+        display: block;
+        margin-top: 4px;
+        color: var(--pw-muted);
+        font-size: 9px;
+    }
+
+    .pw-signout {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 12px;
+        border: 1px solid rgba(231, 112, 112, 0.22);
+        border-radius: 9px;
+        background: rgba(231, 112, 112, 0.07);
+        color: #E9A1A1;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .pw-signout:hover {
+        background: rgba(231, 112, 112, 0.15);
+    }
+
+    .pw-sidebar-footer {
+        margin: 15px 0 0;
+        color: #6F7581;
+        font-size: 9px;
+        text-align: center;
+        letter-spacing: 0.4px;
+    }
+
+    @media (max-width: 768px) {
+        .pw-admin-sidebar {
+            width: 100%;
+            min-width: 0;
+            min-height: auto;
+        }
+
+        .pw-sidebar-spacer {
+            min-height: 16px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pw-nav-link,
+        .pw-signout {
+            transition: none;
+        }
+    }
+</style>
+
+<aside class="pw-admin-sidebar" aria-label="Administrator navigation">
+
+    <!-- Brand -->
+    <div class="pw-brand">
+        <div class="pw-brand-mark" aria-hidden="true">P</div>
+        <div>
+            <h2 class="pw-brand-name">PRIVATE WEALTH</h2>
+            <p class="pw-brand-caption">ADMINISTRATION</p>
+        </div>
+    </div>
+
+    <!-- Current user -->
+    <div class="pw-profile">
+        <div class="pw-avatar" aria-hidden="true">
+            {{ request.user.username|first|upper }}
+        </div>
+
+        <div class="pw-profile-info">
+            <p class="pw-profile-name">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </p>
+
+            <span class="pw-profile-role">
+                {% if request.user.is_superuser %}
+                    SUPERUSER
+                {% elif request.user.is_admin %}
+                    ADMINISTRATOR
+                {% else %}
+                    AUTHORIZED USER
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Main navigation -->
+    <p class="pw-section-label">Workspace</p>
+
+    <nav class="pw-nav" aria-label="Main menu">
+
+        <a href="{% url 'dashboards:admin_dashboard' %}"
+           class="pw-nav-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}"
+           {% if request.resolver_match.url_name == 'admin_dashboard' %}aria-current="page"{% endif %}>
+            <span class="pw-nav-icon" aria-hidden="true">&#9633;</span>
+            <span>Admin Dashboard</span>
+        </a>
+
+        <a href="{% url 'dashboards:admin_manage_users' %}"
+           class="pw-nav-link{% if request.resolver_match.url_name == 'admin_manage_users' %} active{% endif %}"
+           {% if request.resolver_match.url_name == 'admin_manage_users' %}aria-current="page"{% endif %}>
+            <span class="pw-nav-icon" aria-hidden="true">&#9787;</span>
+            <span>User Management</span>
+        </a>
+
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin:index' %}" class="pw-nav-link">
+            <span class="pw-nav-icon" aria-hidden="true">&#9881;</span>
+            <span>Django Administration</span>
+        </a>
+        {% endif %}
+
+    </nav>
+
+    <!-- Bottom section -->
+    <div class="pw-sidebar-spacer"></div>
+
+    <div class="pw-system-status">
+        <span class="pw-status-dot" aria-hidden="true"></span>
+        <div>
+            <span class="pw-status-text">Application Access</span>
+            <span class="pw-status-caption">Authenticated session</span>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="pw-signout">
+            <span aria-hidden="true">&#10140;</span>
+            <span>Sign Out</span>
+        </button>
+    </form>
+
+    <p class="pw-sidebar-footer">
+        PRIVATE WEALTH PORTAL
+    </p>
+
+</aside>

@@ -1,0 +1,49 @@
+﻿import os
+
+timeline_path = "templates/assets/asset_timeline.html"
+os.makedirs("templates/assets", exist_ok=True)
+
+html_content = """{% extends "base.html" %}
+{% block title %}Asset Activity Timeline - Asset Portal{% endblock %}
+{% block page_title %}Asset Activity History{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; color: #1a1a1a;">Chronological Asset Activity</h3>
+    <p style="color: #666; font-size: 14px; margin-bottom: 30px;">Track the lifecycle, creation, updates, and compliance verifications of your portfolio assets.</p>
+
+    <div style="position: relative; border-left: 2px solid #cfa76e; margin-left: 20px; padding-left: 20px;">
+        
+        <!-- Timeline Item 1 -->
+        <div style="margin-bottom: 25px; position: relative;">
+            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
+            <span style="font-size: 12px; color: #888; font-weight: bold;">October 17, 2026 - 14:30</span>
+            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Asset Valuation Updated</h4>
+            <p style="margin: 0; font-size: 13px; color: #555;">Estimated value for Commercial Real Estate portfolio was re-valued.</p>
+        </div>
+
+        <!-- Timeline Item 2 -->
+        <div style="margin-bottom: 25px; position: relative;">
+            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
+            <span style="font-size: 12px; color: #888; font-weight: bold;">October 15, 2026 - 10:15</span>
+            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Compliance Document Verified</h4>
+            <p style="margin: 0; font-size: 13px; color: #555;">Ownership deed verified and stamped by Wealth Advisor.</p>
+        </div>
+
+        <!-- Timeline Item 3 -->
+        <div style="position: relative;">
+            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
+            <span style="font-size: 12px; color: #888; font-weight: bold;">October 10, 2026 - 09:00</span>
+            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Asset Registered</h4>
+            <p style="margin: 0; font-size: 13px; color: #555;">Initial creation of Private Equity holdings record.</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+"""
+
+with open(timeline_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("SUCCESS: Asset Activity Timeline template created successfully!")

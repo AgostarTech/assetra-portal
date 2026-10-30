@@ -1,0 +1,90 @@
+/* Manager Sidebar Layout Styles */
+.manager-sidebar {
+    width: 260px;
+    background-color: #0d0d0d;
+    border-right: 1px solid rgba(207, 167, 110, 0.2);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    padding: 24px 20px;
+    box-sizing: border-box;
+}
+
+.sidebar-brand-box {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(207, 167, 110, 0.2);
+    margin-bottom: 20px;
+}
+
+.sidebar-brand-box h2 {
+    color: #cfa76e;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 4px 0;
+}
+
+.sidebar-brand-box span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.sidebar-link {
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    color: #ffffff;
+    background: rgba(207, 167, 110, 0.1);
+    border-left: 3px solid #cfa76e;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(207, 167, 110, 0.2);
+    padding-top: 15px;
+    text-align: center;
+}
+
+.btn-sidebar-logout {
+    background: transparent;
+    border: 1px solid #f87171;
+    color: #f87171;
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-sidebar-logout:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+/* Main Panel Offset for Sidebar */
+.manager-main-wrapper {
+    margin-left: 260px;
+    min-height: 100vh;
+    background-color: #0d0d0d;
+    box-sizing: border-box;
+}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manager Console - Asset Portal{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manager_dashboard.css' %}">
+
+<div class="manager-container">
+    
+    <!-- Top Header Bar -->
+    <div class="manager-header">
+        <div>
+            <h1>Manager Console: {{ request.user.get_full_name|default:request.user.username }}</h1>
+            <p>Executive Portfolio Oversight & Compliance Verification Center</p>
+        </div>
+        <div>
+            <a href="{% url 'export_compliance_report' %}" class="btn-export">
+                Export Audit Report (PDF)
+            </a>
+        </div>
+    </div>
+
+    <!-- Expanded Executive Metric Cards -->
+    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="metric-card-box">
+            <p class="metric-title">Pending Document Reviews</p>
+            <h3 class="metric-value">{{ pending_count }} Items</h3>
+            <span class="metric-subtext">Awaiting Compliance Sign-off</span>
+        </div>
+        <div class="metric-card-box">
+            <p class="metric-title">Total Active Clients</p>
+            <h3 class="metric-value" style="color: #ffffff;">{{ total_clients }}</h3>
+            <span class="metric-subtext">Registered High-Net-Worth Users</span>
+        </div>
+        <div class="metric-card-box">
+            <p class="metric-title">Active Monitored Assets</p>
+            <h3 class="metric-value" style="color: #38bdf8;">{{ total_managed_assets }} Assets</h3>
+            <span class="metric-subtext">Real Estate, Vehicles & Equities</span>
+        </div>
+    </div>
+
+    <!-- Document Verification Queue Table -->
+    <div class="queue-section" style="margin-bottom: 35px;">
+        <h2 class="queue-title">Document Verification Queue</h2>
+        <div style="overflow-x: auto;">
+            <table class="queue-table">
+                <thead>
+                    <tr>
+                        <th>Document Type</th>
+                        <th>Client</th>
+                        <th>Uploaded Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td><strong>{{ doc.get_category_display }}</strong> - {{ doc.asset.name|default:"General File" }}</td>
+                        <td>{{ doc.uploader.username }}</td>
+                        <td style="color: #94a3b8;">{{ doc.uploaded_at|timesince }} ago</td>
+                        <td>
+                            <span class="badge-status">{{ doc.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{% url 'review_document' doc.id %}" class="action-buttons">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="approve" class="btn-approve">Approve</button>
+                                <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No pending verification items found. Inbox zero achieved.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Targeted Client Oversight Table -->
+    <div class="queue-section">
+        <h2 class="queue-title">Target Client Portfolio Overview</h2>
+        <div style="overflow-x: auto;">
+            <table class="queue-table">
+                <thead>
+                    <tr>
+                        <th>Client Username</th>
+                        <th>Email Address</th>
+                        <th>Date Joined</th>
+                        <th>Account Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in all_clients %}
+                    <tr>
+                        <td><strong>{{ client.username }}</strong></td>
+                        <td>{{ client.email }}</td>
+                        <td style="color: #94a3b8;">{{ client.date_joined|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if client.is_active %}
+                                <span style="color: #34d399; font-weight: 600;">Active</span>
+                            {% else %}
+                                <span style="color: #f87171; font-weight: 600;">Inactive / Locked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-state">No client accounts registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

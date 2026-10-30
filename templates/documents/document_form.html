@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Asset Portal{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #cfa76e;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h3 style="color: #1a1a1a; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Submit File for Verification</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Upload proof of identity, ownership, or valuation. Files will be reviewed by a manager.</p>
+        
+        {{ form.as_p }}
+        
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" style="background-color: #1a1a1a; color: #cfa76e; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">Upload File</button>
+            <a href="{% url 'document_list' %}" style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
