@@ -15,7 +15,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in config(
         "ALLOWED_HOSTS",
-        default="127.0.0.1,localhost",
+        default="127.0.0.1,localhost,.onrender.com,assetra.africa,www.assetra.africa",
     ).split(",")
     if host.strip()
 ]
