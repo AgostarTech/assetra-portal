@@ -35,7 +35,8 @@
             --app-border: rgba(255,255,255,.08);
             --app-gold: #c5a059;
             --app-gold-hover: #d7b574;
-            --app-sidebar-width: 250px;
+            --app-sidebar-width: 270px;
+            --app-manager-sidebar-width: 250px;
             --app-transition: 180ms ease;
         }
 
@@ -189,6 +190,14 @@
             margin: 0;
         }
 
+        /* Custom width adjustment for admin manager sidebar */
+        .wrapper > .manager-sidebar {
+            flex: 0 0 var(--app-manager-sidebar-width);
+            width: var(--app-manager-sidebar-width);
+            min-width: var(--app-manager-sidebar-width);
+            max-width: var(--app-manager-sidebar-width);
+        }
+
         .main-panel {
             display: flex;
             flex: 1 1 0;
@@ -201,6 +210,13 @@
             margin: 0 !important;
             padding: 0;
             overflow-wrap: anywhere;
+        }
+
+        /* Desktop side-by-side spacing alignment */
+        @media (min-width: 769px) {
+            .main-panel {
+                margin-left: 0;
+            }
         }
 
         .content-area {
@@ -394,10 +410,6 @@
         }
 
         @media (max-width: 760px) {
-            /*
-             * Let the existing sidebar stylesheet handle its
-             * mobile visibility and menu-toggle behavior.
-             */
             .wrapper {
                 width: 100%;
                 min-width: 0;
