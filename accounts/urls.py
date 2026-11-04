@@ -2,10 +2,9 @@
 from django.urls import path
 from . import views
 
-app_name = "dashboards"
+app_name = "accounts"
 
 urlpatterns = [
-    path("role-router/", views.role_router, name="role_router"),
-    path("user/", views.user_dashboard, name="user_dashboard"),
-    path("admin/", views.admin_dashboard, name="admin_dashboard"),
+    path("signup/", views.signup_view, name="signup"),
+    path("login/", views.login_view, name="login"),
 ]

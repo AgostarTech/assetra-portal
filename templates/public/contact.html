@@ -1,4 +1,3 @@
-
 {% extends "base_public.html" %}
 {% block title %}Contact Support | Private Wealth{% endblock %}
 {% block content %}
@@ -455,6 +454,41 @@
 
                 <div class="cs-info-list">
 
+                    <!-- OFFICE / LOCATION CARD -->
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                                <circle cx="12" cy="9" r="2.5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Office Location</h3>
+                            <p>
+                                Victoria Noble Center<br>
+                                4th Floor
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- PHONE SUPPORT CARD -->
+                    <article class="cs-info-card">
+                        <div class="cs-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Phone Support</h3>
+                            <p>
+                                <a href="tel:0617722019">0617722019</a>
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- EMAIL SUPPORT CARD -->
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
@@ -466,12 +500,13 @@
                         <div>
                             <h3>Email Support</h3>
                             <p>
-                                Use your organization's verified support
-                                email address.
+                                <a href="mailto:info@assetra.com">info@assetra.com</a><br>
+                                <a href="mailto:assetra@gmail.com">assetra@gmail.com</a>
                             </p>
                         </div>
                     </article>
 
+                    <!-- SUPPORT HOURS CARD -->
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
@@ -483,42 +518,7 @@
                         <div>
                             <h3>Support Hours</h3>
                             <p>
-                                Contact the team through the approved
-                                support channel for current availability.
-                            </p>
-                        </div>
-                    </article>
-
-                    <article class="cs-info-card">
-                        <div class="cs-icon" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4z"/>
-                                <path d="M9 12l2 2 4-4"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3>Account Assistance</h3>
-                            <p>
-                                Get guidance with access issues and
-                                platform functionality.
-                            </p>
-                        </div>
-                    </article>
-
-                    <article class="cs-info-card">
-                        <div class="cs-icon" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M4 4h16v12H8l-4 4z"/>
-                                <path d="M8 8h8M8 11h5"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3>Technical Questions</h3>
-                            <p>
-                                Describe errors, unexpected behavior,
-                                or difficulties using the system.
+                                Monday – Friday: 8:00 AM – 5:00 PM EAT
                             </p>
                         </div>
                     </article>
@@ -536,11 +536,7 @@
                 </div>
             </div>
 
-            <!--
-                FRONT-END FORM DESIGN.
-                Connect this form to a Django view before using it
-                to collect or send support requests.
-            -->
+            <!-- FRONT-END FORM PANEL -->
             <div class="cs-form-panel">
                 <div class="cs-form-heading">
                     <span class="cs-eyebrow">Send an enquiry</span>
