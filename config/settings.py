@@ -79,12 +79,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # --------------------------------------------------
-# DATABASE - POSTGRESQL (RENDER)
+# DATABASE - SUPABASE POSTGRESQL (CLOUD)
 # --------------------------------------------------
 DATABASES = {
     "default": dj_database_url.config(
         default=config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
         conn_max_age=600,
+        ssl_require=True,
     )
 }
 
