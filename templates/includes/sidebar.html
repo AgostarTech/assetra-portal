@@ -489,7 +489,7 @@
         <span class="sidebar-section-label">WORKSPACE</span>
 
         <a href="{% url 'dashboards:user_dashboard' %}"
-           class="sidebar-link {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">
+           class="sidebar-link {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}" data-section="dashboard">
             <i class="fa-solid fa-chart-pie"></i>
             <span>Dashboard</span>
         </a>
@@ -510,26 +510,23 @@
 
             <div class="dropdown-container" id="assetsDropdown"
                  {% if request.resolver_match.app_name != 'assets' %}hidden{% endif %}>
-                <a href="{% url 'assets:asset_list' %}" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}" class="dropdown-link {% if request.resolver_match.url_name == 'asset_list' and not request.GET.category %}active{% endif %}">
                     <i class="fa-solid fa-layer-group"></i> All My Assets
                 </a>
-                <a href="{% url 'assets:asset_list' %}?category=vehicle" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}?category=vehicle" class="dropdown-link {% if request.GET.category == 'vehicle' %}active{% endif %}">
                     <i class="fa-solid fa-car"></i> Vehicles
                 </a>
-                <a href="{% url 'assets:asset_list' %}?category=land" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}?category=land" class="dropdown-link {% if request.GET.category == 'land' %}active{% endif %}">
                     <i class="fa-solid fa-map"></i> Land
                 </a>
-                <a href="{% url 'assets:asset_list' %}?category=house" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}?category=house" class="dropdown-link {% if request.GET.category == 'house' %}active{% endif %}">
                     <i class="fa-solid fa-house"></i> Houses
                 </a>
-                <a href="{% url 'assets:asset_list' %}?category=stock" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}?category=stock" class="dropdown-link {% if request.GET.category == 'stock' %}active{% endif %}">
                     <i class="fa-solid fa-chart-line"></i> Stocks
                 </a>
-                <a href="{% url 'assets:asset_list' %}?category=government_bond" class="dropdown-link">
+                <a href="{% url 'assets:asset_list' %}?category=government_bond" class="dropdown-link {% if request.GET.category == 'government_bond' %}active{% endif %}">
                     <i class="fa-solid fa-landmark"></i> Government Bonds
-                </a>
-                <a href="{% url 'assets:asset_documents' %}" class="dropdown-link">
-                    <i class="fa-solid fa-folder-open"></i> Supporting Documents
                 </a>
             </div>
         </div>
@@ -552,7 +549,7 @@
         {% url 'documents:document_list' as document_list_url %}
         {% if document_list_url %}
         <a href="{{ document_list_url }}"
-           class="sidebar-link {% if request.resolver_match.app_name == 'documents' %}active{% endif %}">
+           class="sidebar-link {% if request.resolver_match.app_name == 'documents' %}active{% endif %}" data-section="documents">
             <i class="fa-solid fa-folder-open"></i><span>My Documents</span>
         </a>
         {% endif %}
@@ -569,7 +566,7 @@
         {% url 'support:user_ticket_list' as support_url %}
         {% if support_url %}
         <a href="{{ support_url }}"
-           class="sidebar-link {% if request.resolver_match.app_name == 'support' %}active{% endif %}">
+           class="sidebar-link {% if request.resolver_match.app_name == 'support' %}active{% endif %}" data-section="support">
             <i class="fa-solid fa-headset"></i><span>Support Center</span>
         </a>
         {% endif %}
