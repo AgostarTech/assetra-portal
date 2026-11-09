@@ -1,0 +1,12 @@
+/* Custom overrides and animations for public site */
+.glass-panel {
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(207, 167, 110, 0.3);
+}
+.gold-glow {
+    box-shadow: 0 0 20px rgba(207, 167, 110, 0.4);
+}
+.hero-bg {
+    background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+}

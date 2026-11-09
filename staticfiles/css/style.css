@@ -1,0 +1,85 @@
+/* Base Styles */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Loading Screen Animation */
+#loader-wrapper {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #1a1a1a;
+    z-index: 9999; display: flex; justify-content: center; align-items: center;
+    transition: opacity 0.5s ease-out;
+}
+.loader-content { position: relative; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; }
+.loader-logo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; z-index: 2; box-shadow: 0 0 20px rgba(207, 167, 110, 0.5); }
+.spinning-dots { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 6px dotted #cfa76e; border-radius: 50%; animation: spin 3s linear infinite; z-index: 1; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+body.loaded #loader-wrapper { opacity: 0; pointer-events: none; visibility: hidden; }
+
+/* Application Layout - FIXED SIDEBAR */
+.wrapper { display: flex; min-height: 100vh; }
+
+.sidebar {
+    position: fixed; /* Locks the sidebar */
+    top: 0; left: 0;
+    width: 260px;
+    height: 100vh;
+    background-color: #1a1a1a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-brand { padding: 20px; display: flex; align-items: center; border-bottom: 1px solid #333; }
+.sidebar-brand img { width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; border: 2px solid #cfa76e; }
+.sidebar-brand span { font-size: 18px; font-weight: bold; color: #cfa76e; letter-spacing: 1px; }
+
+.sidebar-nav { padding: 20px 10px; flex: 1; }
+.nav-link {
+    display: block; color: #ccc; text-decoration: none; padding: 12px 15px;
+    margin-bottom: 5px; border-radius: 6px; transition: all 0.2s; font-size: 15px;
+}
+.nav-link:hover, .nav-link.active { background-color: #cfa76e; color: #1a1a1a; font-weight: bold; }
+.sidebar-heading { color: #666; font-size: 12px; text-transform: uppercase; margin: 20px 0 10px 15px; letter-spacing: 1px; }
+
+/* Main Content Area - Offset for fixed sidebar */
+.main-panel {
+    margin-left: 260px; /* Offset exactly the width of the sidebar */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+}
+
+/* Header */
+.top-header {
+    background: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10;
+    position: sticky; top: 0;
+}
+.header-user { font-weight: bold; color: #333; }
+
+/* Dashboard Cards */
+.metric-card {
+    background: white; padding: 20px; border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
+}
+.metric-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+
+.content-area { padding: 30px; flex: 1; overflow-y: auto; }
+.footer { background: #fff; padding: 15px 30px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #eee; }
+
+@media (max-width: 768px) {
+    .sidebar { position: relative; width: 100%; height: auto; }
+    .main-panel { margin-left: 0; width: 100%; }
+}
