@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Documents & KYC | Admin Control Hub{% endblock %}
+
+{% block content %}
+<div class="pwh-dashboard">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / OPERATIONS</div>
+            <h1>Documents & KYC Verification</h1>
+            <p class="pwh-subtitle">Review, verify, or update uploaded client compliance and asset documents.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Document Queue</h2>
+                <p>Manage verification status</p>
+            </div>
+            <span class="pwh-badge">KYC</span>
+        </div>
+
+        {% if documents %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Uploader</th>
+                        <th>Uploaded Date</th>
+                        <th>Current Status</th>
+                        <th>Action / Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td><strong>{{ doc.get_category_display|default:doc.category|default:"Document" }}</strong></td>
+                        <td>{{ doc.uploader.email|default:"—" }}</td>
+                        <td>{{ doc.uploaded_at|date:"d M Y, H:i"|default:"—" }}</td>
+                        <td><span class="pwh-status">{{ doc.status|default:"Pending" }}</span></td>
+                        <td>
+                            <form method="post" style="display: flex; gap: 8px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                                <select name="status" style="padding: 5px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11px;">
+                                    <option value="SUBMITTED" {% if doc.status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
+                                    <option value="UNDER_REVIEW" {% if doc.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
+                                    <option value="VERIFIED" {% if doc.status == 'VERIFIED' %}selected{% endif %}>Verified</option>
+                                    <option value="REJECTED" {% if doc.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <button type="submit" class="pwh-btn" style="min-height: 28px; padding: 4px 10px; font-size: 11px;">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">No documents found in the queue.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

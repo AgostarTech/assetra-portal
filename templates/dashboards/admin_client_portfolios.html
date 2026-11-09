@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Client Portfolios | Assetra Africa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   ASSETRA AFRICA — CLIENT PORTFOLIOS MANAGEMENT
+========================================================= */
+
+.pw-portfolios {
+    --pw-teal: #062c30;
+    --pw-emerald: #059669;
+    --pw-gold: #c5a059;
+    --pw-bg: #f8fafc;
+    --pw-card: #ffffff;
+    --pw-text: #111827;
+    --pw-muted: #4b5563;
+    --pw-border: rgba(6, 44, 48, 0.12);
+
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    color: var(--pw-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pw-portfolios *, .pw-portfolios *::before, .pw-portfolios *::after {
+    box-sizing: border-box;
+}
+
+.pw-portfolios a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Animations & Transitions */
+.pw-portfolios .pw-panel,
+.pw-portfolios .pw-btn,
+.pw-portfolios table tbody tr {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pw-portfolios .pw-panel:hover {
+    box-shadow: 0 8px 25px rgba(6, 44, 48, 0.08);
+}
+
+/* Topbar & Header */
+.pw-portfolios .pw-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pw-portfolios .pw-eyebrow {
+    color: var(--pw-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.pw-portfolios .pw-page-heading {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.pw-portfolios .pw-description {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+/* Buttons */
+.pw-portfolios .pw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 14px;
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--pw-card);
+    color: var(--pw-teal);
+}
+
+.pw-portfolios .pw-btn:hover {
+    border-color: var(--pw-teal);
+    background: #f1f5f9;
+}
+
+.pw-portfolios .pw-btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Panels */
+.pw-portfolios .pw-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(6, 44, 48, 0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.pw-portfolios .pw-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.pw-portfolios .pw-panel-title {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pw-portfolios .pw-panel-subtitle {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+/* Table Styles */
+.pw-portfolios .pw-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pw-portfolios .pw-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 12px;
+}
+
+.pw-portfolios .pw-table thead th {
+    padding: 12px 16px;
+    color: var(--pw-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--pw-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pw-portfolios .pw-table tbody td {
+    padding: 14px 16px;
+    color: var(--pw-text);
+    border-bottom: 1px solid var(--pw-border);
+    vertical-align: middle;
+}
+
+.pw-portfolios .pw-table tbody tr:hover {
+    background: rgba(52, 211, 153, 0.03);
+}
+
+.pw-portfolios .pw-badge {
+    display: inline-flex;
+    padding: 3px 10px;
+    background: rgba(197, 160, 89, 0.15);
+    color: #92400e;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pw-portfolios .pw-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--pw-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .pw-portfolios .pw-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pw-portfolios">
+
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Wealth Management</div>
+            <h1 class="pw-page-heading">Client Portfolios</h1>
+            <p class="pw-description">Aggregated portfolio valuations and asset counts across all institutional clients.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- PORTFOLIOS PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Client Wealth Summary</h2>
+                <p class="pw-panel-subtitle">Overview of client holdings and estimated valuations</p>
+            </div>
+            <span class="pw-badge">{{ portfolio_data|length|default:0 }} clients</span>
+        </div>
+
+        {% if portfolio_data %}
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Client Identifier</th>
+                        <th>Email Address</th>
+                        <th>Active Assets</th>
+                        <th>Total Portfolio Value</th>
+                        <th style="text-align: right;">Quick Filter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in portfolio_data %}
+                    <tr>
+                        <td><strong>{{ item.client.get_full_name|default:item.client.email|default:"Client" }}</strong></td>
+                        <td style="color: var(--pw-muted);">{{ item.client.email }}</td>
+                        <td>
+                            <span class="pw-badge" style="background: rgba(5, 150, 105, 0.15); color: #065f46;">
+                                {{ item.asset_count }} assets
+                            </span>
+                        </td>
+                        <td>
+                            <strong style="color: var(--pw-teal); font-size: 13px;">
+                                ${{ item.total_value|default:0|floatformat:2|intcomma }}
+                            </strong>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{% url 'dashboards:admin_all_assets' %}?q={{ item.client.email }}" class="pw-btn pw-btn-icon" title="View Client Assets">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pw-empty">No client portfolios available.</div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

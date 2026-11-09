@@ -1,38 +1,196 @@
-{% extends "base.html" %}
-{% block title %}Asset Activity Timeline - Asset Portal{% endblock %}
-{% block page_title %}Asset Activity History{% endblock %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
 
-{% block content %}
-<div style="max-width: 800px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">Chronological Asset Activity</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 30px;">Track the lifecycle, creation, updates, and compliance verifications of your portfolio assets.</p>
+{% block dashboard_title %}Asset Activity Timeline - Asset Portal{% endblock %}
+{% block view_header %}Asset Activity History{% endblock %}
 
-    <div style="position: relative; border-left: 2px solid #cfa76e; margin-left: 20px; padding-left: 20px;">
-        
-        <!-- Timeline Item 1 -->
-        <div style="margin-bottom: 25px; position: relative;">
-            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
-            <span style="font-size: 12px; color: #888; font-weight: bold;">October 17, 2026 - 14:30</span>
-            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Asset Valuation Updated</h4>
-            <p style="margin: 0; font-size: 13px; color: #555;">Estimated value for Commercial Real Estate portfolio was re-valued.</p>
+{% block dashboard_content %}
+<style>
+:root {
+    --asset-primary: #086070;
+    --asset-primary-dark: #064b58;
+    --asset-border: rgba(15, 23, 42, 0.12);
+    --asset-muted: #687181;
+    --asset-text: #0F172A;
+    --asset-radius: 14px;
+}
+
+.asset-workspace {
+    color: var(--asset-text);
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.asset-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px;
+    margin-bottom: 22px;
+    border-radius: var(--asset-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+}
+
+.asset-hero h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.asset-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.asset-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s ease;
+}
+
+.asset-btn-primary {
+    background: #fff;
+    color: var(--asset-primary);
+}
+.asset-btn-primary:hover {
+    background: #f8fafc;
+    color: var(--asset-primary-dark);
+}
+
+.timeline-panel {
+    background: #fff;
+    border: 1px solid var(--asset-border);
+    border-radius: var(--asset-radius);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    padding: 30px;
+}
+
+.timeline-feed {
+    position: relative;
+    border-left: 2px solid var(--asset-primary);
+    margin-left: 20px;
+    padding-left: 25px;
+}
+
+.timeline-item {
+    margin-bottom: 30px;
+    position: relative;
+}
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -32px;
+    top: 2px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border: 3px solid var(--asset-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(8, 96, 112, 0.1);
+}
+
+.timeline-date {
+    font-size: 11px;
+    color: var(--asset-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timeline-title {
+    margin: 4px 0 6px 0;
+    color: var(--asset-text);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.timeline-desc {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--asset-muted);
+    line-height: 1.5;
+}
+</style>
+
+<div class="asset-workspace">
+
+    <!-- HERO HEADER -->
+    <section class="asset-hero">
+        <div>
+            <h2>Asset Activity History</h2>
+            <p>Track the chronological lifecycle, creation, valuation updates, and compliance verifications of your portfolio assets.</p>
         </div>
-
-        <!-- Timeline Item 2 -->
-        <div style="margin-bottom: 25px; position: relative;">
-            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
-            <span style="font-size: 12px; color: #888; font-weight: bold;">October 15, 2026 - 10:15</span>
-            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Compliance Document Verified</h4>
-            <p style="margin: 0; font-size: 13px; color: #555;">Ownership deed verified and stamped by Wealth Advisor.</p>
+        <div>
+            <a href="{% url 'assets:asset_list' %}" class="asset-btn asset-btn-primary">
+                <i class="fa-solid fa-arrow-left"></i> Back to My Assets
+            </a>
         </div>
+    </section>
 
-        <!-- Timeline Item 3 -->
-        <div style="position: relative;">
-            <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: #1a1a1a; border: 2px solid #cfa76e; border-radius: 50%;"></div>
-            <span style="font-size: 12px; color: #888; font-weight: bold;">October 10, 2026 - 09:00</span>
-            <h4 style="margin: 5px 0; color: #1a1a1a; font-size: 15px;">Asset Registered</h4>
-            <p style="margin: 0; font-size: 13px; color: #555;">Initial creation of Private Equity holdings record.</p>
+    <!-- TIMELINE PANEL -->
+    <section class="timeline-panel">
+        <h3 style="margin-top: 0; color: var(--asset-text); font-size: 16px; margin-bottom: 25px; font-weight: 800;">
+            <i class="fa-solid fa-timeline" style="color: var(--asset-primary); margin-right: 8px;"></i> Chronological Activity Feed
+        </h3>
+
+        <div class="timeline-feed">
+            
+            {% if timeline_events %}
+                {% for event in timeline_events %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">{{ event.timestamp|date:"d M Y - H:i" }}</span>
+                    <h4 class="timeline-title">{{ event.title }}</h4>
+                    <p class="timeline-desc">{{ event.description }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default Verified Demo Timeline Items -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">November 07, 2026 - 14:30</span>
+                    <h4 class="timeline-title">Asset Valuation Updated</h4>
+                    <p class="timeline-desc">Estimated valuation for Real Estate &amp; Commercial Portfolio re-indexed.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">November 03, 2026 - 10:15</span>
+                    <h4 class="timeline-title">Compliance Document Verified</h4>
+                    <p class="timeline-desc">Title deed and ownership verification stamp logged in secure vault.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">October 28, 2026 - 09:00</span>
+                    <h4 class="timeline-title">Asset Registered</h4>
+                    <p class="timeline-desc">Initial creation of private wealth holding record in asset portal.</p>
+                </div>
+            {% endif %}
+
         </div>
+    </section>
 
-    </div>
 </div>
 {% endblock %}

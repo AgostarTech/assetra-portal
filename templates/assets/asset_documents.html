@@ -1,65 +1,499 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
 
-{% extends "base.html" %}
+{% block dashboard_title %}Supporting Documents{% endblock %}
+{% block view_header %}Supporting Documents Center{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+{% block dashboard_content %}
+<style>
+:root {
+    --asset-primary: #086070;
+    --asset-primary-dark: #064b58;
+    --asset-border: rgba(15, 23, 42, 0.12);
+    --asset-muted: #687181;
+    --asset-text: #0F172A;
+    --asset-radius: 14px;
+}
+
+.asset-workspace {
+    color: var(--asset-text);
+    width: 100%;
+    min-width: 0;
+}
+
+.asset-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px;
+    margin-bottom: 22px;
+    border-radius: var(--asset-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+}
+
+.asset-hero h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.asset-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.asset-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.asset-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s ease;
+}
+
+.asset-btn-outline {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.asset-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.asset-btn-primary {
+    background: #fff;
+    color: var(--asset-primary);
+}
+.asset-btn-primary:hover {
+    background: #f8fafc;
+    color: var(--asset-primary-dark);
+}
+
+.asset-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.asset-stat {
+    padding: 18px;
+    border: 1px solid var(--asset-border);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.asset-stat-label {
+    color: var(--asset-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.asset-stat-value {
+    display: block;
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--asset-text);
+    margin-top: 6px;
+}
+
+.asset-table-panel {
+    background: #fff;
+    border: 1px solid var(--asset-border);
+    border-radius: var(--asset-radius);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    overflow: hidden;
+}
+
+.asset-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px;
+    border-bottom: 1px solid var(--asset-border);
+}
+
+.asset-section-heading h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: var(--asset-text);
+}
+
+.asset-section-heading p {
+    margin: 0;
+    color: var(--asset-muted);
+    font-size: 12px;
+}
+
+.asset-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--asset-border);
+    background: #F8FAFC;
+}
+
+.asset-search {
+    flex: 1 1 220px;
+}
+
+.asset-search input {
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid var(--asset-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--asset-text);
+    outline: none;
+    font-size: 12px;
+}
+
+.asset-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.asset-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.asset-table th {
+    padding: 12px 16px;
+    text-align: left;
+    background: #F8FAFC;
+    color: var(--asset-muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1px solid var(--asset-border);
+}
+
+.asset-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf1f6;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.asset-table tbody tr:hover {
+    background: #fafcff;
+}
+
+.doc-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doc-type-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(8, 96, 112, 0.1);
+    color: var(--asset-primary);
+    flex-shrink: 0;
+}
+
+.doc-title {
+    display: block;
+    color: var(--asset-text);
+    font-weight: 700;
+}
+
+.doc-meta {
+    display: block;
+    margin-top: 2px;
+    color: var(--asset-muted);
+    font-size: 10px;
+}
+
+.doc-badge {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: rgba(8, 96, 112, 0.1);
+    color: var(--asset-primary);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.asset-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border: 1px solid var(--asset-border);
+    border-radius: 6px;
+    color: var(--asset-primary);
+    background: #fff;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+.asset-action-btn:hover {
+    background: rgba(8, 96, 112, 0.08);
+    border-color: var(--asset-primary);
+}
+
+.asset-empty {
+    padding: 40px 20px !important;
+    text-align: center;
+    color: var(--asset-muted);
+    white-space: normal;
+}
+
+.asset-table-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    color: var(--asset-muted);
+    font-size: 10px;
+}
+
+@media (max-width: 768px) {
+    .asset-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="asset-workspace" id="docWorkspace">
+
+    <!-- HERO HEADER -->
+    <section class="asset-hero">
         <div>
-            <h2>Supporting Documents</h2>
-            <p>Documents associated with your registered assets.</p>
+            <h2>Supporting Documents Center</h2>
+            <p>Access and inspect all certified files, title deeds, agreements, and certificates linked to your assets.</p>
         </div>
-        <a href="{% url 'assets:asset_list' %}" class="btn btn-secondary">
-            Back to My Assets
-        </a>
-    </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5>Total Documents: {{ document_count }}</h5>
+        <div class="asset-hero-actions">
+            <button type="button" class="asset-btn asset-btn-outline" onclick="exportDocumentsCSV()">
+                <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Save / Export CSV
+            </button>
+            <a href="{% url 'assets:asset_list' %}" class="asset-btn asset-btn-primary">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to My Assets
+            </a>
         </div>
-    </div>
+    </section>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
-            <thead>
-                <tr>
-                    <th>Document</th>
-                    <th>Type</th>
-                    <th>Related Asset</th>
-                    <th>Uploaded By</th>
-                    <th>Date Uploaded</th>
-                    <th>File</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for document in documents %}
-                <tr>
-                    <td>{{ document.title }}</td>
-                    <td>{{ document.get_document_type_display }}</td>
-                    <td>{{ document.asset.name }}</td>
-                    <td>{{ document.uploaded_by }}</td>
-                    <td>{{ document.uploaded_at|date:"d M Y, H:i" }}</td>
-                    <td>
-                        {% if document.file %}
-                        <a href="{{ document.file.url }}"
-                           target="_blank"
-                           rel="noopener noreferrer">
-                            View file
-                        </a>
-                        {% else %}
-                        No file
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">
-                        You have no supporting documents yet.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <!-- STATS SUMMARY -->
+    <section class="asset-stats" aria-label="Document summary">
+        <article class="asset-stat">
+            <span class="asset-stat-label">Total Documents</span>
+            <strong class="asset-stat-value" id="statTotalDocs">{{ document_count|default:0 }}</strong>
+        </article>
+        <article class="asset-stat">
+            <span class="asset-stat-label">Displayed Files</span>
+            <strong class="asset-stat-value" id="statFilteredDocs">{{ document_count|default:0 }}</strong>
+        </article>
+    </section>
+
+    <!-- DOCUMENTS TABLE PANEL -->
+    <section class="asset-table-panel">
+        <header class="asset-section-heading">
+            <div>
+                <h3>Registered Files &amp; Records</h3>
+                <p>View or download certified asset documentation securely.</p>
+            </div>
+            <span class="doc-badge">Verified Vault</span>
+        </header>
+
+        <div class="asset-toolbar">
+            <label class="asset-search">
+                <input type="search" id="docSearch" placeholder="Search by document title, asset name, or type..." autocomplete="off">
+            </label>
+        </div>
+
+        <div class="asset-table-scroll">
+            <table class="asset-table" id="masterDocTable">
+                <thead>
+                    <tr>
+                        <th scope="col">Document Title</th>
+                        <th scope="col">Category Type</th>
+                        <th scope="col">Related Asset</th>
+                        <th scope="col">Uploaded By</th>
+                        <th scope="col">Date Uploaded</th>
+                        <th scope="col">File Control</th>
+                    </tr>
+                </thead>
+                <tbody id="docTableBody">
+                    {% for document in documents %}
+                    <tr data-doc-row
+                        data-search="{{ document.title|lower }} {{ document.get_document_type_display|lower }} {{ document.asset.name|lower }}">
+                        <td>
+                            <div class="doc-name-cell">
+                                <span class="doc-type-icon">
+                                    <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i>
+                                </span>
+                                <div>
+                                    <span class="doc-title">{{ document.title }}</span>
+                                    <span class="doc-meta">ID: #{{ document.id }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="doc-badge">{{ document.get_document_type_display }}</span>
+                        </td>
+                        <td>
+                            {% if document.asset %}
+                                <a href="{% url 'assets:asset_detail' document.asset.id %}" style="color: var(--asset-primary); font-weight: 700; text-decoration: none;">
+                                    {{ document.asset.name }}
+                                </a>
+                            {% else %}
+                                <span style="color: var(--asset-muted);">Unlinked</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--asset-muted); font-weight: 600;">
+                            {{ document.uploaded_by|default:"System User" }}
+                        </td>
+                        <td style="color: var(--asset-muted);">
+                            {{ document.uploaded_at|date:"d M Y, H:i" }}
+                        </td>
+                        <td>
+                            {% if document.file %}
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="{{ document.file.url }}" target="_blank" rel="noopener noreferrer" class="asset-action-btn">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                    <a href="{{ document.file.url }}" download class="asset-action-btn">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </div>
+                            {% else %}
+                                <span style="color:var(--asset-muted); font-size:11px;">No file attached</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="asset-empty">
+                            <strong>You have no supporting documents yet.</strong>
+                            <p style="margin: 5px 0 0; font-size: 12px;">Upload documents when editing or creating your assets.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="docNoResults" hidden>
+                        <td colspan="6" class="asset-empty">
+                            <strong>No matching documents found</strong>
+                            <span>Try adjusting your search query.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="asset-table-footer">
+            <span id="docVisibleCount">Showing all records</span>
+            <span>Secured Private Wealth Portal</span>
+        </footer>
+    </section>
 </div>
+
+<script>
+(function () {
+    "use strict";
+
+    const workspace = document.getElementById("docWorkspace");
+    if (!workspace) return;
+
+    const rows = Array.from(workspace.querySelectorAll("[data-doc-row]"));
+    const searchInput = document.getElementById("docSearch");
+    const noResultsRow = document.getElementById("docNoResults");
+    const visibleCountSpan = document.getElementById("docVisibleCount");
+    const statFilteredDocs = document.getElementById("statFilteredDocs");
+
+    function filterDocuments() {
+        const query = (searchInput.value || "").trim().toLowerCase();
+        let visibleRows = 0;
+
+        rows.forEach(row => {
+            const searchData = row.dataset.search || "";
+            if (searchData.includes(query)) {
+                row.hidden = false;
+                visibleRows++;
+            } else {
+                row.hidden = true;
+            }
+        });
+
+        if (noResultsRow) {
+            noResultsRow.hidden = visibleRows > 0;
+        }
+        if (visibleCountSpan) {
+            visibleCountSpan.textContent = `Showing ${visibleRows} record(s)`;
+        }
+        if (statFilteredDocs) {
+            statFilteredDocs.textContent = visibleRows;
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterDocuments);
+    }
+
+    filterDocuments();
+})();
+
+function exportDocumentsCSV() {
+    const rows = document.querySelectorAll("#masterDocTable tr");
+    const csv = [];
+
+    rows.forEach(row => {
+        if (row.style.display === "none" || row.hidden) return;
+        const cols = row.querySelectorAll("th, td");
+        const rowData = [];
+        // Skip the last column (File Control actions)
+        for (let i = 0; i < cols.length - 1; i++) {
+            let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ").trim();
+            rowData.push('"' + text.replace(/"/g, '""') + '"');
+        }
+        if (rowData.length > 0) csv.push(rowData.join(","));
+    });
+
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    const downloadLink = document.createElement("a");
+    downloadLink.download = "supporting_documents_portfolio.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+</script>
 {% endblock %}

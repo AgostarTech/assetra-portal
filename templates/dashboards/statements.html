@@ -1,0 +1,29 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load humanize %}
+
+{% block dashboard_title %}Statements & Reports{% endblock %}
+{% block view_header %}Official Statements & Reports{% endblock %}
+
+{% block dashboard_content %}
+<div class="panel" style="background:#FFFFFF; border:1px solid rgba(15,23,42,0.12); border-radius:14px; padding:24px; box-shadow:0 3px 12px rgba(15,23,42,.03);">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+        <div>
+            <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Certified Portfolio Statement</h3>
+            <p style="margin:0; color:#687181; font-size:13px;">Review and download your official valuation summary.</p>
+        </div>
+        <a href="#" class="btn-primary" style="background:#086070; color:#FFF; padding:10px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF Statement
+        </a>
+    </div>
+
+    <div style="background:#F4F6F9; border-radius:10px; padding:18px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <strong style="display:block; font-size:13px; color:#0F172A;">Current Portfolio Net Worth</strong>
+            <span style="color:#687181; font-size:12px;">Based on active recorded valuations</span>
+        </div>
+        <div style="font-size:18px; font-weight:800; color:#086070;">
+            ${{ summary.total_current_value|default:0|floatformat:2|intcomma }}
+        </div>
+    </div>
+</div>
+{% endblock %}

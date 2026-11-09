@@ -1,4 +1,3 @@
-
 import os
 
 from django.conf import settings
@@ -14,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 def validate_asset_document_size(uploaded_file):
     """Limit each uploaded document to 10 MB."""
-    max_size = 10 * 1024 * 1024
+    max_size = 10 * 1024 * 1024  # 10 MB in bytes
 
     if uploaded_file.size > max_size:
         raise ValidationError(
@@ -31,6 +30,21 @@ def validate_asset_document_filename(uploaded_file):
 
 
 # ============================================================
+# CHOICES FOR OWNERSHIP & SHARES
+# ============================================================
+
+class AssetOwnership(models.TextChoices):
+    INDIVIDUAL = "INDIVIDUAL", _("Individual (Personal)")
+    COMPANY = "COMPANY", _("Company / Corporate")
+
+
+class ShareType(models.TextChoices):
+    PRIVATE = "PRIVATE", _("Privately Held Company")
+    PUBLIC = "PUBLIC", _("Publicly Listed Company")
+    DSE = "DSE", _("Dar es Salaam Stock Exchange (DSE)")
+
+
+# ============================================================
 # MAIN ASSET MODEL
 # ============================================================
 
@@ -40,8 +54,9 @@ class Asset(models.Model):
         VEHICLE = "VEHICLE", _("Vehicle")
         LAND = "LAND", _("Land")
         HOUSE = "HOUSE", _("House")
-        STOCK = "STOCK", _("Stock")
+        STOCK = "STOCK", _("Stock (Company Shares)")
         BOND = "BOND", _("Government Bond")
+        OTHER = "OTHER", _("Other Asset")
 
     class StatusChoices(models.TextChoices):
         ACTIVE = "ACTIVE", _("Active")
@@ -52,6 +67,21 @@ class Asset(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="assets",
+    )
+
+    # Individual vs Company Asset Ownership Options
+    ownership_type = models.CharField(
+        max_length=20,
+        choices=AssetOwnership.choices,
+        default=AssetOwnership.INDIVIDUAL,
+        help_text=_("Designates whether this asset is owned individually or under a corporate entity."),
+    )
+
+    company_name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=_("If owned by a company, specify the corporate entity name."),
     )
 
     category = models.CharField(
@@ -111,7 +141,8 @@ class Asset(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.name} ({self.get_category_display()})"
+        ownership_label = "Company" if self.ownership_type == AssetOwnership.COMPANY else "Individual"
+        return f"{self.name} ({self.get_category_display()}) - [{ownership_label}]"
 
 
 # ============================================================
@@ -204,7 +235,7 @@ class House(models.Model):
 
 
 # ============================================================
-# STOCK DETAILS
+# STOCK / COMPANY SHARES DETAILS
 # ============================================================
 
 class Stock(models.Model):
@@ -214,16 +245,39 @@ class Stock(models.Model):
         related_name="stock_details",
     )
 
+    share_category = models.CharField(
+        max_length=20,
+        choices=ShareType.choices,
+        default=ShareType.PRIVATE,
+        help_text=_("Select whether shares are private, public global, or DSE listed."),
+    )
+
     company = models.CharField(max_length=255)
-    ticker = models.CharField(max_length=20)
+    
+    ticker = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text=_("Stock ticker symbol if listed (e.g., NMB, CRDB, VODA for DSE)."),
+    )
 
     units = models.DecimalField(
         max_digits=15,
         decimal_places=4,
     )
 
+    price_per_share = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=0.00,
+    )
+
+    @property
+    def total_shares_value(self):
+        return self.units * self.price_per_share
+
     def __str__(self):
-        return f"{self.units} shares of {self.ticker}"
+        return f"{self.units} shares of {self.company} ({self.ticker or 'Private'})"
 
 
 # ============================================================
@@ -254,6 +308,33 @@ class GovernmentBond(models.Model):
 
     def __str__(self):
         return f"{self.issuer} Bond maturing {self.maturity_date}"
+
+
+# ============================================================
+# OTHER ASSET DETAILS (New addition for miscellaneous holdings)
+# ============================================================
+
+class OtherAsset(models.Model):
+    asset = models.OneToOneField(
+        Asset,
+        on_delete=models.CASCADE,
+        related_name="other_details",
+    )
+
+    asset_sub_type = models.CharField(
+        max_length=150,
+        help_text=_("Specify type of asset, e.g. Artwork, Machinery, Jewelry, Crypto, etc."),
+    )
+
+    serial_number_or_identifier = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("Any serial number, wallet address, or unique asset identifier."),
+    )
+
+    def __str__(self):
+        return f"{self.asset_sub_type}: {self.asset.name}"
 
 
 # ============================================================
@@ -317,7 +398,7 @@ class AssetDocument(models.Model):
         verbose_name_plural = "Asset Documents"
 
     def __str__(self):
-        return f"{self.title} - {self.asset.name}"
+        return f"{self.title} for {self.asset.name}"
 
 
 # ============================================================
@@ -345,7 +426,7 @@ class AssetValuationHistory(models.Model):
 
     def __str__(self):
         return (
-            f"{self.asset.name} - "
+            f"{self.asset.name}: "
             f"{self.estimated_value} on "
             f"{self.recorded_at.strftime('%Y-%m-%d')}"
         )

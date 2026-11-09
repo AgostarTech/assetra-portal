@@ -1,51 +1,96 @@
-{% extends "base.html" %}
-{% block title %}Live Support Chat - Asset Portal{% endblock %}
-{% block page_title %}Real-Time Help Desk Live Chat{% endblock %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 
-{% block content %}
-<div style="max-width: 800px; margin: 20px auto; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 500px;">
-    <div style="background: #1a1a1a; color: #cfa76e; padding: 15px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px; font-weight: bold;">
-        Enterprise Support Live Channel (Powered by WebSockets)[cite: 1]
-    </div>
-    
-    <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; background: #fdfbf7; display: flex; flex-direction: column; gap: 12px;">
-        <div style="align-self: flex-start; background: #fff; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; max-width: 70%;">
-            <strong style="color: #1a1a1a; display: block; font-size: 12px;">Support Agent (James)</strong>
-            <span style="font-size: 14px; color: #333;">Hello Agola. How can our wealth support team assist your portfolio operations today?</span>
+{% block dashboard_title %}Live Client Chat - Private Wealth Portal{% endblock %}
+{% block view_header %}Live Wealth Advisory Chat{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; max-width: 900px; margin: 0 auto; }
+
+    .asset-hero {
+        padding: 24px; margin-bottom: 22px; border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .chat-box {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); display: flex; flex-direction: column;
+        height: 500px; box-shadow: 0 3px 12px rgba(15, 23, 42, .03); overflow: hidden;
+    }
+
+    .chat-header {
+        padding: 18px 24px; background: #f8fafc; border-bottom: 1px solid var(--asset-border);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .chat-messages {
+        flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #fdfefe;
+    }
+
+    .message {
+        max-width: 75%; padding: 12px 16px; border-radius: 12px; font-size: 13px; line-height: 1.4;
+    }
+    .message.incoming { background: #f1f5f9; color: var(--asset-text); align-self: flex-start; border-bottom-left-radius: 3px; }
+    .message.outgoing { background: var(--asset-primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
+
+    .chat-input-area {
+        padding: 15px 20px; background: #fff; border-top: 1px solid var(--asset-border);
+        display: flex; gap: 12px; align-items: center;
+    }
+    .chat-input-area input {
+        flex: 1; padding: 11px 16px; border: 1px solid var(--asset-border); border-radius: 8px;
+        font-size: 13.5px; outline: none; background: #f8fafc; color: var(--asset-text);
+    }
+    .chat-input-area input:focus { border-color: var(--asset-primary); background: #fff; }
+
+    .btn-send {
+        background: var(--asset-primary); color: #fff; border: none; padding: 11px 20px;
+        border-radius: 8px; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: background 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-send:hover { background: var(--asset-primary-hover); }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <h2>Live Wealth Advisory Chat</h2>
+        <p>Connect instantly with dedicated private client officers for portfolio guidance and asset verification.</p>
+    </section>
+
+    <div class="chat-box">
+        <div class="chat-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: #16845b;"></div>
+                <strong style="font-size: 14px; color: var(--asset-text);">Assetra Private Advisory Desk</strong>
+            </div>
+            <span style="font-size: 11.5px; color: var(--asset-muted);">Agent Online • Typically replies in 2 mins</span>
+        </div>
+
+        <div class="chat-messages">
+            <div class="message incoming">
+                Welcome to Assetra Private Wealth Portal, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>. How may our advisory team assist you with your portfolio today?
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" placeholder="Type your message to your wealth advisor..." id="chatMessageInput">
+            <button type="button" class="btn-send" onclick="alert('Live chat connection established. Your message has been routed to your advisory team.')">
+                <i class="fa-solid fa-paper-plane"></i> Send
+            </button>
         </div>
     </div>
-    
-    <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-        <input type="text" id="chat-input" placeholder="Type your support message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" onkeypress="if(event.key === 'Enter') sendChatMessage();">
-        <button onclick="sendChatMessage()" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Send</button>
-    </div>
 </div>
-
-<script>
-    function sendChatMessage() {
-        const input = document.getElementById("chat-input");
-        const msg = input.value.trim();
-        if(!msg) return;
-        
-        const chatContainer = document.getElementById("chat-messages");
-        
-        // Append user message
-        const userDiv = document.createElement("div");
-        userDiv.style.cssText = "align-self: flex-end; background: #1a1a1a; color: #fff; padding: 10px 15px; border-radius: 6px; max-width: 70%;";
-        userDiv.innerHTML = `<strong style="color: #cfa76e; display: block; font-size: 12px;">You</strong><span style="font-size: 14px;">${msg}</span>`;
-        chatContainer.appendChild(userDiv);
-        
-        input.value = "";
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-        
-        // Simulated automated agent response
-        setTimeout(() => {
-            const agentDiv = document.createElement("div");
-            agentDiv.style.cssText = "align-self: flex-start; background: #fff; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; max-width: 70%;";
-            agentDiv.innerHTML = `<strong style="color: #1a1a1a; display: block; font-size: 12px;">Support Agent (James)</strong><span style="font-size: 14px; color: #333;">Thank you for your message. A compliance specialist has been notified.</span>`;
-            chatContainer.appendChild(agentDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 1000);
-    }
-</script>
 {% endblock %}

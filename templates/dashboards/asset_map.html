@@ -1,0 +1,87 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block dashboard_title %}Geographic Map - Asset Portal{% endblock %}
+{% block view_header %}Asset Geographic Distribution{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; }
+
+    .asset-hero {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 20px; flex-wrap: wrap; padding: 24px; margin-bottom: 22px;
+        border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .map-container-card {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); padding: 20px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03); margin-bottom: 25px;
+    }
+
+    .geo-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px;
+    }
+
+    .geo-item {
+        background: #f8fafc; border: 1px solid var(--asset-border);
+        border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .geo-item h5 { margin: 0; font-size: 14px; font-weight: 700; color: var(--asset-text); }
+    .geo-item span { font-size: 12px; color: var(--asset-muted); }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <div>
+            <h2>Geographic Map &amp; Real Estate Vault</h2>
+            <p>Spatial distribution of registered land parcels and commercial/residential buildings.</p>
+        </div>
+    </section>
+
+    <div class="map-container-card">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 800; color: var(--asset-text);">
+            <i class="fa-solid fa-map-location-dot" style="color: var(--asset-primary); margin-right: 8px;"></i> Active Land &amp; Property Coordinates
+        </h3>
+        <p style="color: var(--asset-muted); font-size: 12.5px;">
+            Showing all verified physical real estate holdings registered in your private portfolio.
+        </p>
+
+        {% if geo_assets %}
+            <div class="geo-grid">
+                {% for asset in geo_assets %}
+                    <div class="geo-item">
+                        <h5><i class="fa-solid fa-building-columns" style="color: var(--asset-primary); margin-right: 6px;"></i> {{ asset.name }}</h5>
+                        <span><strong>Category:</strong> {{ asset.get_category_display }}</span>
+                        <span><strong>Valuation:</strong> ${{ asset.current_estimated_value|floatformat:2|intcomma }}</span>
+                        <span><strong>Status:</strong> <span style="color: #16764f; font-weight: 700;">Verified Active</span></span>
+                        <a href="{% url 'assets:asset_detail' asset.id %}" style="margin-top: 6px; font-size: 11.5px; color: var(--asset-primary); text-decoration: none; font-weight: 700;">
+                            View Property Deed &rarr;
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--asset-muted);">
+                <i class="fa-solid fa-map" style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No land or building assets registered for geographic mapping.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

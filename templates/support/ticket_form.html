@@ -1,21 +1,91 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 
-{% block title %}{{ title }} - Asset Portal{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
+{% block dashboard_title %}Open Support Ticket - Private Wealth Portal{% endblock %}
+{% block view_header %}Submit Support Ticket{% endblock %}
 
-{% block content %}
-<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #cfa76e;">
-    <form method="post">
-        {% csrf_token %}
-        <h3 style="color: #1a1a1a; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Contact Help Desk</h3>
-        <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Describe your issue in detail. A support agent will review and update the status shortly.</p>
-        
-        {{ form.as_p }}
-        
-        <div style="margin-top: 30px; display: flex; gap: 15px;">
-            <button type="submit" style="background-color: #1a1a1a; color: #cfa76e; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">Submit Ticket</button>
-            <a href="{% url 'user_ticket_list' %}" style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold;">Cancel</a>
-        </div>
-    </form>
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; max-width: 800px; margin: 0 auto; }
+
+    .asset-hero {
+        padding: 24px; margin-bottom: 22px; border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .panel {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); padding: 30px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--asset-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 11px 14px; border: 1px solid var(--asset-border); border-radius: 8px; font-size: 13.5px; color: var(--asset-text); background: #f8fafc; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--asset-primary); background: #fff; }
+
+    .btn-submit {
+        background: var(--asset-primary); color: #fff; padding: 12px 24px; border-radius: 8px;
+        text-decoration: none; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
+        border: none; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-submit:hover { background: var(--asset-primary-hover); }
+
+    .btn-cancel {
+        background: #F4F6F9; color: var(--asset-text); border: 1px solid var(--asset-border);
+        padding: 12px 20px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px; margin-left: 10px;
+    }
+    .btn-cancel:hover { background: #e2e8f0; }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <h2>Open Support Ticket</h2>
+        <p>Detail your inquiry below and our client advisory desk will respond within 24 hours.</p>
+    </section>
+
+    <div class="panel">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: rgba(220, 38, 38, 0.1); color: #dc2626; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #dc2626; font-size: 11.5px; margin-top: 4px;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div style="margin-top: 25px; display: flex; align-items: center;">
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Ticket
+                </button>
+                <a href="{% url 'support:ticket_list' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

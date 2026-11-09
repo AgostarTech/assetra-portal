@@ -1,133 +1,341 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 
-{% extends "base.html" %}
+{% block dashboard_title %}{{ title }} - Asset Portal{% endblock %}
+{% block view_header %}{{ title }}{% endblock %}
 
-{% block title %}{{ title }} - Asset Portal{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(8, 96, 112, 0.15);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 12px;
+        --asset-card-bg: #f0f7f9; /* Subtle blue tint for cards */
+        --asset-card-hover-bg: #e6f2f5;
+    }
 
-{% block content %}
-<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #cfa76e;">
+    .form-workspace {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 24px 28px;
+        border-radius: var(--asset-radius);
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+        border: 1px solid var(--asset-border);
+        border-top: 4px solid var(--asset-primary);
+    }
 
-    <form method="post" enctype="multipart/form-data">
+    .form-section-header {
+        color: var(--asset-text);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin: 20px 0 10px 0;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        grid-column: 1 / -1;
+    }
+
+    .form-section-header:first-of-type {
+        margin-top: 0;
+    }
+
+    .form-section-header i {
+        font-size: 13px;
+        color: var(--asset-primary);
+    }
+
+    .error-container {
+        grid-column: 1 / -1;
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid rgba(185, 28, 28, 0.2);
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 12px;
+    }
+
+    /* Table Grid Layout (3 Columns) */
+    .form-table-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    /* Blue-Tinted Compact Field Cells */
+    .form-table-grid p {
+        margin-bottom: 0;
+        background: var(--asset-card-bg);
+        border: 1px solid var(--asset-border);
+        padding: 8px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Textareas span full width */
+    .form-table-grid p:has(textarea) {
+        grid-column: 1 / -1;
+    }
+
+    .form-table-grid p:hover {
+        border-color: var(--asset-primary);
+        background: var(--asset-card-hover-bg);
+        box-shadow: 0 4px 12px rgba(8, 96, 112, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .form-table-grid label {
+        display: block;
+        font-size: 9.5px;
+        font-weight: 800;
+        color: var(--asset-primary);
+        margin-bottom: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .form-table-grid input[type="text"],
+    .form-table-grid input[type="number"],
+    .form-table-grid input[type="date"],
+    .form-table-grid input[type="file"],
+    .form-table-grid select,
+    .form-table-grid textarea {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid rgba(8, 96, 112, 0.2);
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--asset-text);
+        background: #ffffff;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .form-table-grid textarea {
+        min-height: 50px;
+        resize: vertical;
+    }
+
+    .form-table-grid input:focus,
+    .form-table-grid select:focus,
+    .form-table-grid textarea:focus {
+        border-color: var(--asset-primary);
+        box-shadow: 0 0 0 3px rgba(8, 96, 112, 0.15);
+    }
+
+    .form-table-grid .helptext {
+        display: block;
+        margin-top: 2px;
+        font-size: 9.5px;
+        color: var(--asset-muted);
+    }
+
+    .document-table-card {
+        grid-column: 1 / -1;
+        background: var(--asset-card-bg);
+        border: 1px solid var(--asset-border);
+        padding: 12px 14px;
+        border-radius: 6px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .document-table-card:hover {
+        border-color: var(--asset-primary);
+        background: var(--asset-card-hover-bg);
+    }
+
+    .document-table-note {
+        grid-column: 1 / -1;
+        color: var(--asset-muted);
+        font-size: 10px;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .uploaded-files-wrapper {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .btn-group-custom {
+        grid-column: 1 / -1;
+        margin-top: 6px;
+        display: flex;
+        gap: 10px;
+        padding-top: 14px;
+        border-top: 1px solid var(--asset-border);
+    }
+
+    .btn-submit {
+        background-color: var(--asset-primary);
+        color: #ffffff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(8, 96, 112, 0.2);
+    }
+    .btn-submit:hover {
+        background-color: var(--asset-primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background-color: #f1f5f9;
+        color: var(--asset-text);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .btn-cancel:hover {
+        background-color: #e2e8f0;
+    }
+
+    /* Tablet Breakpoint (2 Columns) */
+    @media (max-width: 1024px) {
+        .form-table-grid,
+        .document-table-card,
+        .uploaded-files-wrapper {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    /* Mobile Breakpoint (1 Column) */
+    @media (max-width: 768px) {
+        .form-workspace {
+            padding: 14px 10px;
+        }
+        .form-table-grid,
+        .document-table-card,
+        .uploaded-files-wrapper {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .btn-group-custom {
+            flex-direction: row;
+        }
+        .btn-submit, .btn-cancel {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="form-workspace">
+
+    <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
-        {% if asset_form.errors or specific_form.errors or document_form.errors or asset_form.non_field_errors or specific_form.non_field_errors or document_form.non_field_errors %}
-            <div style="background: #fff0f0; color: #8b1e1e; border: 1px solid #efb6b6; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                <strong>Please correct the following errors:</strong>
+        <div class="form-table-grid">
 
-                {% for error in asset_form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-
-                {% for error in specific_form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-
-                {% for error in document_form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-
-                {% for field in asset_form %}
-                    {% for error in field.errors %}
-                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-
-                {% for field in specific_form %}
-                    {% for error in field.errors %}
-                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-
-                {% for field in document_form %}
-                    {% for error in field.errors %}
-                        <p><strong>{{ field.label }}:</strong> {{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <!-- GENERAL ASSET DETAILS -->
-        <h3 style="color: #1a1a1a; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-            General Financial Details
-        </h3>
-
-        {{ asset_form.as_p }}
-
-        <!-- CATEGORY-SPECIFIC DETAILS -->
-        <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-            Specific Category Details
-        </h3>
-
-        {{ specific_form.as_p }}
-
-        <!-- SUPPORTING DOCUMENT UPLOAD -->
-        <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-            Supporting Documents
-        </h3>
-
-        <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            Upload a document associated with this asset, such as a title deed,
-            purchase agreement, valuation report, registration certificate,
-            share certificate, or bond certificate.
-        </p>
-
-        <div style="background: #faf8f4; border: 1px solid #eee2d0; padding: 18px; border-radius: 6px; margin-bottom: 20px;">
-            {{ document_form.as_p }}
-
-            <p style="color: #666; font-size: 13px; margin-bottom: 0;">
-                Accepted formats: PDF, JPG, JPEG, PNG. Maximum file size: 10 MB per document.
-                Leave the file field empty if you do not want to upload a document.
-            </p>
-        </div>
-
-        <!-- EXISTING DOCUMENTS -->
-        {% if asset %}
-            <h3 style="color: #1a1a1a; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                Previously Uploaded Documents
-            </h3>
-
-            {% for document in asset.supporting_documents.all %}
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border: 1px solid #eee; padding: 14px; margin-bottom: 10px; border-radius: 6px;">
-
-                    <div>
-                        <strong style="color: #1a1a1a;">
-                            {{ document.title }}
-                        </strong>
-
-                        <p style="color: #666; font-size: 13px; margin: 5px 0;">
-                            {{ document.get_document_type_display }}
-                        </p>
-
-                        <p style="color: #777; font-size: 12px; margin: 0;">
-                            Uploaded: {{ document.uploaded_at|date:"d M Y, H:i" }}
-                        </p>
-                    </div>
-
-                    <span style="font-size: 12px; color: #8a6a35;">
-                        Document saved
-                    </span>
+            {% if asset_form.errors or specific_form.errors or document_form.errors or asset_form.non_field_errors or specific_form.non_field_errors or document_form.non_field_errors %}
+                <div class="error-container">
+                    <strong>Please correct the following errors before proceeding:</strong>
+                    {% for error in asset_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    {% for error in specific_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    {% for error in document_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    {% for field in asset_form %}{% for error in field.errors %}<p><strong>{{ field.label }}:</strong> {{ error }}</p>{% endfor %}{% endfor %}
+                    {% for field in specific_form %}{% for error in field.errors %}<p><strong>{{ field.label }}:</strong> {{ error }}</p>{% endfor %}{% endfor %}
+                    {% for field in document_form %}{% for error in field.errors %}<p><strong>{{ field.label }}:</strong> {{ error }}</p>{% endfor %}{% endfor %}
                 </div>
-            {% empty %}
-                <p style="color: #777;">
-                    No supporting documents have been uploaded for this asset yet.
+            {% endif %}
+
+            <!-- GENERAL ASSET DETAILS -->
+            <div class="form-section-header">
+                <i class="fa-solid fa-wallet"></i> General Financial &amp; Ownership Details
+            </div>
+
+            {{ asset_form.as_p }}
+
+            <!-- CATEGORY-SPECIFIC REQUIREMENTS -->
+            <div class="form-section-header">
+                <i class="fa-solid fa-sliders"></i> 
+                {% if category == 'VEHICLE' %}Vehicle Specifications
+                {% elif category == 'LAND' %}Land Plot Specifications
+                {% elif category == 'HOUSE' %}Building &amp; Real Estate Specifications
+                {% elif category == 'STOCK' %}Company Stock &amp; Share Details
+                {% elif category == 'BOND' %}Government Bond Security Terms
+                {% elif category == 'OTHER' %}Miscellaneous Asset Details
+                {% else %}Specific Category Details{% endif %}
+            </div>
+
+            <div class="specific-requirements-card" data-category="{{ category }}" style="display: contents;">
+                {{ specific_form.as_p }}
+            </div>
+
+            <!-- SUPPORTING DOCUMENT UPLOAD -->
+            <div class="form-section-header">
+                <i class="fa-solid fa-file-arrow-up"></i> Supporting Documentation
+            </div>
+
+            <div class="document-table-card">
+                <p class="document-table-note">
+                    Attach title deeds, purchase agreements, or valuation certificates. Accepted: PDF, JPG, PNG (Max 10 MB).
                 </p>
-            {% endfor %}
-        {% endif %}
+                {{ document_form.as_p }}
+            </div>
 
-        <!-- ACTION BUTTONS -->
-        <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+            <!-- PREVIOUSLY UPLOADED DOCUMENTS (IF EDITING) -->
+            {% if asset and asset.supporting_documents.all %}
+                <div class="form-section-header">
+                    <i class="fa-solid fa-folder-open"></i> Previously Uploaded Files
+                </div>
 
-            <button
-                type="submit"
-                style="background-color: #1a1a1a; color: #cfa76e; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
-                Save Asset
-            </button>
+                <div class="uploaded-files-wrapper">
+                    {% for document in asset.supporting_documents.all %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--asset-border); padding: 8px 10px; border-radius: 6px; background: var(--asset-card-bg);">
+                            <div>
+                                <strong style="color: var(--asset-text); font-size: 11px;">{{ document.title }}</strong>
+                                <p style="color: var(--asset-muted); font-size: 9.5px; margin: 1px 0 0;">{{ document.get_document_type_display }} • {{ document.uploaded_at|date:"d M Y" }}</p>
+                            </div>
+                            <a href="{{ document.file.url }}" target="_blank" style="font-size: 11px; font-weight: 800; color: var(--asset-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            <a
-                href="{% url 'assets:asset_list' %}"
-                style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold;">
-                Cancel
-            </a>
+            <!-- ACTION BUTTONS -->
+            <div class="btn-group-custom">
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-check"></i> Save Asset
+                </button>
+                <a href="{% url 'assets:asset_list' %}" class="btn-cancel">
+                    Cancel
+                </a>
+            </div>
 
         </div>
     </form>

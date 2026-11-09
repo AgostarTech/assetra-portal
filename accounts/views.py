@@ -1,44 +1,35 @@
+import uuid
+import requests
+from datetime import timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model, login, authenticate
+from django.utils import timezone
+from django.conf import settings
+from .utils import send_otp_notifications
+from .models import UserSubscription, PaymentTransaction
+from .gateway import TanzanianPaymentGateway
 
 User = get_user_model()
 
 
 # ==========================================================
-# ROLE-BASED REDIRECTION
+# ROLE-BASED REDIRECTION (ADMIN vs. USER)
 # ==========================================================
 
 @login_required
 def role_router(request):
     """
-    Redirect authenticated users to their respective dashboards
-    based on their assigned roles.
+    Redirects authenticated users strictly to Admin or User dashboards.
     """
-
     user = request.user
-    role = (getattr(user, "role", "") or "").upper()
+    role = (getattr(user, "role", "USER") or "USER").upper()
 
-    if role == "ADMIN":
-        return redirect("admin:index")
+    if role == "ADMIN" or user.is_staff or user.is_superuser:
+        return redirect("dashboards:admin_dashboard")
 
-    elif role == "MANAGER":
-        return redirect("dashboards:manager_dashboard")
-
-    elif role in ["HELP_DESK", "HELPDESK"]:
-        return redirect("dashboards:helpdesk_dashboard")
-
-    elif role in ["USER", "BENEFICIARY"]:
-        return redirect("dashboards:user_dashboard")
-
-    messages.error(
-        request,
-        "Your account role is not configured. Please contact the administrator."
-    )
-
-    return redirect("accounts:login")
+    return redirect("dashboards:user_dashboard")
 
 
 # ==========================================================
@@ -46,90 +37,57 @@ def role_router(request):
 # ==========================================================
 
 def signup_view(request):
-    """
-    Handles standard user registration.
-    Newly registered users receive the USER role by default.
-    """
-
     if request.user.is_authenticated:
         return redirect("dashboards:role_router")
 
     if request.method == "POST":
-
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
         email = request.POST.get("email", "").strip().lower()
+        phone_number = request.POST.get("phone_number", "").strip()
         password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm_password", "")
 
-        # Validate required fields
-        if not email or not password:
-            messages.error(
-                request,
-                "Email and password are required to register."
-            )
-            return render(
-                request,
-                "registration/signup.html"
-            )
+        if not email or not password or not confirm_password:
+            messages.error(request, "All required fields, including password confirmation, must be filled.")
+            return render(request, "registration/signup.html")
 
-        # Validate password length
         if len(password) < 8:
-            messages.error(
-                request,
-                "Password must contain at least 8 characters."
-            )
-            return render(
-                request,
-                "registration/signup.html"
-            )
+            messages.error(request, "Password must contain at least 8 characters.")
+            return render(request, "registration/signup.html")
 
-        # Check whether email already exists
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match. Please re-enter.")
+            return render(request, "registration/signup.html")
+
         if User.objects.filter(email__iexact=email).exists():
-            messages.error(
-                request,
-                "An account with this email address already exists."
-            )
-            return render(
-                request,
-                "registration/signup.html"
-            )
+            messages.error(request, "An account with this email address already exists.")
+            return render(request, "registration/signup.html")
 
-        # Generate a unique username
-        base_username = email.split("@")[0]
-        username = base_username
-        counter = 1
-
-        while User.objects.filter(username=username).exists():
-            username = f"{base_username}{counter}"
-            counter += 1
-
-        # Create the new user
         user = User.objects.create_user(
-            username=username,
             email=email,
             password=password,
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            phone_number=phone_number if phone_number else None
         )
 
-        # Assign default beneficiary/user role
         user.role = "USER"
         user.save(update_fields=["role"])
 
-        # Authenticate newly registered user
-        login(request, user)
+        # Automatically create free trial subscription upon signup
+        UserSubscription.objects.get_or_create(user=user)
 
-        messages.success(
-            request,
-            f"Welcome to the portal, {user.first_name or user.username}!"
-        )
+        user.generate_otp()
+        send_otp_notifications(user)
 
-        return redirect("dashboards:role_router")
+        request.session['pre_otp_user_id'] = user.id
+        request.session.modified = True
+        
+        messages.info(request, "Account created! A verification code has been sent to your email and phone.")
+        return redirect("accounts:verify_otp")
 
-    return render(
-        request,
-        "registration/signup.html"
-    )
+    return render(request, "registration/signup.html")
 
 
 # ==========================================================
@@ -137,45 +95,179 @@ def signup_view(request):
 # ==========================================================
 
 def login_view(request):
-    """
-    Handles user authentication and redirects authenticated
-    users according to their assigned roles.
-    """
-
     if request.user.is_authenticated:
         return redirect("dashboards:role_router")
 
     if request.method == "POST":
+        identifier = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
 
-        form = AuthenticationForm(
-            request,
-            data=request.POST
-        )
+        user = authenticate(request, username=identifier, password=password)
 
-        if form.is_valid():
+        if user is not None:
+            user.generate_otp()
+            send_otp_notifications(user)
 
-            user = form.get_user()
+            request.session['pre_otp_user_id'] = user.id
+            request.session.modified = True
+            
+            messages.info(request, "A verification code has been sent to your email and phone.")
+            return redirect("accounts:verify_otp")
+        else:
+            messages.error(request, "Invalid credentials. Please check your email/phone and password.")
 
+    return render(request, "registration/login.html")
+
+
+# ==========================================================
+# OTP VERIFICATION & DIRECT REDIRECTION
+# ==========================================================
+
+def verify_otp_view(request):
+    user_id = request.session.get('pre_otp_user_id')
+    if not user_id:
+        messages.error(request, "Verification session expired. Please sign in again.")
+        return redirect("accounts:login")
+
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return redirect("accounts:login")
+
+    if request.method == "POST":
+        entered_code = request.POST.get("otp_code", "").strip()
+
+        if user.is_otp_valid(entered_code):
+            user.otp_code = None
+            user.otp_created_at = None
+            user.save(update_fields=['otp_code', 'otp_created_at'])
+
+            if 'pre_otp_user_id' in request.session:
+                del request.session['pre_otp_user_id']
+                
             login(request, user)
 
-            messages.success(
-                request,
-                f"Welcome back, {user.first_name or user.username}!"
-            )
+            messages.success(request, f"Welcome back, {user.first_name or user.email}!")
 
-            return redirect("dashboards:role_router")
-
+            role = (getattr(user, "role", "USER") or "USER").upper()
+            if role == "ADMIN" or user.is_staff or user.is_superuser:
+                return redirect("dashboards:admin_dashboard")
+            else:
+                return redirect("dashboards:user_dashboard")
         else:
-            messages.error(
-                request,
-                "Invalid credentials. Please check your username/email and password."
-            )
+            messages.error(request, "Invalid or expired verification code. Please try again.")
 
-    else:
-        form = AuthenticationForm()
+    return render(request, "registration/verify_otp.html")
 
-    return render(
-        request,
-        "registration/login.html",
-        {"form": form}
-    )
+
+# ==========================================================
+# BILLING & SUBSCRIPTIONS
+# ==========================================================
+
+@login_required
+def subscription_plans_view(request):
+    sub, _ = UserSubscription.objects.get_or_create(user=request.user)
+    sub.check_expiration()
+    context = {
+        "subscription": sub,
+        "title": "Account Subscription & Plans"
+    }
+    return render(request, 'accounts/subscription_plans.html', context)
+
+
+@login_required
+def select_payment_method(request):
+    """Step 2: User selects their preferred Tanzanian mobile network or bank with free sandbox simulation."""
+    plan = request.GET.get('plan') or request.POST.get('plan')
+    if not plan:
+        return redirect('accounts:subscription_plans')
+        
+    amount = 10000.00 if plan == 'MONTHLY' else 100000.00
+    
+    if request.method == 'POST':
+        gateway = request.POST.get('gateway')  # 'MOBILE_MONEY' or 'BANK'
+        provider = request.POST.get('provider')  # 'MPESA', 'TIGOPESA', 'AIRTEL', 'HALOPESA', 'NMB', etc.
+        phone_number = request.POST.get('phone_number', '').strip()
+        
+        if gateway == 'MOBILE_MONEY' and not phone_number:
+            messages.error(request, "Please enter your mobile money phone number.")
+            return redirect(f"{request.path}?plan={plan}")
+            
+        ref_code = f"AST-{uuid.uuid4().hex[:10].upper()}"
+        
+        PaymentTransaction.objects.create(
+            user=request.user,
+            reference_code=ref_code,
+            amount=amount,
+            gateway=gateway,
+            plan_purchased=plan,
+            is_successful=False
+        )
+        
+        # Trigger free simulation gateway request
+        gateway_res = TanzanianPaymentGateway.request_mno_checkout(phone_number, amount, ref_code, provider)
+        messages.success(request, f"{gateway_res['message']} [Sandbox Mode]")
+        
+        context = {
+            "plan": plan,
+            "amount": amount,
+            "ref_code": ref_code,
+            "simulation_mode": True,
+            "title": "Complete Simulated Checkout"
+        }
+        return render(request, 'accounts/payment_checkout.html', context)
+
+    context = {
+        "plan": plan,
+        "amount": amount,
+        "title": "Select Payment Method & Provider"
+    }
+    return render(request, 'accounts/payment_checkout.html', context)
+
+
+@login_required
+def initiate_payment(request):
+    """Initiates payment transaction log."""
+    if request.method == 'POST':
+        plan = request.POST.get('plan')
+        gateway = request.POST.get('gateway')
+        amount = 10000.00 if plan == 'MONTHLY' else 100000.00
+        ref_code = f"AST-{uuid.uuid4().hex[:10].upper()}"
+
+        PaymentTransaction.objects.create(
+            user=request.user,
+            reference_code=ref_code,
+            amount=amount,
+            gateway=gateway,
+            plan_purchased=plan,
+            is_successful=False
+        )
+        messages.info(request, f"Payment request initiated for {amount:,.2f} TZS.")
+        return redirect('accounts:subscription_plans')
+
+    return redirect('accounts:subscription_plans')
+
+
+@login_required
+def simulate_payment_success(request, reference_code):
+    """Instantly simulates payment completion for free testing in sandbox mode."""
+    try:
+        tx = PaymentTransaction.objects.get(reference_code=reference_code, user=request.user)
+        tx.is_successful = True
+        tx.save()
+
+        # Activate user subscription immediately
+        sub, _ = UserSubscription.objects.get_or_create(user=request.user)
+        sub.plan_type = tx.plan_purchased
+        sub.status = 'ACTIVE'
+        sub.is_locked = False
+        
+        days_to_add = 30 if tx.plan_purchased == 'MONTHLY' else 365
+        sub.expiry_date = timezone.now() + timedelta(days=days_to_add)
+        sub.save()
+
+        messages.success(request, f"Sandbox payment of {tx.amount:,.2f} TZS confirmed successfully! Your portal access is now active.")
+    except PaymentTransaction.DoesNotExist:
+        messages.error(request, "Transaction reference not found.")
+
+    return redirect('accounts:subscription_plans')

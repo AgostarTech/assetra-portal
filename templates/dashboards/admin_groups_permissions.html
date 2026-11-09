@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Groups & Permissions | Assetra Africa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   ASSETRA AFRICA — GROUPS & PERMISSIONS MANAGEMENT
+========================================================= */
+
+.pw-groups {
+    --pw-teal: #062c30;
+    --pw-emerald: #059669;
+    --pw-gold: #c5a059;
+    --pw-bg: #f8fafc;
+    --pw-card: #ffffff;
+    --pw-text: #111827;
+    --pw-muted: #4b5563;
+    --pw-border: rgba(6, 44, 48, 0.12);
+    --pw-danger: #dc2626;
+
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    color: var(--pw-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pw-groups *, .pw-groups *::before, .pw-groups *::after {
+    box-sizing: border-box;
+}
+
+.pw-groups a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Animations & Transitions */
+.pw-groups .pw-panel,
+.pw-groups .pw-btn,
+.pw-groups table tbody tr {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pw-groups .pw-panel:hover {
+    box-shadow: 0 8px 25px rgba(6, 44, 48, 0.08);
+}
+
+/* Topbar & Header */
+.pw-groups .pw-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pw-groups .pw-eyebrow {
+    color: var(--pw-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.pw-groups .pw-page-heading {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.pw-groups .pw-description {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+/* Buttons */
+.pw-groups .pw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--pw-card);
+    color: var(--pw-teal);
+}
+
+.pw-groups .pw-btn:hover {
+    border-color: var(--pw-teal);
+    background: #f1f5f9;
+}
+
+.pw-groups .pw-btn-primary {
+    background: var(--pw-teal);
+    border-color: var(--pw-teal);
+    color: #34d399;
+}
+
+.pw-groups .pw-btn-primary:hover {
+    background: #041f22;
+    color: #ffffff;
+}
+
+.pw-groups .pw-btn-danger {
+    color: var(--pw-danger);
+    border-color: rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.04);
+}
+
+.pw-groups .pw-btn-danger:hover {
+    background: var(--pw-danger);
+    color: #ffffff;
+}
+
+/* Alerts / Messages */
+.pw-groups .pw-messages {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pw-groups .pw-alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pw-groups .pw-alert-success {
+    color: #065f46;
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+}
+
+.pw-groups .pw-alert-error {
+    color: #991b1b;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}
+
+/* Panels */
+.pw-groups .pw-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(6, 44, 48, 0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.pw-groups .pw-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.pw-groups .pw-panel-title {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pw-groups .pw-panel-subtitle {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+.pw-groups .pw-panel-body {
+    padding: 20px;
+}
+
+/* Form Styles */
+.pw-groups .pw-form-group {
+    display: flex;
+    gap: 10px;
+    max-width: 550px;
+}
+
+.pw-groups .pw-input, .pw-groups .pw-select {
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    color: var(--pw-text);
+    background: #f8fafc;
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.pw-groups .pw-input:focus, .pw-groups .pw-select:focus {
+    border-color: var(--pw-teal);
+    outline: none;
+}
+
+/* Table Styles */
+.pw-groups .pw-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pw-groups .pw-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 12px;
+}
+
+.pw-groups .pw-table thead th {
+    padding: 12px 16px;
+    color: var(--pw-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--pw-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pw-groups .pw-table tbody td {
+    padding: 14px 16px;
+    color: var(--pw-text);
+    border-bottom: 1px solid var(--pw-border);
+    vertical-align: middle;
+}
+
+.pw-groups .pw-table tbody tr:hover {
+    background: rgba(52, 211, 153, 0.03);
+}
+
+.pw-groups .pw-badge {
+    display: inline-flex;
+    padding: 3px 10px;
+    background: rgba(197, 160, 89, 0.15);
+    color: #92400e;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pw-groups .pw-member-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.pw-groups .pw-member-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: #f1f5f9;
+    border: 1px solid var(--pw-border);
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.pw-groups .pw-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--pw-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .pw-groups .pw-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .pw-groups .pw-form-group {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pw-groups">
+
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Access Control</div>
+            <h1 class="pw-page-heading">User Groups & Permissions</h1>
+            <p class="pw-description">Organize users into Normal Users, Admins, and Superadmins, or manage custom permission groups.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- NOTIFICATIONS -->
+    {% if messages %}
+        <div class="pw-messages">
+            {% for message in messages %}
+                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- CREATE GROUP PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Create New Permission Group</h2>
+                <p class="pw-panel-subtitle">Add a custom group to partition user access levels.</p>
+            </div>
+        </div>
+        <div class="pw-panel-body">
+            <form method="post" class="pw-form-group">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_group">
+                <input type="text" name="group_name" placeholder="Group Name (e.g., Compliance Officers, Risk Managers)" required class="pw-input">
+                <button type="submit" class="pw-btn pw-btn-primary">Create Group</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- EXISTING GROUPS PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">System Groups & Members</h2>
+                <p class="pw-panel-subtitle">Manage group memberships, view counts, and delete groups.</p>
+            </div>
+            <span class="pw-badge">{{ groups.count|default:0 }} groups</span>
+        </div>
+
+        {% if groups %}
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Assigned Members</th>
+                        <th>Add Member</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--pw-teal); font-size: 13px;">{{ group.name }}</strong><br>
+                            <span style="color: var(--pw-muted); font-size: 11px;">{{ group.permissions.count }} permissions assigned</span>
+                        </td>
+                        <td>
+                            <div class="pw-member-list">
+                                {% for member in group.user_set.all %}
+                                    <span class="pw-member-chip">
+                                        {{ member.username }}
+                                        <!-- Remove member form -->
+                                        <form method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="remove_member">
+                                            <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                            <input type="hidden" name="user_id" value="{{ member.pk }}">
+                                            <button type="submit" style="background:none; border:none; color:var(--pw-danger); cursor:pointer; font-weight:bold; padding:0 2px;" title="Remove member">&times;</button>
+                                        </form>
+                                    </span>
+                                {% empty %}
+                                    <span style="color: var(--pw-muted); font-style: italic; font-size: 11px;">No members in this group</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <!-- Add Member Form -->
+                            <form method="post" style="display: flex; gap: 6px; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_member">
+                                <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                <select name="user_id" class="pw-select" required style="width: 160px; font-size: 11px;">
+                                    <option value="">Select user...</option>
+                                    {% for usr in all_users %}
+                                        <option value="{{ usr.pk }}">{{ usr.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="pw-btn" style="padding: 4px 10px; font-size: 11px;">Add</button>
+                            </form>
+                        </td>
+                        <td>
+                            <!-- Delete Group Form -->
+                            <form method="post" onsubmit="return confirm('Are you sure you want to delete the group {{ group.name }}?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_group">
+                                <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                <button type="submit" class="pw-btn pw-btn-danger" style="padding: 4px 8px; font-size: 11px;">Delete Group</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pw-empty">No user groups have been created yet.</div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

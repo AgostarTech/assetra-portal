@@ -243,3 +243,44 @@ class AssetDocumentForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+
+from django import forms
+from .models import (
+    Asset,
+    AssetDocument,
+    Vehicle,
+    Land,
+    House,
+    Stock,
+    GovernmentBond,
+    OtherAsset,
+)
+
+
+class OtherAssetForm(forms.ModelForm):
+    class Meta:
+        model = OtherAsset
+        fields = [
+            "asset_sub_type",
+            "serial_number_or_identifier",
+        ]
+        widgets = {
+            "asset_sub_type": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g., Artwork, Machinery, Jewelry, Crypto",
+                }
+            ),
+            "serial_number_or_identifier": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Serial number, wallet address, or unique ID (optional)",
+                }
+            ),
+        }
+        labels = {
+            "asset_sub_type": "Asset Type / Category",
+            "serial_number_or_identifier": "Serial Number / Identifier",
+        }

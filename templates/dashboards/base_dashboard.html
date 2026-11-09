@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block dashboard_title %}Portal{% endblock %} | Private Wealth Portal</title>
+    
+    <!-- FontAwesome Icons & Inter Font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+    <style>
+        :root {
+            --portal-bg: #F4F6F9;
+            --portal-card-bg: #FFFFFF;
+            --portal-text: #0F172A;
+            --portal-muted: #687181;
+            --portal-border: rgba(15, 23, 42, 0.08);
+            --portal-accent: #086070;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--portal-bg);
+            color: var(--portal-text);
+            font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+        }
+
+        .portal-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .portal-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .portal-topbar {
+            height: 70px;
+            background: var(--portal-card-bg);
+            border-bottom: 1px solid var(--portal-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 750;
+            color: var(--portal-text);
+        }
+
+        .secure-badge {
+            font-size: 11px;
+            color: #16845b;
+            background: #e9f8f0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .portal-main-body {
+            padding: 30px;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .portal-content-wrapper {
+                margin-left: 0;
+            }
+            .portal-topbar {
+                padding: 0 15px 0 65px;
+            }
+            .portal-main-body {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-layout">
+        <!-- Persistent Left Sidebar -->
+        {% include "includes/sidebar.html" %}
+
+        <!-- Main Viewport Area -->
+        <div class="portal-content-wrapper">
+            <header class="portal-topbar">
+                <div class="topbar-title">
+                    {% block view_header %}Client Dashboard{% endblock %}
+                </div>
+                <div class="portal-topbar-actions">
+                    <span class="secure-badge">
+                        <i class="fa-solid fa-lock" aria-hidden="true"></i> Encrypted Session
+                    </span>
+                </div>
+            </header>
+
+            <main class="portal-main-body">
+                {% if messages %}
+                    <div style="margin-bottom: 20px;">
+                        {% for message in messages %}
+                            <div style="padding: 12px 16px; border-radius: 8px; font-size: 13px; background: {% if message.tags == 'error' %}#fde8e8; color:#9b1c1c{% else %}#e1effe; color:#1e429f{% endif %};">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Child templates inject their unique content here -->
+                {% block dashboard_content %}
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>

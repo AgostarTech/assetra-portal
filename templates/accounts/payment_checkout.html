@@ -1,0 +1,168 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}Secure Checkout - Private Wealth Portal{% endblock %}
+{% block view_header %}Select Payment Channel &amp; Provider{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+    .checkout-container { max-width: 750px; margin: 0 auto; color: var(--asset-text); }
+    .checkout-card { background: #fff; border: 1px solid var(--asset-border); border-radius: var(--asset-radius); padding: 30px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05); }
+    .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+    .channel-box { border: 2px solid var(--asset-border); border-radius: 10px; padding: 18px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 700; font-size: 14px; }
+    .channel-box.active { border-color: var(--asset-primary); background: rgba(8, 96, 112, 0.04); color: var(--asset-primary); }
+    
+    .provider-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px; }
+    .provider-option { border: 2px solid var(--asset-border); border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s; background: #fafafa; }
+    .provider-option input { display: none; }
+    .provider-option.selected { border-color: var(--asset-primary); background: rgba(8, 96, 112, 0.06); color: var(--asset-primary); }
+    .provider-logo { width: 52px; height: 40px; object-fit: contain; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-control { width: 100%; padding: 12px 15px; border: 1px solid var(--asset-border); border-radius: 8px; font-size: 14px; }
+    .btn-pay { background: var(--asset-primary); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+    .btn-pay:hover { background: var(--asset-primary-hover); }
+    .btn-simulate { background: #16845b; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 800; font-size: 15px; text-align: center; text-decoration: none; display: block; margin-top: 15px; }
+    .btn-simulate:hover { background: #126a48; color: #fff; }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--asset-border); padding-bottom: 15px; margin-bottom: 25px;">
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800;">Selected Plan: {{ plan|title }} Access</h3>
+                <p style="margin: 3px 0 0; font-size: 13px; color: var(--asset-muted);">Total Secure Payable Amount</p>
+            </div>
+            <div style="font-size: 22px; font-weight: 800; color: var(--asset-primary);">{{ amount|floatformat:2 }} TZS</div>
+        </div>
+
+        {% if simulation_mode %}
+        <div style="background: rgba(22, 132, 91, 0.08); border: 1px solid #16845b; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 25px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 32px; color: #16845b; margin-bottom: 10px;"></i>
+            <h4 style="margin: 0 0 5px; color: #16845b; font-size: 16px;">USSD Push Prompt Dispatched (Sandbox)</h4>
+            <p style="margin: 0; font-size: 13px; color: var(--asset-muted);">Reference Code: <strong>{{ ref_code }}</strong></p>
+            <p style="font-size: 12px; color: var(--asset-muted); margin-top: 8px;">Click below to simulate customer approval and instantly activate your account access.</p>
+        </div>
+
+        <a href="{% url 'accounts:simulate_payment_success' ref_code %}" class="btn-simulate">
+            <i class="fa-solid fa-bolt" style="margin-right: 6px;"></i> Simulate &amp; Confirm Successful Payment
+        </a>
+        <a href="{% url 'accounts:subscription_plans' %}" style="display: block; text-align: center; margin-top: 15px; font-size: 13px; color: var(--asset-muted); text-decoration: none;">Cancel and Return to Plans</a>
+
+        {% else %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="plan" value="{{ plan }}">
+            <input type="hidden" name="gateway" id="selectedGateway" value="MOBILE_MONEY">
+
+            <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 10px;">1. Choose Payment Channel</label>
+            <div class="channel-grid">
+                <div class="channel-box active" onclick="setGateway('MOBILE_MONEY', this)">
+                    <i class="fa-solid fa-mobile-screen-button" style="font-size: 18px; display: block; margin-bottom: 6px;"></i> Mobile Money
+                </div>
+                <div class="channel-box" onclick="setGateway('BANK', this)">
+                    <i class="fa-solid fa-building-columns" style="font-size: 18px; display: block; margin-bottom: 6px;"></i> Bank Transfer / Gateway
+                </div>
+            </div>
+
+            <div id="mobileMoneySection">
+                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 10px;">2. Select Mobile Network Operator</label>
+                <div class="provider-grid">
+                    <label class="provider-option selected" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="MPESA" checked>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/15/M-PESA_LOGO-01.svg" alt="Vodacom M-Pesa" class="provider-logo">
+                        <span>M-Pesa</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="TIGOPESA">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Tigo_logo_2021.svg" alt="Tigo Pesa" class="provider-logo">
+                        <span>Tigo Pesa</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="AIRTEL">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Airtel_logo.svg" alt="Airtel Money" class="provider-logo">
+                        <span>Airtel Money</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="HALOPESA">
+                        <img src="{% static 'images/payments/halopesa.png' %}" alt="Halopesa" class="provider-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width: 42px; height: 42px; background: #ff6600; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px;">HALO</div>
+                        <span>Halopesa</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px;">Mobile Phone Number (Tanzania)</label>
+                    <input type="text" name="phone_number" id="phoneNumberInput" class="form-control" placeholder="e.g. 0712345678 or 0755123456" required>
+                </div>
+            </div>
+
+            <div id="bankSection" style="display: none;">
+                <label style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 10px;">2. Select Bank Partner</label>
+                <div class="provider-grid">
+                    <label class="provider-option selected" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="NMB">
+                        <img src="{% static 'images/payments/nmb.png' %}" alt="NMB Bank" class="provider-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width: 42px; height: 42px; background: #0056b3; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px;">NMB</div>
+                        <span>NMB Bank</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="CRDB">
+                        <img src="{% static 'images/payments/crdb.png' %}" alt="CRDB Bank" class="provider-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width: 42px; height: 42px; background: #00843d; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px;">CRDB</div>
+                        <span>CRDB Bank</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="NBC">
+                        <img src="{% static 'images/payments/nbc.png' %}" alt="NBC Bank" class="provider-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width: 42px; height: 42px; background: #b5121b; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px;">NBC</div>
+                        <span>NBC Bank</span>
+                    </label>
+                    <label class="provider-option" onclick="selectProvider(this)">
+                        <input type="radio" name="provider" value="EXIM">
+                        <img src="{% static 'images/payments/exim.png' %}" alt="Exim Bank" class="provider-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none; width: 42px; height: 42px; background: #002b49; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px;">EXIM</div>
+                        <span>Exim Bank</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-pay">Initiate Secure Payment Prompt</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function setGateway(gateway, element) {
+        document.getElementById('selectedGateway').value = gateway;
+        document.querySelectorAll('.channel-box').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        const phoneInput = document.getElementById('phoneNumberInput');
+        if (gateway === 'MOBILE_MONEY') {
+            document.getElementById('mobileMoneySection').style.display = 'block';
+            document.getElementById('bankSection').style.display = 'none';
+            phoneInput.required = true;
+        } else {
+            document.getElementById('mobileMoneySection').style.display = 'none';
+            document.getElementById('bankSection').style.display = 'block';
+            phoneInput.required = false;
+        }
+    }
+
+    function selectProvider(element) {
+        element.closest('.provider-grid').querySelectorAll('.provider-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        element.querySelector('input').checked = true;
+    }
+</script>
+{% endblock %}

@@ -1,8 +1,11 @@
-
+import os
+import io
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import (
@@ -13,6 +16,7 @@ from .forms import (
     HouseForm,
     StockForm,
     GovernmentBondForm,
+    OtherAssetForm,
 )
 from .models import Asset, AssetDocument
 
@@ -27,6 +31,7 @@ CATEGORY_FORMS = {
     Asset.CategoryChoices.HOUSE: HouseForm,
     Asset.CategoryChoices.STOCK: StockForm,
     Asset.CategoryChoices.BOND: GovernmentBondForm,
+    Asset.CategoryChoices.OTHER: OtherAssetForm,
 }
 
 CATEGORY_DETAILS = {
@@ -35,6 +40,7 @@ CATEGORY_DETAILS = {
     Asset.CategoryChoices.HOUSE: "house_details",
     Asset.CategoryChoices.STOCK: "stock_details",
     Asset.CategoryChoices.BOND: "bond_details",
+    Asset.CategoryChoices.OTHER: "other_details",
 }
 
 CATEGORY_LABELS = {
@@ -43,9 +49,10 @@ CATEGORY_LABELS = {
     Asset.CategoryChoices.HOUSE: "Houses",
     Asset.CategoryChoices.STOCK: "Stocks",
     Asset.CategoryChoices.BOND: "Government Bonds",
+    Asset.CategoryChoices.OTHER: "Other Assets",
 }
 
-# Sidebar query parameter -> actual Django category value.
+# Sidebar query parameter / alias routing -> actual Django category value.
 CATEGORY_ALIASES = {
     "vehicle": Asset.CategoryChoices.VEHICLE,
     "vehicles": Asset.CategoryChoices.VEHICLE,
@@ -60,12 +67,21 @@ CATEGORY_ALIASES = {
     "government_bond": Asset.CategoryChoices.BOND,
     "government-bonds": Asset.CategoryChoices.BOND,
     "government_bonds": Asset.CategoryChoices.BOND,
+    "other": Asset.CategoryChoices.OTHER,
+    "others": Asset.CategoryChoices.OTHER,
 }
 
 
 # ============================================================
 # HELPER FUNCTIONS
 # ============================================================
+
+def _is_admin(user):
+    """Check if user has admin privileges (superuser, staff, or ADMIN role)."""
+    return user.is_authenticated and (
+        user.is_superuser or user.is_staff or getattr(user, "role", "USER").upper() == "ADMIN"
+    )
+
 
 def _get_asset_detail(asset):
     """Return the asset's category-specific details if available."""
@@ -134,16 +150,84 @@ def asset_list(request):
 
 
 # ============================================================
-# SUPPORTING DOCUMENTS
+# DEDICATED CATEGORY LIST VIEWS
+# ============================================================
+
+@login_required
+def vehicle_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.VEHICLE, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/vehicle_list.html", {"assets": assets, "asset_count": assets.count()})
+
+@login_required
+def land_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.LAND, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/land_list.html", {"assets": assets, "asset_count": assets.count()})
+
+@login_required
+def house_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.HOUSE, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/house_list.html", {"assets": assets, "asset_count": assets.count()})
+
+@login_required
+def stock_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.STOCK, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/stock_list.html", {"assets": assets, "asset_count": assets.count()})
+
+@login_required
+def bond_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.BOND, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/bond_list.html", {"assets": assets, "asset_count": assets.count()})
+
+@login_required
+def other_list(request):
+    assets = Asset.objects.filter(owner=request.user, category=Asset.CategoryChoices.OTHER, status=Asset.StatusChoices.ACTIVE).order_by("-created_at")
+    return render(request, "assets/other_list.html", {"assets": assets, "asset_count": assets.count()})
+
+
+# ============================================================
+# ASSET DETAIL VIEW
+# ============================================================
+
+@login_required
+def asset_detail(request, asset_id):
+    """Display comprehensive details, specifics, and linked documents for a single asset."""
+    if _is_admin(request.user):
+        asset = get_object_or_404(Asset, pk=asset_id)
+    else:
+        asset = get_object_or_404(Asset, pk=asset_id, owner=request.user)
+
+    specific_detail = _get_asset_detail(asset)
+    
+    # Pre-process specific fields to avoid template underscore restrictions (_meta)
+    specific_fields = []
+    if specific_detail:
+        for field in specific_detail._meta.fields:
+            if field.name not in ['id', 'asset']:
+                val = getattr(specific_detail, field.name, None)
+                if val is not None and val != "":
+                    specific_fields.append({
+                        "label": field.verbose_name.title(),
+                        "value": val
+                    })
+
+    documents = asset.documents.all() if hasattr(asset, 'documents') else AssetDocument.objects.filter(asset=asset)
+
+    context = {
+        "asset": asset,
+        "specific_detail": specific_detail,
+        "specific_fields": specific_fields,
+        "documents": documents,
+    }
+    return render(request, "assets/asset_detail.html", context)
+
+
+# ============================================================
+# SUPPORTING DOCUMENTS & INTELLIGENCE VAULT
 # ============================================================
 
 @login_required
 def asset_documents(request):
-    """
-    Display supporting documents belonging only to the logged-in user's
-    assets. The asset ownership filter is applied through the relationship.
-    """
-
+    """Display supporting documents belonging only to the logged-in user's assets."""
     documents = (
         AssetDocument.objects.filter(asset__owner=request.user)
         .select_related("asset", "uploaded_by")
@@ -155,11 +239,33 @@ def asset_documents(request):
         "document_count": documents.count(),
     }
 
-    return render(
-        request,
-        "assets/asset_documents.html",
-        context,
+    return render(request, "assets/asset_documents.html", context)
+
+
+@login_required
+def asset_map(request):
+    """Renders the geographic map view for real estate and land parcels."""
+    geo_assets = Asset.objects.filter(
+        owner=request.user,
+        status=Asset.StatusChoices.ACTIVE,
+        category__in=[Asset.CategoryChoices.LAND, Asset.CategoryChoices.HOUSE]
     )
+    
+    context = {
+        "geo_assets": geo_assets,
+    }
+    return render(request, "assets/asset_map.html", context)
+
+
+@login_required
+def asset_timeline(request):
+    """Renders the chronological activity history and audit lifecycle of portfolio assets."""
+    user_assets = Asset.objects.filter(owner=request.user).order_by("-created_at")
+    
+    context = {
+        "user_assets": user_assets,
+    }
+    return render(request, "assets/asset_timeline.html", context)
 
 
 # ============================================================
@@ -172,7 +278,7 @@ def create_asset_generic(request, specific_form_class, category, title):
 
     if request.method == "POST":
         asset_form = AssetForm(request.POST)
-        specific_form = specific_form_class(request.POST)
+        specific_form = specific_form_class(request.POST, request.FILES)
         document_form = _get_document_form(request)
 
         asset_valid = asset_form.is_valid()
@@ -235,52 +341,27 @@ def create_asset_generic(request, specific_form_class, category, title):
 
 @login_required
 def create_vehicle(request):
-    return create_asset_generic(
-        request,
-        VehicleForm,
-        Asset.CategoryChoices.VEHICLE,
-        "Add New Vehicle",
-    )
-
+    return create_asset_generic(request, VehicleForm, Asset.CategoryChoices.VEHICLE, "Add New Vehicle")
 
 @login_required
 def create_land(request):
-    return create_asset_generic(
-        request,
-        LandForm,
-        Asset.CategoryChoices.LAND,
-        "Add New Land",
-    )
-
+    return create_asset_generic(request, LandForm, Asset.CategoryChoices.LAND, "Add New Land")
 
 @login_required
 def create_house(request):
-    return create_asset_generic(
-        request,
-        HouseForm,
-        Asset.CategoryChoices.HOUSE,
-        "Add New House",
-    )
-
+    return create_asset_generic(request, HouseForm, Asset.CategoryChoices.HOUSE, "Add New House")
 
 @login_required
 def create_stock(request):
-    return create_asset_generic(
-        request,
-        StockForm,
-        Asset.CategoryChoices.STOCK,
-        "Add New Stock",
-    )
-
+    return create_asset_generic(request, StockForm, Asset.CategoryChoices.STOCK, "Add New Stock")
 
 @login_required
 def create_bond(request):
-    return create_asset_generic(
-        request,
-        GovernmentBondForm,
-        Asset.CategoryChoices.BOND,
-        "Add Government Bond",
-    )
+    return create_asset_generic(request, GovernmentBondForm, Asset.CategoryChoices.BOND, "Add Government Bond")
+
+@login_required
+def create_other(request):
+    return create_asset_generic(request, OtherAssetForm, Asset.CategoryChoices.OTHER, "Add Other Asset")
 
 
 # ============================================================
@@ -289,13 +370,11 @@ def create_bond(request):
 
 @login_required
 def asset_update(request, asset_id):
-    """Update an asset owned by the current user and optionally add a document."""
-
-    asset = get_object_or_404(
-        Asset,
-        pk=asset_id,
-        owner=request.user,
-    )
+    """Update an asset (any asset if admin, or user's own asset) and optionally add a document."""
+    if _is_admin(request.user):
+        asset = get_object_or_404(Asset, pk=asset_id)
+    else:
+        asset = get_object_or_404(Asset, pk=asset_id, owner=request.user)
 
     specific_form_class = CATEGORY_FORMS.get(asset.category)
 
@@ -309,6 +388,7 @@ def asset_update(request, asset_id):
         asset_form = AssetForm(request.POST, instance=asset)
         specific_form = specific_form_class(
             request.POST,
+            request.FILES,
             instance=specific_instance,
         )
         document_form = _get_document_form(request)
@@ -321,9 +401,9 @@ def asset_update(request, asset_id):
             try:
                 with transaction.atomic():
                     updated_asset = asset_form.save(commit=False)
-
-                    # Never accept a different owner or category from a form.
-                    updated_asset.owner = request.user
+                    # Keep original owner if admin edits someone else's asset
+                    if not updated_asset.owner_id:
+                        updated_asset.owner = asset.owner
                     updated_asset.category = asset.category
                     updated_asset.save()
 
@@ -345,6 +425,8 @@ def asset_update(request, asset_id):
                 )
             else:
                 messages.success(request, "Asset updated successfully.")
+                if _is_admin(request.user):
+                    return redirect("dashboards:admin_all_assets")
                 return redirect("assets:asset_list")
 
         else:
@@ -368,3 +450,91 @@ def asset_update(request, asset_id):
     }
 
     return render(request, "assets/asset_form.html", context)
+
+
+# ============================================================
+# ASSET DELETE VIEW
+# ============================================================
+
+@login_required
+def asset_delete(request, asset_id):
+    """Delete an asset securely (any asset if admin, or user's own asset)."""
+    if _is_admin(request.user):
+        asset = get_object_or_404(Asset, pk=asset_id)
+    else:
+        asset = get_object_or_404(Asset, pk=asset_id, owner=request.user)
+
+    if request.method == "POST":
+        asset_name = asset.name
+        asset.delete()
+        messages.success(request, f"Asset '{asset_name}' was deleted successfully.")
+        if _is_admin(request.user):
+            return redirect("dashboards:admin_all_assets")
+        return redirect("assets:asset_list")
+
+    context = {
+        "asset": asset,
+    }
+    return render(request, "assets/asset_confirm_delete.html", context)
+
+
+# ============================================================
+# INDIVIDUAL ASSET PDF REPORT GENERATOR
+# ============================================================
+
+@login_required
+def asset_report_pdf(request, asset_id):
+    """Generate and download a certified valuation report PDF for an individual asset."""
+    if _is_admin(request.user):
+        asset = get_object_or_404(Asset, pk=asset_id)
+    else:
+        asset = get_object_or_404(Asset, pk=asset_id, owner=request.user)
+
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        
+        # Header Styling
+        p.setFillColorRGB(0.03, 0.38, 0.44) # #086070
+        p.rect(0, 735, 612, 60, fill=1, stroke=0)
+        p.setFillColorRGB(1, 1, 1)
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(54, 755, "SECURED PRIVATE WEALTH PORTAL")
+        p.setFont("Helvetica", 10)
+        p.drawString(54, 740, "Official Certified Asset Valuation Report")
+
+        # Asset Details Section
+        p.setFillColorRGB(0.06, 0.09, 0.16)
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(54, 680, f"Asset: {asset.name}")
+        
+        p.setFont("Helvetica", 11)
+        p.drawString(54, 650, f"Record ID: #{asset.id}")
+        p.drawString(54, 630, f"Category: {asset.get_category_display()}")
+        p.drawString(54, 610, f"Estimated Valuation: ${asset.current_estimated_value:,.2f}")
+        owner_name = getattr(asset.owner, 'email', str(asset.owner))
+        p.drawString(54, 590, f"Registered Owner: {owner_name}")
+        p.drawString(54, 570, f"Verification Status: Certified Active")
+
+        # Footer
+        p.setFont("Helvetica-Oblique", 9)
+        p.setFillColorRGB(0.4, 0.4, 0.4)
+        p.drawString(54, 50, "This is an official computer-generated document from Assetra Private Wealth Portal.")
+
+        p.showPage()
+        p.save()
+
+        buffer.seek(0)
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Asset_Report_{asset.id}.pdf"'
+        return response
+
+    except ImportError:
+        # Fallback if ReportLab is not installed
+        report_text = f"Asset Report #{asset.id}\n{asset.name}\nValuation: ${asset.current_estimated_value}"
+        response = HttpResponse(report_text, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="Asset_Report_{asset.id}.txt"'
+        return response

@@ -1,11 +1,11 @@
 ﻿{% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Private Wealth Asset Portfolio Management System">
-    <meta name="theme-color" content="#111318">
+    <meta name="theme-color" content="#FFFFFF">
 
     <title>{% block title %}Asset Portfolio Management{% endblock %}</title>
 
@@ -15,9 +15,9 @@
             try {
                 const theme = localStorage.getItem("pwh-theme");
                 document.documentElement.dataset.theme =
-                    theme === "light" ? "light" : "dark";
+                    theme === "dark" ? "dark" : "light";
             } catch (error) {
-                document.documentElement.dataset.theme = "dark";
+                document.documentElement.dataset.theme = "light";
             }
         })();
     </script>
@@ -26,30 +26,32 @@
 
     <style>
         :root {
-            color-scheme: dark;
-            --app-bg: #111318;
-            --app-surface: #191c23;
-            --app-surface-alt: #15171d;
-            --app-text: #f4f5f7;
-            --app-muted: #9298a5;
-            --app-border: rgba(255,255,255,.08);
-            --app-gold: #c5a059;
-            --app-gold-hover: #d7b574;
+            color-scheme: light;
+            --app-bg: #F4F6F9; /* White smoke background */
+            --app-surface: #FFFFFF; /* Clean white */
+            --app-surface-alt: #EDF0F5;
+            --app-text: #0F172A; /* Black / Dark neutral text */
+            --app-muted: #687181;
+            --app-border: rgba(15, 23, 42, 0.12);
+            --app-teal: #0097B2; /* Primary Teal */
+            --app-teal-hover: #048AA2; /* Secondary Teal */
+            --app-teal-dark: #086070; /* Deep Slate Teal */
             --app-sidebar-width: 270px;
             --app-manager-sidebar-width: 250px;
             --app-transition: 180ms ease;
         }
 
-        html[data-theme="light"] {
-            color-scheme: light;
-            --app-bg: #f4f6f9;
-            --app-surface: #ffffff;
-            --app-surface-alt: #edf0f5;
-            --app-text: #202632;
-            --app-muted: #687181;
-            --app-border: rgba(25,35,50,.12);
-            --app-gold: #9c762e;
-            --app-gold-hover: #805d20;
+        html[data-theme="dark"] {
+            color-scheme: dark;
+            --app-bg: #0F172A; /* Enhanced Dark Mode background */
+            --app-surface: #1E293B; /* Enhanced Dark Mode surface */
+            --app-surface-alt: #15171d;
+            --app-text: #F8FAFC; /* Enhanced Dark Mode text */
+            --app-muted: #9298a5;
+            --app-border: rgba(255,255,255,.08);
+            --app-teal: #0097B2;
+            --app-teal-hover: #048AA2;
+            --app-teal-dark: #086070;
         }
 
         *,
@@ -101,12 +103,12 @@
         input:focus-visible,
         select:focus-visible,
         textarea:focus-visible {
-            outline: 2px solid var(--app-gold);
+            outline: 2px solid var(--app-teal);
             outline-offset: 3px;
         }
 
         /* =========================
-           PAGE LOADING SCREEN
+            PAGE LOADING SCREEN
         ========================== */
 
         #loader-wrapper {
@@ -119,8 +121,8 @@
             justify-content: center;
             gap: 18px;
             padding: 24px;
-            background: #111318;
-            color: #f4f5f7;
+            background: var(--app-surface);
+            color: var(--app-text);
             transition: opacity 250ms ease, visibility 250ms ease;
         }
 
@@ -140,15 +142,15 @@
         .app-loader-spinner {
             width: 34px;
             height: 34px;
-            border: 3px solid rgba(197,160,89,.2);
-            border-top-color: #c5a059;
+            border: 3px solid rgba(0, 151, 178, 0.2);
+            border-top-color: var(--app-teal);
             border-radius: 50%;
             animation: app-spin 800ms linear infinite;
         }
 
         .app-loader-title {
             margin: 0;
-            color: #c5a059;
+            color: var(--app-teal-dark);
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 2px;
@@ -158,7 +160,7 @@
 
         .app-loader-caption {
             margin: -10px 0 0;
-            color: #9298a5;
+            color: var(--app-muted);
             font-size: 11px;
             text-align: center;
         }
@@ -168,7 +170,7 @@
         }
 
         /* =========================
-           MAIN APPLICATION LAYOUT
+            MAIN APPLICATION LAYOUT
         ========================== */
 
         .wrapper {
@@ -261,7 +263,7 @@
         }
 
         /* =========================
-           THEME SWITCH
+            THEME SWITCH
         ========================== */
 
         .app-theme-toggle {
@@ -290,18 +292,18 @@
         }
 
         .app-theme-toggle:hover {
-            border-color: var(--app-gold);
+            border-color: var(--app-teal);
             transform: translateY(-2px);
         }
 
         .app-theme-icon {
-            color: var(--app-gold);
+            color: var(--app-teal);
             font-size: 16px;
             line-height: 1;
         }
 
         /* =========================
-           INACTIVITY WARNING
+            INACTIVITY WARNING
         ========================== */
 
         .app-idle-overlay {
@@ -335,6 +337,7 @@
             margin: 0 0 10px;
             font-size: 20px;
             line-height: 1.4;
+            color: var(--app-teal-dark);
         }
 
         .app-idle-dialog p {
@@ -361,13 +364,13 @@
         }
 
         .app-idle-continue {
-            color: #171717;
-            background: var(--app-gold);
-            border-color: var(--app-gold);
+            color: #FFFFFF;
+            background: var(--app-teal);
+            border-color: var(--app-teal);
         }
 
         .app-idle-continue:hover {
-            background: var(--app-gold-hover);
+            background: var(--app-teal-hover);
         }
 
         .app-idle-logout {
@@ -376,11 +379,11 @@
         }
 
         .app-idle-logout:hover {
-            border-color: var(--app-gold);
+            border-color: var(--app-teal);
         }
 
         /* =========================
-           PUBLIC / LOGIN PAGES
+            PUBLIC / LOGIN PAGES
         ========================== */
 
         .public-shell {
@@ -396,7 +399,7 @@
         }
 
         /* =========================
-           RESPONSIVE DESIGN
+            RESPONSIVE DESIGN
         ========================== */
 
         @media (max-width: 1100px) {
@@ -529,7 +532,7 @@
             aria-pressed="false"
         >
             <span class="app-theme-icon" id="appThemeIcon" aria-hidden="true">☼</span>
-            <span id="appThemeLabel">Light mode</span>
+            <span id="appThemeLabel">Dark mode</span>
         </button>
 
         <!-- Inactivity warning -->
@@ -629,33 +632,33 @@
             const themeLabel = document.getElementById("appThemeLabel");
 
             function updateThemeControls(theme) {
-                const isLight = theme === "light";
+                const isDark = theme === "dark";
 
                 if (themeIcon) {
-                    themeIcon.textContent = isLight ? "☾" : "☼";
+                    themeIcon.textContent = isDark ? "☼" : "☾";
                 }
 
                 if (themeLabel) {
-                    themeLabel.textContent = isLight ? "Dark mode" : "Light mode";
+                    themeLabel.textContent = isDark ? "Light mode" : "Dark mode";
                 }
 
                 if (themeToggle) {
                     themeToggle.setAttribute(
                         "aria-pressed",
-                        isLight ? "true" : "false"
+                        isDark ? "true" : "false"
                     );
 
                     themeToggle.setAttribute(
                         "aria-label",
-                        isLight
-                            ? "Switch to dark theme"
-                            : "Switch to light theme"
+                        isDark
+                            ? "Switch to light theme"
+                            : "Switch to dark theme"
                     );
                 }
             }
 
             function applyTheme(theme) {
-                const safeTheme = theme === "light" ? "light" : "dark";
+                const safeTheme = theme === "dark" ? "dark" : "light";
 
                 document.documentElement.dataset.theme = safeTheme;
 
@@ -669,17 +672,17 @@
             }
 
             applyTheme(
-                document.documentElement.dataset.theme === "light"
-                    ? "light"
-                    : "dark"
+                document.documentElement.dataset.theme === "dark"
+                    ? "dark"
+                    : "light"
             );
 
             if (themeToggle) {
                 themeToggle.addEventListener("click", function () {
                     const currentTheme =
-                        document.documentElement.dataset.theme || "dark";
+                        document.documentElement.dataset.theme || "light";
 
-                    applyTheme(currentTheme === "dark" ? "light" : "dark");
+                    applyTheme(currentTheme === "light" ? "dark" : "light");
                 });
             }
 
@@ -691,11 +694,6 @@
                 document.getElementById("appContinueSession");
             const logoutButton = document.getElementById("appLogoutNow");
 
-            /*
-             * Browser-side warning at 14 minutes.
-             * Browser-side logout at 15 minutes.
-             * Configure Django's server-side session expiry separately.
-             */
             const IDLE_LIMIT_MS = 15 * 60 * 1000;
             const WARNING_BEFORE_MS = 60 * 1000;
 
@@ -746,7 +744,7 @@
                 if (logoutForm) {
                     logoutForm.submit();
                 } else {
-                    window.location.href = "{% url 'login' %}";
+                    window.location.href = "{% url 'accounts:login' %}";
                 }
             }
 

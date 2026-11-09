@@ -1,48 +1,35 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}User Management | Private Wealth{% endblock %}
+{% block title %}User Management | Assetra Africa{% endblock %}
 
 {% block extra_css %}
 <style>
 /* =========================================================
-   PRIVATE WEALTH — USER MANAGEMENT
+   ASSETRA AFRICA — USER MANAGEMENT (COMPACT LIGHT THEME)
 ========================================================= */
 
 .pw-users {
+    --pw-teal: #062c30;
+    --pw-emerald: #059669;
     --pw-gold: #c5a059;
-    --pw-gold-light: #e0c184;
-    --pw-bg: var(--app-bg, #111318);
-    --pw-card: var(--app-surface, #191c23);
-    --pw-text: var(--app-text, #f4f5f7);
-    --pw-muted: var(--app-muted, #9298a5);
-    --pw-border: var(--app-border, rgba(255,255,255,.09));
+    --pw-bg: #f8fafc;
+    --pw-card: #ffffff;
+    --pw-text: #111827;
+    --pw-muted: #4b5563;
+    --pw-border: rgba(6, 44, 48, 0.12);
+    --pw-danger: #dc2626;
 
     width: 100%;
     max-width: 1600px;
     margin: 0 auto;
-    padding: clamp(16px, 2.5vw, 32px);
+    padding: clamp(16px, 2vw, 24px);
     color: var(--pw-text);
     font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
-.pw-users *,
-.pw-users *::before,
-.pw-users *::after {
+.pw-users *, .pw-users *::before, .pw-users *::after {
     box-sizing: border-box;
-}
-
-.pw-users button,
-.pw-users input,
-.pw-users select {
-    font: inherit;
-}
-
-.pw-users button,
-.pw-users a,
-.pw-users input,
-.pw-users select {
-    -webkit-tap-highlight-color: transparent;
 }
 
 .pw-users a {
@@ -50,155 +37,136 @@
     text-decoration: none;
 }
 
-.pw-users button:focus-visible,
-.pw-users a:focus-visible,
-.pw-users input:focus-visible,
-.pw-users select:focus-visible {
-    outline: 2px solid var(--pw-gold);
-    outline-offset: 3px;
+/* Animations & Transitions */
+.pw-users .pw-stat,
+.pw-users .pw-panel,
+.pw-users .pw-btn,
+.pw-users table tbody tr {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.pw-users .pw-muted {
-    color: var(--pw-muted);
+.pw-users .pw-stat:hover,
+.pw-users .pw-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(6, 44, 48, 0.08);
+}
+
+/* Topbar & Header */
+.pw-users .pw-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .pw-users .pw-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin: 0 0 10px;
-    color: var(--pw-gold);
+    color: var(--pw-teal);
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-}
-
-.pw-users .pw-eyebrow::before {
-    width: 7px;
-    height: 7px;
-    flex: 0 0 7px;
-    border-radius: 50%;
-    background: var(--pw-gold);
-    content: "";
-    box-shadow: 0 0 12px rgba(197,160,89,.4);
+    margin-bottom: 4px;
 }
 
 .pw-users .pw-page-heading {
     margin: 0;
-    color: var(--pw-text);
-    font-size: clamp(25px, 3vw, 35px);
+    color: var(--pw-teal);
+    font-size: clamp(22px, 2.5vw, 28px);
     font-weight: 800;
-    letter-spacing: -.8px;
-    line-height: 1.2;
+    letter-spacing: -0.5px;
 }
 
 .pw-users .pw-description {
-    max-width: 680px;
-    margin: 10px 0 0;
+    margin: 4px 0 0;
     color: var(--pw-muted);
-    font-size: 13px;
-    line-height: 1.8;
+    font-size: 12px;
 }
 
-.pw-users .pw-topbar {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 22px;
-    margin-bottom: 28px;
-}
-
-.pw-users .pw-back-link {
+/* Buttons */
+.pw-users .pw-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
-    flex-shrink: 0;
-    min-height: 42px;
-    padding: 10px 15px;
-    color: var(--pw-text);
-    background: var(--pw-card);
+    gap: 6px;
+    min-height: 36px;
+    padding: 8px 14px;
     border: 1px solid var(--pw-border);
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 700;
-    transition: border-color .18s ease, transform .18s ease;
+    cursor: pointer;
+    background: var(--pw-card);
+    color: var(--pw-teal);
 }
 
-.pw-users .pw-back-link:hover {
-    border-color: var(--pw-gold);
-    transform: translateY(-1px);
+.pw-users .pw-btn:hover {
+    border-color: var(--pw-teal);
+    background: #f1f5f9;
 }
 
-/* Notifications */
+.pw-users .pw-btn-primary {
+    background: var(--pw-teal);
+    border-color: var(--pw-teal);
+    color: #34d399;
+}
 
+.pw-users .pw-btn-primary:hover {
+    background: #041f22;
+    color: #ffffff;
+}
+
+.pw-users .pw-btn-danger {
+    color: var(--pw-danger);
+    border-color: rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.04);
+}
+
+.pw-users .pw-btn-danger:hover {
+    background: var(--pw-danger);
+    color: #ffffff;
+}
+
+/* Alerts / Messages */
 .pw-users .pw-messages {
     display: grid;
-    gap: 10px;
-    margin-bottom: 22px;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .pw-users .pw-alert {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-    border: 1px solid var(--pw-border);
-    border-radius: 12px;
-    font-size: 13px;
-    overflow-wrap: anywhere;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .pw-users .pw-alert-success {
-    color: #86efac;
-    background: rgba(22,101,52,.15);
-    border-color: rgba(34,197,94,.25);
+    color: #065f46;
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
 }
 
 .pw-users .pw-alert-error {
-    color: #fca5a5;
-    background: rgba(127,29,29,.18);
-    border-color: rgba(239,68,68,.3);
+    color: #991b1b;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
 }
 
-.pw-users .pw-alert-info {
-    color: var(--pw-text);
-    background: var(--pw-card);
-}
-
-/* Summary cards */
-
+/* Compact Stats Grid */
 .pw-users .pw-stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
 .pw-users .pw-stat {
-    position: relative;
-    min-width: 0;
-    padding: 22px;
-    overflow: hidden;
-    background:
-        linear-gradient(145deg, rgba(255,255,255,.025), transparent 70%),
-        var(--pw-card);
+    padding: 16px;
+    background: var(--pw-card);
     border: 1px solid var(--pw-border);
-    border-radius: 16px;
-    transition: border-color .2s ease, transform .2s ease;
-}
-
-.pw-users .pw-stat:hover {
-    border-color: rgba(197,160,89,.42);
-    transform: translateY(-2px);
-}
-
-.pw-users .pw-stat-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(6, 44, 48, 0.02);
 }
 
 .pw-users .pw-stat-label {
@@ -206,543 +174,174 @@
     color: var(--pw-muted);
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 1.2px;
-    line-height: 1.7;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .pw-users .pw-stat-value {
-    margin: 12px 0 0;
-    color: var(--pw-text);
-    font-size: clamp(27px, 3vw, 36px);
+    margin: 8px 0 2px;
+    color: var(--pw-teal);
+    font-size: 24px;
     font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    overflow-wrap: anywhere;
 }
 
 .pw-users .pw-stat-note {
-    margin: 10px 0 0;
+    margin: 0;
     color: var(--pw-muted);
     font-size: 11px;
 }
 
-.pw-users .pw-stat-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
-    color: var(--pw-gold);
-    background: rgba(197,160,89,.11);
-    border: 1px solid rgba(197,160,89,.15);
-    border-radius: 13px;
-}
-
-.pw-users .pw-stat-icon svg {
-    width: 23px;
-    height: 23px;
-}
-
-.pw-users .pw-stat-icon.pw-green {
-    color: #4ade80;
-    background: rgba(34,197,94,.09);
-    border-color: rgba(34,197,94,.15);
-}
-
-.pw-users .pw-stat-icon.pw-purple {
-    color: #c4b5fd;
-    background: rgba(139,92,246,.1);
-    border-color: rgba(139,92,246,.17);
-}
-
-.pw-users .pw-gold {
-    color: var(--pw-gold);
-}
-
-.pw-users .pw-green-text {
-    color: #4ade80;
-}
-
-/* Main panel */
-
+/* Main Panel & Table */
 .pw-users .pw-panel {
-    min-width: 0;
-    overflow: hidden;
     background: var(--pw-card);
     border: 1px solid var(--pw-border);
-    border-radius: 17px;
-    box-shadow: 0 12px 35px rgba(0,0,0,.09);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(6, 44, 48, 0.04);
+    overflow: hidden;
 }
 
 .pw-users .pw-panel-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    padding: 23px;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--pw-border);
 }
 
 .pw-users .pw-panel-title {
     margin: 0;
-    color: var(--pw-text);
-    font-size: 17px;
+    color: var(--pw-teal);
+    font-size: 15px;
     font-weight: 800;
-}
-
-.pw-users .pw-panel-subtitle {
-    margin: 6px 0 0;
-    color: var(--pw-muted);
-    font-size: 12px;
-    line-height: 1.7;
 }
 
 .pw-users .pw-search-form {
     display: flex;
-    align-items: stretch;
-    gap: 8px;
-    width: min(100%, 510px);
+    gap: 6px;
+    width: min(100%, 400px);
 }
 
 .pw-users .pw-search-input {
     width: 100%;
-    min-width: 0;
-    min-height: 42px;
-    padding: 10px 13px;
+    height: 36px;
+    padding: 6px 12px;
     color: var(--pw-text);
-    background: var(--pw-bg);
+    background: #f8fafc;
     border: 1px solid var(--pw-border);
-    border-radius: 9px;
+    border-radius: 8px;
     font-size: 12px;
-    transition: border-color .18s ease;
-}
-
-.pw-users .pw-search-input::placeholder {
-    color: var(--pw-muted);
-    opacity: .8;
 }
 
 .pw-users .pw-search-input:focus {
-    border-color: var(--pw-gold);
+    border-color: var(--pw-teal);
     outline: none;
 }
-
-.pw-users .pw-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 40px;
-    padding: 10px 14px;
-    border: 1px solid transparent;
-    border-radius: 9px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 800;
-    white-space: nowrap;
-    transition: background .18s ease, border-color .18s ease, opacity .18s ease;
-}
-
-.pw-users .pw-btn-gold {
-    color: #171717;
-    background: var(--pw-gold);
-}
-
-.pw-users .pw-btn-gold:hover {
-    background: var(--pw-gold-light);
-}
-
-.pw-users .pw-btn-outline {
-    color: var(--pw-text);
-    background: transparent;
-    border-color: var(--pw-border);
-}
-
-.pw-users .pw-btn-outline:hover {
-    border-color: var(--pw-gold);
-}
-
-.pw-users .pw-search-result {
-    margin: 15px 0 0;
-    color: var(--pw-muted);
-    font-size: 12px;
-}
-
-.pw-users .pw-search-result strong {
-    color: var(--pw-text);
-}
-
-/* Table */
 
 .pw-users .pw-table-wrap {
     width: 100%;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
 }
 
 .pw-users .pw-table {
     width: 100%;
-    min-width: 1050px;
-    border-collapse: separate;
-    border-spacing: 0;
+    min-width: 900px;
+    border-collapse: collapse;
     text-align: left;
     font-size: 12px;
 }
 
 .pw-users .pw-table thead th {
-    padding: 15px 18px;
+    padding: 10px 16px;
     color: var(--pw-muted);
-    background: rgba(0,0,0,.12);
+    background: #f1f5f9;
     border-bottom: 1px solid var(--pw-border);
     font-size: 9px;
     font-weight: 800;
-    letter-spacing: 1.2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    white-space: nowrap;
 }
 
 .pw-users .pw-table tbody td {
-    padding: 18px;
+    padding: 12px 16px;
     color: var(--pw-text);
     border-bottom: 1px solid var(--pw-border);
     vertical-align: middle;
 }
 
-.pw-users .pw-table tbody tr:last-child td {
-    border-bottom: 0;
-}
-
-.pw-users .pw-table tbody tr {
-    transition: background .15s ease;
-}
-
 .pw-users .pw-table tbody tr:hover {
-    background: rgba(197,160,89,.035);
+    background: rgba(52, 211, 153, 0.03);
 }
 
-.pw-users .pw-account-name {
-    color: var(--pw-text);
-    font-size: 13px;
-    font-weight: 800;
-    overflow-wrap: anywhere;
-}
-
-.pw-users .pw-account-email {
-    display: block;
-    margin-top: 5px;
-    color: var(--pw-muted);
-    font-size: 11px;
-    overflow-wrap: anywhere;
-}
-
-.pw-users .pw-account-tag {
-    display: inline-flex;
-    margin-top: 8px;
-    padding: 4px 7px;
-    color: var(--pw-muted);
-    background: rgba(255,255,255,.035);
-    border: 1px solid var(--pw-border);
-    border-radius: 5px;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-}
-
-.pw-users .pw-account-tag.pw-superuser {
-    color: #c4b5fd;
-    background: rgba(139,92,246,.09);
-    border-color: rgba(139,92,246,.25);
-}
-
-.pw-users .pw-role,
-.pw-users .pw-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.pw-users .pw-role {
-    padding: 6px 9px;
-    border: 1px solid;
-    border-radius: 30px;
-}
-
-.pw-users .pw-role-admin {
-    color: var(--pw-gold-light);
-    background: rgba(197,160,89,.08);
-    border-color: rgba(197,160,89,.25);
-}
-
-.pw-users .pw-role-user {
-    color: #93c5fd;
-    background: rgba(59,130,246,.08);
-    border-color: rgba(59,130,246,.22);
-}
-
-.pw-users .pw-dot {
-    width: 7px;
-    height: 7px;
-    flex: 0 0 7px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-.pw-users .pw-status-active {
-    color: #4ade80;
-}
-
-.pw-users .pw-status-inactive {
-    color: #f87171;
-}
-
-.pw-users .pw-date {
-    color: var(--pw-muted);
-    font-size: 11px;
-    white-space: nowrap;
-}
-
+/* Inline Form Controls */
 .pw-users .pw-account-form {
     display: flex;
-    align-items: flex-end;
-    gap: 9px;
-    min-width: 360px;
-}
-
-.pw-users .pw-field {
-    display: grid;
-    gap: 6px;
-    min-width: 110px;
-}
-
-.pw-users .pw-field-label {
-    color: var(--pw-muted);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .8px;
-    text-transform: uppercase;
+    align-items: center;
+    gap: 8px;
 }
 
 .pw-users .pw-select {
-    width: 100%;
-    min-height: 36px;
-    padding: 7px 26px 7px 9px;
+    height: 32px;
+    padding: 4px 8px;
     color: var(--pw-text);
-    background: var(--pw-bg);
+    background: #f8fafc;
     border: 1px solid var(--pw-border);
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 11px;
 }
 
-.pw-users .pw-select:focus {
-    border-color: var(--pw-gold);
-}
-
-.pw-users .pw-active-control {
+.pw-users .pw-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 7px;
-    min-height: 36px;
-    color: var(--pw-text);
+    gap: 4px;
     font-size: 11px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.pw-users .pw-checkbox {
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    accent-color: var(--pw-gold);
+    font-weight: 600;
+    color: var(--pw-text);
     cursor: pointer;
 }
 
-.pw-users .pw-protected {
-    min-width: 150px;
-    color: var(--pw-muted);
-    font-size: 11px;
-    line-height: 1.8;
-}
-
-.pw-users .pw-protected strong {
-    display: block;
-    color: var(--pw-gold);
-    font-size: 11px;
-}
-
-.pw-users .pw-empty {
-    padding: 55px 20px !important;
-    text-align: center;
-}
-
-.pw-users .pw-empty-icon {
+.pw-users .pw-actions-cell {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 52px;
-    height: 52px;
-    margin: 0 auto 14px;
-    color: var(--pw-gold);
-    background: rgba(197,160,89,.09);
-    border: 1px solid rgba(197,160,89,.17);
-    border-radius: 15px;
-    font-size: 22px;
+    gap: 6px;
 }
 
-.pw-users .pw-empty-title {
-    margin: 0;
-    color: var(--pw-text);
-    font-size: 14px;
-    font-weight: 800;
-}
-
-.pw-users .pw-empty-text {
-    margin: 7px 0 0;
-    color: var(--pw-muted);
-    font-size: 12px;
-}
-
-.pw-users .pw-panel-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 15px 22px;
-    border-top: 1px solid var(--pw-border);
-}
-
-.pw-users .pw-footer-text {
-    margin: 0;
-    color: var(--pw-muted);
+.pw-users .pw-badge {
+    display: inline-flex;
+    padding: 3px 8px;
+    border-radius: 12px;
     font-size: 10px;
-    line-height: 1.7;
+    font-weight: 700;
 }
 
-/* Security notice */
-
-.pw-users .pw-security {
-    display: flex;
-    align-items: flex-start;
-    gap: 13px;
-    margin-top: 20px;
-    padding: 17px 19px;
-    background: rgba(197,160,89,.045);
-    border: 1px solid rgba(197,160,89,.2);
-    border-radius: 13px;
+.pw-users .pw-badge-admin {
+    background: rgba(197, 160, 89, 0.15);
+    color: #92400e;
 }
 
-.pw-users .pw-security-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    color: var(--pw-gold);
-    background: rgba(197,160,89,.1);
-    border-radius: 10px;
+.pw-users .pw-badge-user {
+    background: #e0f2fe;
+    color: #0369a1;
 }
 
-.pw-users .pw-security-icon svg {
-    width: 19px;
-    height: 19px;
+.pw-users .pw-badge-active {
+    background: #d1fae5;
+    color: #065f46;
 }
 
-.pw-users .pw-security-title {
-    margin: 0;
-    color: var(--pw-gold-light);
-    font-size: 12px;
-    font-weight: 800;
+.pw-users .pw-badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
-.pw-users .pw-security-text {
-    margin: 5px 0 0;
-    color: var(--pw-muted);
-    font-size: 11px;
-    line-height: 1.8;
-}
-
-/* Responsive */
-
-@media (max-width: 1000px) {
-    .pw-users .pw-panel-head {
-        flex-direction: column;
+@media (max-width: 768px) {
+    .pw-users .pw-stats {
+        grid-template-columns: 1fr;
     }
-
-    .pw-users .pw-search-form {
-        width: 100%;
-    }
-}
-
-@media (max-width: 700px) {
     .pw-users .pw-topbar {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .pw-users .pw-back-link {
-        align-self: flex-start;
-    }
-
-    .pw-users .pw-stats {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .pw-users .pw-stat {
-        padding: 18px;
-    }
-
-    .pw-users .pw-stat-value {
-        font-size: 29px;
-    }
-
-    .pw-users .pw-panel-head {
-        padding: 18px;
-    }
-
-    .pw-users .pw-search-form {
-        flex-wrap: wrap;
-    }
-
-    .pw-users .pw-search-input {
-        flex: 1 1 100%;
-    }
-
-    .pw-users .pw-panel-footer {
-        align-items: flex-start;
-        flex-direction: column;
-        padding: 15px 18px;
-    }
-}
-
-@media (max-width: 420px) {
-    .pw-users {
-        padding: 13px;
-    }
-
-    .pw-users .pw-search-form .pw-btn {
-        flex: 1;
-    }
-
-    .pw-users .pw-page-heading {
-        font-size: 25px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .pw-users *,
-    .pw-users *::before,
-    .pw-users *::after {
-        scroll-behavior: auto !important;
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
     }
 }
 </style>
@@ -751,361 +350,183 @@
 {% block content %}
 <div class="pw-users">
 
-    <!-- PAGE HEADER -->
+    <!-- TOPBAR / HEADER -->
     <header class="pw-topbar">
         <div>
-            <p class="pw-eyebrow">Administration / Access Control</p>
-            <h1 class="pw-page-heading">User Management Hub</h1>
-            <p class="pw-description">
-                Manage registered accounts, review access roles, and control account status.
-                Changes should follow your organisation's access approval policy.
-            </p>
+            <div class="pw-eyebrow">Assetra Africa / Administration</div>
+            <h1 class="pw-page-heading">User Management & Permissions</h1>
+            <p class="pw-description">Provision accounts, modify role permissions, inspect details, and manage security access.</p>
         </div>
 
-        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-back-link">
-            <span aria-hidden="true">&larr;</span>
-            Back to Admin Hub
-        </a>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Trigger modal or link for creating a user -->
+            <button type="button" class="pw-btn pw-btn-primary" onclick="document.getElementById('createUserModal').style.display='flex'">
+                + Create User
+            </button>
+            <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+                &larr; Admin Hub
+            </a>
+        </div>
     </header>
 
-    <!-- DJANGO MESSAGES -->
+    <!-- NOTIFICATION MESSAGES -->
     {% if messages %}
-        <div class="pw-messages" aria-live="polite" aria-atomic="true">
+        <div class="pw-messages">
             {% for message in messages %}
-                <div class="pw-alert
-                    {% if 'success' in message.tags %}
-                        pw-alert-success
-                    {% elif 'error' in message.tags %}
-                        pw-alert-error
-                    {% else %}
-                        pw-alert-info
-                    {% endif %}">
-                    <span aria-hidden="true">
-                        {% if 'success' in message.tags %}&#10003;
-                        {% elif 'error' in message.tags %}!{% else %}i{% endif %}
-                    </span>
-                    <div>{{ message }}</div>
+                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
+                    {{ message }}
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- ACCOUNT STATISTICS -->
-    <section class="pw-stats" aria-label="User account statistics">
-
+    <!-- STATS CARDS -->
+    <section class="pw-stats">
         <article class="pw-stat">
-            <div class="pw-stat-top">
-                <div>
-                    <p class="pw-stat-label">Registered Accounts</p>
-                    <p class="pw-stat-value">
-                        {{ total_users|default:users.count|default:0 }}
-                    </p>
-                    <p class="pw-stat-note">Accounts matching the current view</p>
-                </div>
-                <div class="pw-stat-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="10" cy="7" r="4"/>
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
-            </div>
+            <p class="pw-stat-label">Total Accounts</p>
+            <p class="pw-stat-value">{{ total_users|default:users.count|default:0 }}</p>
+            <p class="pw-stat-note">Registered in system</p>
         </article>
-
         <article class="pw-stat">
-            <div class="pw-stat-top">
-                <div>
-                    <p class="pw-stat-label">Active Accounts</p>
-                    <p class="pw-stat-value pw-green-text">
-                        {{ active_users_count|default:0 }}
-                    </p>
-                    <p class="pw-stat-note">Accounts currently enabled</p>
-                </div>
-                <div class="pw-stat-icon pw-green" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="m8 12 2.5 2.5L16 9"/>
-                    </svg>
-                </div>
-            </div>
+            <p class="pw-stat-label">Active Users</p>
+            <p class="pw-stat-value" style="color: var(--pw-emerald);">{{ active_users_count|default:0 }}</p>
+            <p class="pw-stat-note">Currently operational</p>
         </article>
-
         <article class="pw-stat">
-            <div class="pw-stat-top">
-                <div>
-                    <p class="pw-stat-label">Administrator Accounts</p>
-                    <p class="pw-stat-value pw-gold">
-                        {{ admin_users_count|default:0 }}
-                    </p>
-                    <p class="pw-stat-note">Accounts with administrator role</p>
-                </div>
-                <div class="pw-stat-icon pw-purple" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/>
-                        <path d="m9 12 2 2 4-4"/>
-                    </svg>
-                </div>
-            </div>
+            <p class="pw-stat-label">Administrators</p>
+            <p class="pw-stat-value" style="color: var(--pw-gold);">{{ admin_users_count|default:0 }}</p>
+            <p class="pw-stat-note">Elevated access privilege</p>
         </article>
-
     </section>
 
-    <!-- USER MANAGEMENT TABLE -->
-    <section class="pw-panel" aria-labelledby="pw-accounts-heading">
-
+    <!-- USER TABLE PANEL -->
+    <section class="pw-panel">
         <div class="pw-panel-head">
-            <div>
-                <h2 class="pw-panel-title" id="pw-accounts-heading">
-                    All Registered Accounts
-                </h2>
-                <p class="pw-panel-subtitle">
-                    Review each account before applying role or status changes.
-                </p>
-            </div>
+            <h2 class="pw-panel-title">System Directory</h2>
 
-            <form method="get"
-                  action="{% url 'dashboards:admin_manage_users' %}"
-                  class="pw-search-form"
-                  role="search">
-
-                <label for="pw-user-search" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
-                    Search user accounts
-                </label>
-
-                <input
-                    id="pw-user-search"
-                    class="pw-search-input"
-                    type="search"
-                    name="q"
-                    value="{{ request.GET.q|default:'' }}"
-                    placeholder="Search username, name or email..."
-                    maxlength="150"
-                    autocomplete="off"
-                >
-
-                <button class="pw-btn pw-btn-gold" type="submit">
-                    Search
-                </button>
-
+            <form method="get" action="{% url 'dashboards:admin_manage_users' %}" class="pw-search-form">
+                <input class="pw-search-input" type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search username, name, or email...">
+                <button class="pw-btn" type="submit">Search</button>
                 {% if request.GET.q %}
-                    <a class="pw-btn pw-btn-outline"
-                       href="{% url 'dashboards:admin_manage_users' %}">
-                        Clear
-                    </a>
+                    <a href="{% url 'dashboards:admin_manage_users' %}" class="pw-btn">Clear</a>
                 {% endif %}
             </form>
         </div>
 
-        {% if request.GET.q %}
-            <div style="padding:0 23px 16px;">
-                <p class="pw-search-result">
-                    Search results for:
-                    <strong>{{ request.GET.q }}</strong>
-                </p>
-            </div>
-        {% endif %}
-
-        <div class="pw-table-wrap" role="region"
-             aria-label="Registered user accounts table" tabindex="0">
-
+        <div class="pw-table-wrap">
             <table class="pw-table">
                 <thead>
                     <tr>
-                        <th scope="col">Account</th>
-                        <th scope="col">Full Name</th>
-                        <th scope="col">Role</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Date Joined</th>
-                        <th scope="col">Account Controls</th>
+                        <th>Account / Email</th>
+                        <th>Full Name</th>
+                        <th>Role & Permissions</th>
+                        <th>Status</th>
+                        <th>Joined Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {% for u in users %}
                         <tr>
                             <td>
-                                <div class="pw-account-name">{{ u.username }}</div>
-                                <span class="pw-account-email">
-                                    {{ u.email|default:"No email provided" }}
-                                </span>
-
-                                {% if u.is_superuser %}
-                                    <span class="pw-account-tag pw-superuser">
-                                        Superuser
-                                    </span>
-                                {% endif %}
-
-                                {% if u.id == request.user.id %}
-                                    <span class="pw-account-tag">Your account</span>
-                                {% endif %}
+                                <strong style="color: var(--pw-teal);">{{ u.username }}</strong><br>
+                                <span style="color: var(--pw-muted); font-size: 11px;">{{ u.email|default:"No email" }}</span>
                             </td>
-
+                            <td>{{ u.get_full_name|default:"Not provided" }}</td>
                             <td>
-                                {% with full_name=u.get_full_name %}
-                                    {% if full_name %}
-                                        {{ full_name }}
-                                    {% else %}
-                                        <span class="pw-muted">Not provided</span>
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-
-                            <td>
-                                {% if u.is_admin or u.is_superuser %}
-                                    <span class="pw-role pw-role-admin">
-                                        <span class="pw-dot" aria-hidden="true"></span>
-                                        Administrator
-                                    </span>
+                                {% if u.is_superuser or u.is_staff or u.role == 'ADMIN' %}
+                                    <span class="pw-badge pw-badge-admin">Administrator</span>
                                 {% else %}
-                                    <span class="pw-role pw-role-user">
-                                        <span class="pw-dot" aria-hidden="true"></span>
-                                        Normal User
-                                    </span>
+                                    <span class="pw-badge pw-badge-user">Normal User</span>
                                 {% endif %}
                             </td>
-
                             <td>
                                 {% if u.is_active %}
-                                    <span class="pw-status pw-status-active">
-                                        <span class="pw-dot" aria-hidden="true"></span>
-                                        Active
-                                    </span>
+                                    <span class="pw-badge pw-badge-active">Active</span>
                                 {% else %}
-                                    <span class="pw-status pw-status-inactive">
-                                        <span class="pw-dot" aria-hidden="true"></span>
-                                        Inactive
-                                    </span>
+                                    <span class="pw-badge pw-badge-inactive">Inactive</span>
                                 {% endif %}
                             </td>
-
-                            <td class="pw-date">
-                                {{ u.date_joined|date:"d M Y, H:i" }}
-                            </td>
-
+                            <td style="color: var(--pw-muted);">{{ u.date_joined|date:"d M Y" }}</td>
                             <td>
-                                {% if u.is_superuser or u.id == request.user.id %}
-                                    <div class="pw-protected">
-                                        <strong>Protected account</strong>
-                                        Role and status controls are unavailable here.
-                                    </div>
-                                {% else %}
-                                    <form
-                                        method="post"
-                                        action="{% url 'dashboards:admin_manage_users' %}{% if request.GET.q %}?q={{ request.GET.q|urlencode }}{% endif %}"
-                                        class="pw-account-form"
-                                    >
-                                        {% csrf_token %}
-                                        <input type="hidden" name="user_id" value="{{ u.pk }}">
-
-                                        <div class="pw-field">
-                                            <label class="pw-field-label"
-                                                   for="pw-role-{{ u.pk }}">
-                                                Access Role
-                                            </label>
-                                            <select
-                                                class="pw-select"
-                                                id="pw-role-{{ u.pk }}"
-                                                name="role"
-                                                required
-                                            >
-                                                <option value="USER"
-                                                    {% if u.role == 'USER' %}selected{% endif %}>
-                                                    Normal User
-                                                </option>
-                                                <option value="ADMIN"
-                                                    {% if u.role == 'ADMIN' %}selected{% endif %}>
-                                                    Administrator
-                                                </option>
+                                <div class="pw-actions-cell">
+                                    {% if not u.is_superuser and u.id != request.user.id %}
+                                        <!-- Inline Role/Permission & Status Update Form -->
+                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" class="pw-account-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ u.pk }}">
+                                            <select name="role" class="pw-select">
+                                                <option value="USER" {% if u.role != 'ADMIN' and not u.is_staff %}selected{% endif %}>User</option>
+                                                <option value="ADMIN" {% if u.role == 'ADMIN' or u.is_staff %}selected{% endif %}>Admin</option>
                                             </select>
-                                        </div>
-
-                                        <div class="pw-field">
-                                            <span class="pw-field-label">Account</span>
-                                            <label class="pw-active-control"
-                                                   for="pw-active-{{ u.pk }}">
-                                                <input
-                                                    class="pw-checkbox"
-                                                    id="pw-active-{{ u.pk }}"
-                                                    type="checkbox"
-                                                    name="is_active"
-                                                    value="on"
-                                                    {% if u.is_active %}checked{% endif %}
-                                                >
-                                                Active
+                                            <label class="pw-checkbox-label">
+                                                <input type="checkbox" name="is_active" value="on" {% if u.is_active %}checked{% endif %}> Active
                                             </label>
-                                        </div>
+                                            <button type="submit" class="pw-btn" style="padding: 4px 8px; font-size: 10px;">Save</button>
+                                        </form>
 
-                                        <button
-                                            class="pw-btn pw-btn-gold"
-                                            type="submit"
-                                            aria-label="Save role and status for {{ u.username }}"
-                                        >
-                                            Save
-                                        </button>
-                                    </form>
-                                {% endif %}
+                                        <!-- Delete User Action Form -->
+                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" onsubmit="return confirm('Are you sure you want to delete user {{ u.username }}?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_user_id" value="{{ u.pk }}">
+                                            <button type="submit" class="pw-btn pw-btn-danger" style="padding: 4px 8px; font-size: 10px;" title="Delete User">Delete</button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: var(--pw-muted); font-size: 11px; font-style: italic;">Protected</span>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="pw-empty">
-                                <div class="pw-empty-icon" aria-hidden="true">
-                                    &#8981;
-                                </div>
-                                <h3 class="pw-empty-title">No matching accounts found</h3>
-                                <p class="pw-empty-text">
-                                    Try another search term or clear the search filter.
-                                </p>
-                                {% if request.GET.q %}
-                                    <a href="{% url 'dashboards:admin_manage_users' %}"
-                                       class="pw-btn pw-btn-outline"
-                                       style="margin-top:16px;">
-                                        View all accounts
-                                    </a>
-                                {% endif %}
+                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--pw-muted);">
+                                No user accounts found.
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        <footer class="pw-panel-footer">
-            <p class="pw-footer-text">
-                Changes are subject to server-side access validation.
-            </p>
-            <p class="pw-footer-text">
-                Private Wealth &middot; Access Management
-            </p>
-        </footer>
-
     </section>
 
-    <!-- SECURITY NOTICE -->
-    <aside class="pw-security" aria-labelledby="pw-security-heading">
-        <div class="pw-security-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 9v4"/>
-                <path d="M12 17h.01"/>
-                <path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
-            </svg>
+    <!-- CREATE USER MODAL (Simple overlay style) -->
+    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: var(--pw-card); border-radius: 12px; padding: 24px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; color: var(--pw-teal); font-size: 16px;">Create New User Account</h3>
+                <button type="button" onclick="document.getElementById('createUserModal').style.display='none'" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--pw-muted);">&times;</button>
+            </div>
+            <form method="post" action="{% url 'dashboards:admin_manage_users' %}">
+                {% csrf_token %}
+                <input type="hidden" name="create_user" value="1">
+                <div style="display: grid; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">USERNAME</label>
+                        <input type="text" name="username" required class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">EMAIL ADDRESS</label>
+                        <input type="email" name="email" class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">INITIAL PASSWORD</label>
+                        <input type="password" name="password" required class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">ASSIGN ROLE & PERMISSIONS</label>
+                        <select name="role" class="pw-select" style="width: 100%; height: 38px;">
+                            <option value="USER">Normal User</option>
+                            <option value="ADMIN">Administrator</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+                        <button type="button" class="pw-btn" onclick="document.getElementById('createUserModal').style.display='none'">Cancel</button>
+                        <button type="submit" class="pw-btn pw-btn-primary">Create Account</button>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div>
-            <h2 class="pw-security-title" id="pw-security-heading">
-                Access Control Reminder
-            </h2>
-            <p class="pw-security-text">
-                Administrator access may expose sensitive client and financial information.
-                Grant it only to authorised personnel. The Django view must validate the
-                submitted role, prevent unauthorised account changes, and enforce permissions
-                on every request. Hiding controls in this template is not a security boundary.
-            </p>
-        </div>
-    </aside>
+    </div>
 
 </div>
 {% endblock %}

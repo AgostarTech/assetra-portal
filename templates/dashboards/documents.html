@@ -1,0 +1,51 @@
+{% extends 'dashboards/client_dashboard.html' %}
+
+{% block dashboard_title %}My Documents{% endblock %}
+{% block view_header %}Account Documents & Records{% endblock %}
+
+{% block dashboard_content %}
+<div class="panel" style="background:#FFFFFF; border:1px solid rgba(15,23,42,0.12); border-radius:14px; padding:24px; box-shadow:0 3px 12px rgba(15,23,42,.03);">
+    <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Uploaded Documents</h3>
+    <p style="margin:0 0 20px; color:#687181; font-size:13px;">Securely store and review your asset titles, certificates, and verification records.</p>
+
+    <div class="table-wrapper" style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+                <tr style="background:#F8FAFC; border-bottom:1px solid rgba(15,23,42,0.08);">
+                    <th style="padding:12px; text-align:left; color:#687181;">Document Title</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Status</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Uploaded Date</th>
+                    <th style="padding:12px; text-align:right; color:#687181;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr style="border-bottom:1px solid #edf0f5;">
+                    <td style="padding:12px; font-weight:600; color:#0F172A;">{{ doc.title|default:"Unnamed document" }}</td>
+                    <td style="padding:12px;">
+                        <span style="padding:4px 8px; border-radius:20px; font-size:10px; font-weight:700; background:#e1effe; color:#1e429f;">
+                            {{ doc.get_status_display|default:"Submitted" }}
+                        </span>
+                    </td>
+                    <td style="padding:12px; color:#687181;">{{ doc.uploaded_at|date:"d M Y" }}</td>
+                    <td style="padding:12px; text-align:right;">
+                        {% if doc.file %}
+                        <a href="{{ doc.file.url }}" target="_blank" style="color:#086070; font-weight:700; text-decoration:none;">View File</a>
+                        {% else %}
+                        <span style="color:#687181;">Not available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:40px; color:#687181;">
+                        <i class="fa-solid fa-folder-open" style="font-size:24px; margin-bottom:8px; display:block;"></i>
+                        No documents uploaded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

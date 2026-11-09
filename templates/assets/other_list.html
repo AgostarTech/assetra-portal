@@ -1,0 +1,118 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block dashboard_title %}Other Assets Management Center{% endblock %}
+{% block view_header %}Registered Miscellaneous Assets{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+    .asset-workspace { width: 100%; }
+    .asset-hero {
+        padding: 24px;
+        margin-bottom: 22px;
+        border-radius: var(--asset-radius);
+        color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; }
+    .asset-table-panel {
+        background: #fff;
+        border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius);
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    }
+    .asset-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    .asset-table th { padding: 12px 16px; text-align: left; background: #F8FAFC; color: var(--asset-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--asset-border); }
+    .asset-table td { padding: 14px 16px; border-bottom: 1px solid #edf1f6; font-size: 12px; vertical-align: middle; }
+    .asset-table tbody tr:hover { background: #fafcff; }
+    .asset-action-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border: 1px solid var(--asset-border); border-radius: 6px; color: var(--asset-primary); background: #fff; text-decoration: none; font-size: 11px; font-weight: 700; }
+    .asset-action-btn:hover { background: rgba(8, 96, 112, 0.08); }
+    .asset-action-btn.delete { color: #b91c1c; border-color: rgba(185, 28, 28, 0.2); }
+    .asset-action-btn.delete:hover { background: #fef2f2; }
+    .asset-empty { padding: 40px 20px; text-align: center; color: var(--asset-muted); }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <div>
+            <h2>Other Assets Management Center</h2>
+            <p>Track unique or miscellaneous holdings such as specialized machinery, artwork, jewelry, or digital tokens.</p>
+        </div>
+        <div style="margin-top: 15px;">
+            <a href="{% url 'assets:create_other' %}" class="asset-action-btn" style="background: #fff; color: var(--asset-primary); padding: 8px 14px;">
+                <i class="fa-solid fa-plus"></i> Add Other Asset
+            </a>
+        </div>
+    </section>
+
+    <section class="asset-table-panel">
+        <div class="asset-table-scroll">
+            <table class="asset-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Asset Details</th>
+                        <th scope="col">Estimated Valuation</th>
+                        <th scope="col">Linked Document</th>
+                        <th scope="col">Management Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="display:inline-grid; place-items:center; width:34px; height:34px; border-radius:8px; background:rgba(8, 96, 112, 0.1); color:var(--asset-primary);">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                </span>
+                                <div>
+                                    <strong style="display:block; color:var(--asset-text);">{{ asset.name }}</strong>
+                                    <small style="color:var(--asset-muted);">ID: #{{ asset.id }} {% if asset.other_details.asset_sub_type %}| Type: {{ asset.other_details.asset_sub_type }}{% endif %}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-weight: 750;">
+                            ${{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                        </td>
+                        <td>
+                            {% if asset.document %}
+                                <a href="{{ asset.document.url }}" target="_blank" class="asset-action-btn">
+                                    <i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> View Doc
+                                </a>
+                            {% else %}
+                                <span style="color:var(--asset-muted); font-size:11px;">No document</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px;">
+                                <a href="{% url 'assets:asset_detail' asset.id %}" class="asset-action-btn"><i class="fa-solid fa-eye"></i> View</a>
+                                <a href="{% url 'assets:asset_update' asset.id %}" class="asset-action-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                                <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="asset-action-btn"><i class="fa-solid fa-download"></i> Report</a>
+                                <a href="{% url 'assets:asset_delete' asset.id %}" class="asset-action-btn delete"><i class="fa-solid fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="asset-empty">
+                            <strong>No other assets registered yet</strong>
+                            <p style="margin: 5px 0 0; font-size: 12px;">Add your first miscellaneous asset using the button above.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

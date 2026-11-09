@@ -1,0 +1,375 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block dashboard_title %}Houses &amp; Buildings Management{% endblock %}
+{% block view_header %}Registered Real Estate &amp; Properties{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { width: 100%; }
+
+    .asset-hero {
+        padding: 22px 24px;
+        margin-bottom: 18px;
+        border-radius: var(--asset-radius);
+        color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .asset-hero h2 { margin: 0 0 4px; font-size: 22px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 16px;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--asset-primary);
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-hero-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 14px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .btn-hero-outline:hover {
+        background: rgba(255, 255, 255, 0.22);
+    }
+
+    .asset-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 220px;
+        max-width: 380px;
+    }
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--asset-muted);
+        font-size: 12px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 9px 12px 9px 34px;
+        border: 1px solid var(--asset-border);
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--asset-text);
+        background: #fff;
+        outline: none;
+    }
+    .search-box input:focus {
+        border-color: var(--asset-primary);
+        box-shadow: 0 0 0 3px rgba(8, 96, 112, 0.1);
+    }
+
+    .asset-count-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--asset-muted);
+        background: #f8fafc;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--asset-border);
+    }
+
+    .asset-table-panel {
+        background: #fff;
+        border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius);
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .asset-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .asset-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    .asset-table th {
+        padding: 12px 16px;
+        text-align: left;
+        background: #F8FAFC;
+        color: var(--asset-muted);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        border-bottom: 1px solid var(--asset-border);
+    }
+    .asset-table td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #edf1f6;
+        font-size: 12px;
+        vertical-align: middle;
+    }
+    .asset-table tbody tr {
+        transition: background 0.15s ease;
+    }
+    .asset-table tbody tr:hover { background: #f8fbfc; }
+
+    .status-pill {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 800;
+        background: rgba(8, 96, 112, 0.1);
+        color: var(--asset-primary);
+    }
+
+    .asset-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 10px;
+        border: 1px solid var(--asset-border);
+        border-radius: 6px;
+        color: var(--asset-primary);
+        background: #fff;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        transition: all 0.15s ease;
+    }
+    .asset-action-btn:hover {
+        background: rgba(8, 96, 112, 0.08);
+        border-color: var(--asset-primary);
+    }
+    .asset-action-btn.delete {
+        color: #b91c1c;
+        border-color: rgba(185, 28, 28, 0.2);
+    }
+    .asset-action-btn.delete:hover {
+        background: #fef2f2;
+        border-color: #b91c1c;
+    }
+
+    .asset-empty { padding: 40px 20px; text-align: center; color: var(--asset-muted); }
+
+    @media (max-width: 768px) {
+        .asset-hero { padding: 18px; }
+        .hero-actions { width: 100%; }
+        .btn-hero-primary, .btn-hero-outline { flex: 1; justify-content: center; }
+        .search-box { max-width: 100%; }
+    }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <div>
+            <h2>Houses &amp; Buildings Management</h2>
+            <p>Track residential and commercial buildings, property IDs, locations, and building information.</p>
+        </div>
+        <div class="hero-actions">
+            <button type="button" onclick="exportHousesCSV()" class="btn-hero-outline">
+                <i class="fa-solid fa-file-csv"></i> Save / Export CSV
+            </button>
+            <a href="{% url 'assets:create_house' %}" class="btn-hero-primary">
+                <i class="fa-solid fa-plus"></i> Add House / Building
+            </a>
+        </div>
+    </section>
+
+    <div class="asset-toolbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="houseSearchInput" placeholder="Search by name, location, or property ID..." onkeyup="filterHousesTable()">
+        </div>
+        <span class="asset-count-badge">
+            Total Properties: <strong id="houseCount">{{ assets|length }}</strong>
+        </span>
+    </div>
+
+    <section class="asset-table-panel">
+        <div class="asset-table-scroll">
+            <table class="asset-table" id="housesTable">
+                <thead>
+                    <tr>
+                        <th scope="col">Property Details</th>
+                        <th scope="col">Location &amp; ID</th>
+                        <th scope="col">Building Information</th>
+                        <th scope="col">Estimated Valuation</th>
+                        <th scope="col">Documents</th>
+                        <th scope="col">Full Data Controls</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr class="house-row">
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="display:inline-grid; place-items:center; width:34px; height:34px; border-radius:8px; background:rgba(8, 96, 112, 0.1); color:var(--asset-primary); flex-shrink:0;">
+                                    <i class="fa-solid fa-house"></i>
+                                </span>
+                                <div>
+                                    <strong style="display:block; color:var(--asset-text);">{{ asset.name }}</strong>
+                                    <small style="color:var(--asset-muted);">ID: #{{ asset.id }} • {{ asset.get_status_display }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if asset.house_details %}
+                                <strong style="display:block; color:var(--asset-text);">{{ asset.house_details.location }}</strong>
+                                <span class="status-pill">Prop ID: {{ asset.house_details.property_identification }}</span>
+                            {% else %}
+                                <span style="color:var(--asset-muted);">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if asset.house_details.building_information %}
+                                <span style="color: var(--asset-text); font-size: 11px;">
+                                    {{ asset.house_details.building_information|truncatechars:45 }}
+                                </span>
+                            {% else %}
+                                <span style="color:var(--asset-muted);">—</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 750; color: var(--asset-text);">
+                            {{ asset.currency|default:"USD" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                        </td>
+                        <td>
+                            {% with doc=asset.supporting_documents.first %}
+                                {% if doc %}
+                                    <a href="{{ doc.file.url }}" target="_blank" class="asset-action-btn" title="{{ doc.title }}">
+                                        <i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> View Doc
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'assets:asset_update' asset.id %}" class="asset-action-btn" style="color:var(--asset-muted);">
+                                        <i class="fa-solid fa-upload"></i> Upload
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px;">
+                                <a href="{% url 'assets:asset_detail' asset.id %}" class="asset-action-btn" title="View full details">
+                                    <i class="fa-solid fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'assets:asset_update' asset.id %}" class="asset-action-btn" title="Edit house">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </a>
+                                <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="asset-action-btn" title="Download PDF Report">
+                                    <i class="fa-solid fa-download"></i> Report
+                                </a>
+                                <a href="{% url 'assets:asset_delete' asset.id %}" class="asset-action-btn delete" title="Delete house">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="asset-empty">
+                            <strong>No houses or buildings registered yet</strong>
+                            <p style="margin: 5px 0 0; font-size: 12px;">Add your first property using the button above.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+function filterHousesTable() {
+    const input = document.getElementById("houseSearchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#housesTable tbody tr.house-row");
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(input)) {
+            row.style.display = "";
+            visibleCount++;
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    const countEl = document.getElementById("houseCount");
+    if (countEl) countEl.textContent = visibleCount;
+}
+
+function exportHousesCSV() {
+    const rows = document.querySelectorAll("#housesTable tr");
+    const csv = [];
+
+    rows.forEach(row => {
+        if (row.style.display === "none") return;
+        const cols = row.querySelectorAll("th, td");
+        const rowData = [];
+        for (let i = 0; i < cols.length - 2; i++) {
+            let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ").trim();
+            rowData.push('"' + text.replace(/"/g, '""') + '"');
+        }
+        if (rowData.length > 0) csv.push(rowData.join(","));
+    });
+
+    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    const downloadLink = document.createElement("a");
+    downloadLink.download = "houses_buildings_portfolio.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+</script>
+{% endblock %}

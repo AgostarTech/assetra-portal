@@ -1,46 +1,122 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
 
-{% block title %}Support Center - Asset Portal{% endblock %}
-{% block page_title %}Support Center{% endblock %}
+{% block dashboard_title %}Support Center - Private Wealth Portal{% endblock %}
+{% block view_header %}Client Support &amp; Ticketing Desk{% endblock %}
 
-{% block content %}
-<div style="max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
-        <h2 style="margin: 0; color: #1a1a1a;">My Support Tickets</h2>
-        <a href="{% url 'create_ticket' %}" style="background-color: #1a1a1a; color: #cfa76e; padding: 10px 15px; text-decoration: none; border-radius: 6px; font-weight: bold;">+ New Ticket</a>
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; }
+
+    .asset-hero {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 20px; flex-wrap: wrap; padding: 24px; margin-bottom: 22px;
+        border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .panel {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); padding: 24px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03); margin-bottom: 25px;
+    }
+
+    .table-container { width: 100%; overflow-x: auto; margin-top: 15px; }
+    .portal-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    .portal-table th { background: #f8fafc; color: var(--asset-muted); font-weight: 700; padding: 12px 15px; border-bottom: 1px solid var(--asset-border); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    .portal-table td { padding: 14px 15px; border-bottom: 1px solid #edf0f5; color: var(--asset-text); vertical-align: middle; }
+    .portal-table tr:hover { background: #fdfefe; }
+
+    .badge-status {
+        display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-open { background: rgba(22, 132, 91, 0.1); color: #16845b; }
+    .badge-closed { background: rgba(104, 113, 129, 0.1); color: var(--asset-muted); }
+
+    .btn-action {
+        background: var(--asset-primary); color: #fff; padding: 10px 18px; border-radius: 8px;
+        text-decoration: none; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
+        transition: background 0.2s; border: none; cursor: pointer;
+    }
+    .btn-action:hover { background: var(--asset-primary-hover); color: #fff; }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <div>
+            <h2>Client Support Center</h2>
+            <p>Submit inquiries, track resolution tickets, and communicate directly with private wealth advisors.</p>
+        </div>
+        <div>
+            <a href="{% url 'support:create_ticket' %}" class="btn-action" style="background: #fff; color: var(--asset-primary);">
+                <i class="fa-solid fa-plus"></i> Open New Ticket
+            </a>
+        </div>
+    </section>
+
+    <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h3 style="margin: 0 0 4px; font-size: 16px; font-weight: 800; color: var(--asset-text);">
+                    <i class="fa-solid fa-headset" style="color: var(--asset-primary); margin-right: 8px;"></i> My Support Tickets
+                </h3>
+                <p style="margin: 0; font-size: 12.5px; color: var(--asset-muted);">Total Inquiries: <strong>{{ ticket_count|default:tickets.count }}</strong></p>
+            </div>
+        </div>
+
+        {% if tickets %}
+            <div class="table-container">
+                <table class="portal-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Submitted Date</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                            <tr>
+                                <td><strong>#{{ ticket.id }}</strong></td>
+                                <td>{{ ticket.subject }}</td>
+                                <td>
+                                    <span class="badge-status {% if ticket.status == 'CLOSED' %}badge-closed{% else %}badge-open{% endif %}">
+                                        {{ ticket.get_status_display|default:"Active" }}
+                                    </span>
+                                </td>
+                                <td>{{ ticket.created_at|date:"F d, Y - P" }}</td>
+                                <td style="text-align: right;">
+                                    <a href="{% url 'support:ticket_list' %}" style="color: var(--asset-primary); font-weight: 700; font-size: 12px; text-decoration: none;">
+                                        View Details <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 45px 20px; color: var(--asset-muted);">
+                <i class="fa-solid fa-circle-check" style="font-size: 32px; margin-bottom: 12px; color: #cbd5e1;"></i>
+                <p style="margin: 0 0 15px; font-size: 13.5px;">You have no active support tickets at this time.</p>
+                <a href="{% url 'support:create_ticket' %}" class="btn-action">Open Your First Ticket</a>
+            </div>
+        {% endif %}
     </div>
-
-    {% if tickets %}
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background-color: #f4f6f9; text-align: left;">
-                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Subject</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Priority</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Status</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Submitted On</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ticket in tickets %}
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 12px; font-weight: bold; color: #333;">{{ ticket.subject }}</td>
-                    <td style="padding: 12px;">
-                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;
-                            {% if ticket.priority == 'CRITICAL' %}background: #dc3545; color: white;
-                            {% elif ticket.priority == 'HIGH' %}background: #fd7e14; color: white;
-                            {% elif ticket.priority == 'MEDIUM' %}background: #ffc107; color: #333;
-                            {% else %}background: #17a2b8; color: white;{% endif %}">
-                            {{ ticket.get_priority_display }}
-                        </span>
-                    </td>
-                    <td style="padding: 12px; font-size: 13px; color: #666; font-weight: bold;">{{ ticket.get_status_display }}</td>
-                    <td style="padding: 12px; font-size: 13px; color: #666;">{{ ticket.created_at|date:"M d, Y" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p style="color: #666; text-align: center; padding: 40px 0;">You have no support history. Need help? Open a new ticket.</p>
-    {% endif %}
 </div>
 {% endblock %}

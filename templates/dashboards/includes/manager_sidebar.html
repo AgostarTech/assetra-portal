@@ -1,346 +1,455 @@
-﻿
-{% load static %}
+﻿{% load static %}
+
+<aside class="manager-sidebar">
+
+    <!-- Brand -->
+    <div class="manager-brand">
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="manager-brand-link">
+            <div class="manager-logo" aria-hidden="true">A</div>
+            <div>
+                <div class="manager-brand-name">ASSETRA AFRICA</div>
+                <div class="manager-brand-subtitle">ADMINISTRATION</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Administrator identity -->
+    <div class="manager-identity">
+        <div class="manager-label">SIGNED IN AS</div>
+
+        <div class="manager-user-card">
+            <div class="manager-avatar-wrapper">
+                <div class="manager-avatar" aria-hidden="true">
+                    {% if request.user.username %}
+                        {{ request.user.username|slice:":1"|upper }}
+                    {% elif request.user.email %}
+                        {{ request.user.email|slice:":1"|upper }}
+                    {% else %}
+                        A
+                    {% endif %}
+                </div>
+                <!-- Online Status Indicator -->
+                <span class="manager-online-dot" title="Online & Connected"></span>
+            </div>
+            <div class="manager-user-details">
+                <div class="manager-username">
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% elif request.user.username %}
+                        {{ request.user.username }}
+                    {% elif request.user.email %}
+                        {{ request.user.email }}
+                    {% else %}
+                        Administrator
+                    {% endif %}
+                </div>
+                <span class="manager-role">
+                    {% if request.user.is_superuser %}
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> SUPERUSER
+                    {% else %}
+                        <i class="fa-solid fa-user-gear" aria-hidden="true"></i> SYSTEM ADMIN
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="manager-navigation" aria-label="Administration Navigation">
+
+        <div class="manager-section-label">SYSTEM COMMAND</div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}"
+           class="manager-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            <span class="manager-nav-icon"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i></span>
+            <span>Admin Dashboard</span>
+        </a>
+
+        <!-- Collapsible Dropdown: User & Access Control -->
+        <div class="manager-dropdown-group {% if 'users' in request.resolver_match.url_name or 'groups_permissions' in request.resolver_match.url_name %}open{% endif %}">
+            <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
+                <span class="manager-section-label" style="padding:0; margin:0;">USER & ACCESS CONTROL</span>
+                <i class="fa-solid fa-chevron-down manager-chevron"></i>
+            </button>
+            <div class="manager-submenu">
+                <a href="{% url 'dashboards:admin_manage_users' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_manage_users' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-users-gear" aria-hidden="true"></i></span>
+                    <span>User Accounts</span>
+                </a>
+
+                <a href="{% url 'dashboards:admin_groups_permissions' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_groups_permissions' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-user-shield" aria-hidden="true"></i></span>
+                    <span>Groups & Permissions</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Collapsible Dropdown: Portfolio & Assets -->
+        <div class="manager-dropdown-group {% if 'all_assets' in request.resolver_match.url_name or 'client_portfolios' in request.resolver_match.url_name %}open{% endif %}">
+            <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
+                <span class="manager-section-label" style="padding:0; margin:0;">PORTFOLIO & ASSETS</span>
+                <i class="fa-solid fa-chevron-down manager-chevron"></i>
+            </button>
+            <div class="manager-submenu">
+                <a href="{% url 'dashboards:admin_all_assets' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_all_assets' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-vault" aria-hidden="true"></i></span>
+                    <span>All System Assets</span>
+                </a>
+
+                <a href="{% url 'dashboards:admin_client_portfolios' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_client_portfolios' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></span>
+                    <span>Client Portfolios</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Collapsible Dropdown: Operations & Audit -->
+        <div class="manager-dropdown-group {% if 'documents_kyc' in request.resolver_match.url_name or 'support_tickets' in request.resolver_match.url_name or 'audit_logs' in request.resolver_match.url_name %}open{% endif %}">
+            <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
+                <span class="manager-section-label" style="padding:0; margin:0;">OPERATIONS & AUDIT</span>
+                <i class="fa-solid fa-chevron-down manager-chevron"></i>
+            </button>
+            <div class="manager-submenu">
+                <a href="{% url 'dashboards:admin_documents_kyc' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_documents_kyc' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-file-invoice" aria-hidden="true"></i></span>
+                    <span>Documents & KYC</span>
+                </a>
+
+                <a href="{% url 'dashboards:admin_support_tickets' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_support_tickets' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></span>
+                    <span>Support Tickets</span>
+                </a>
+
+                <a href="{% url 'dashboards:admin_audit_logs' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'admin_audit_logs' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span>
+                    <span>System Audit Logs</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="manager-divider" aria-hidden="true"></div>
+
+        <a href="{% url 'dashboards:role_router' %}" class="manager-nav-link">
+            <span class="manager-nav-icon"><i class="fa-solid fa-arrow-left-long" aria-hidden="true"></i></span>
+            <span>Role Home</span>
+        </a>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="manager-sidebar-footer">
+        <div class="manager-footer-caption">Secure Management Portal</div>
+
+        {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="manager-logout-button">
+                    <span class="manager-logout-icon"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></span>
+                    <span>Sign Out</span>
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+</aside>
 
 <style>
-    .pw-admin-sidebar,
-    .pw-admin-sidebar * {
+    .manager-sidebar {
         box-sizing: border-box;
-    }
-
-    .pw-admin-sidebar {
-        --pw-gold: #C5A059;
-        --pw-bg: #111318;
-        --pw-surface: #191C23;
-        --pw-border: rgba(255, 255, 255, 0.08);
-        --pw-muted: #9298A5;
-        width: 260px;
-        min-width: 260px;
-        min-height: 100vh;
+        width: 280px;
+        min-width: 280px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
         display: flex;
         flex-direction: column;
-        background: var(--pw-bg);
-        color: #F4F5F7;
-        border-right: 1px solid var(--pw-border);
+        background: #062c30;
+        color: #f4f4f6;
+        border-right: 1px solid rgba(52, 211, 153, 0.2);
         font-family: Inter, "Segoe UI", Arial, sans-serif;
-        padding: 24px 16px 18px;
+        z-index: 100;
     }
 
-    .pw-brand {
+    .manager-brand {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+        background: rgba(5, 44, 48, 0.6);
+    }
+
+    .manager-brand-link {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 4px 8px 26px;
-        border-bottom: 1px solid var(--pw-border);
+        color: #fff;
+        text-decoration: none;
     }
 
-    .pw-brand-mark {
-        width: 42px;
-        height: 42px;
+    .manager-logo {
+        width: 40px;
+        height: 40px;
         flex-shrink: 0;
-        display: grid;
-        place-items: center;
-        border: 1px solid rgba(197, 160, 89, 0.6);
-        border-radius: 12px;
-        color: var(--pw-gold);
-        font-size: 22px;
-        font-weight: 700;
-    }
-
-    .pw-brand-name {
-        margin: 0;
-        color: #F7F5EF;
-        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid #34d399;
+        background: rgba(52, 211, 153, 0.12);
+        color: #34d399;
+        font-family: Georgia, serif;
+        font-size: 18px;
         font-weight: 800;
-        letter-spacing: 1.2px;
+        box-shadow: 0 0 15px rgba(52, 211, 153, 0.25);
     }
 
-    .pw-brand-caption {
-        margin: 5px 0 0;
-        color: var(--pw-gold);
-        font-size: 9px;
+    .manager-brand-name {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .manager-brand-subtitle {
+        margin-top: 2px;
+        color: #34d399;
+        font-size: 8.5px;
         font-weight: 700;
         letter-spacing: 2px;
     }
 
-    .pw-section-label {
-        margin: 26px 10px 12px;
-        color: var(--pw-muted);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 1.6px;
-        text-transform: uppercase;
+    .manager-identity {
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+        background: rgba(11, 83, 91, 0.3);
     }
 
-    .pw-profile {
+    .manager-label,
+    .manager-section-label {
+        color: #94a3b8;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .manager-label {
+        margin-bottom: 8px;
+    }
+
+    .manager-user-card {
         display: flex;
         align-items: center;
         gap: 11px;
-        padding: 14px 11px;
-        margin-top: 20px;
-        background: var(--pw-surface);
-        border: 1px solid var(--pw-border);
-        border-radius: 12px;
-        min-width: 0;
     }
 
-    .pw-avatar {
-        width: 40px;
-        height: 40px;
+    .manager-avatar-wrapper {
+        position: relative;
         flex-shrink: 0;
+    }
+
+    .manager-avatar {
+        width: 36px;
+        height: 36px;
         display: grid;
         place-items: center;
         border-radius: 50%;
-        background: rgba(197, 160, 89, 0.14);
-        border: 1px solid rgba(197, 160, 89, 0.4);
-        color: var(--pw-gold);
-        font-size: 15px;
+        background: rgba(52, 211, 153, 0.15);
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        color: #34d399;
+        font-size: 14px;
         font-weight: 800;
-        text-transform: uppercase;
+        font-family: Georgia, serif;
     }
 
-    .pw-profile-info {
+    .manager-online-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background: #34d399;
+        border: 2px solid #062c30;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #34d399;
+    }
+
+    .manager-user-details {
         min-width: 0;
     }
 
-    .pw-profile-name {
-        margin: 0;
-        overflow-wrap: anywhere;
-        color: #F4F5F7;
-        font-size: 12px;
+    .manager-username {
+        color: #ffffff;
+        font-size: 13px;
         font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .pw-profile-role {
-        display: inline-block;
-        margin-top: 6px;
-        color: var(--pw-gold);
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .pw-nav {
-        display: flex;
-        flex-direction: column;
+    .manager-role {
+        display: inline-flex;
+        align-items: center;
         gap: 5px;
+        margin-top: 5px;
+        padding: 3px 8px;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        border-radius: 20px;
+        background: rgba(5, 150, 105, 0.2);
+        color: #34d399;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 
-    .pw-nav-link {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-height: 45px;
-        padding: 11px 12px;
-        border: 1px solid transparent;
-        border-radius: 9px;
-        color: #B8BDC7;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 600;
-        transition: background 0.2s ease, color 0.2s ease,
-                    border-color 0.2s ease;
-    }
-
-    .pw-nav-icon {
-        width: 20px;
-        flex-shrink: 0;
-        color: #9298A5;
-        font-size: 16px;
-        text-align: center;
-    }
-
-    .pw-nav-link:hover {
-        background: rgba(255, 255, 255, 0.045);
-        color: #FFFFFF;
-        border-color: var(--pw-border);
-    }
-
-    .pw-nav-link:hover .pw-nav-icon {
-        color: var(--pw-gold);
-    }
-
-    .pw-nav-link.active {
-        background: rgba(197, 160, 89, 0.12);
-        color: var(--pw-gold);
-        border-color: rgba(197, 160, 89, 0.2);
-    }
-
-    .pw-nav-link.active .pw-nav-icon {
-        color: var(--pw-gold);
-    }
-
-    .pw-sidebar-spacer {
+    .manager-navigation {
         flex: 1;
-        min-height: 28px;
+        padding: 16px 14px;
+        overflow-y: auto;
     }
 
-    .pw-system-status {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        padding: 12px;
-        margin-bottom: 16px;
-        border: 1px solid var(--pw-border);
-        border-radius: 9px;
-        background: rgba(255, 255, 255, 0.02);
+    .manager-dropdown-group {
+        margin-top: 14px;
+        margin-bottom: 6px;
     }
 
-    .pw-status-dot {
-        width: 8px;
-        height: 8px;
-        flex-shrink: 0;
-        background: #43C98B;
-        border-radius: 50%;
-        box-shadow: 0 0 9px rgba(67, 201, 139, 0.3);
-    }
-
-    .pw-status-text {
-        color: #C4C9D2;
-        font-size: 10px;
-        font-weight: 600;
-    }
-
-    .pw-status-caption {
-        display: block;
-        margin-top: 4px;
-        color: var(--pw-muted);
-        font-size: 9px;
-    }
-
-    .pw-signout {
+    .manager-dropdown-toggle {
         width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 9px;
-        padding: 12px;
-        border: 1px solid rgba(231, 112, 112, 0.22);
-        border-radius: 9px;
-        background: rgba(231, 112, 112, 0.07);
-        color: #E9A1A1;
-        font: inherit;
-        font-size: 12px;
-        font-weight: 700;
+        justify-content: space-between;
+        background: transparent;
+        border: none;
+        padding: 4px 10px 8px;
         cursor: pointer;
-        transition: background 0.2s ease;
+        text-align: left;
     }
 
-    .pw-signout:hover {
-        background: rgba(231, 112, 112, 0.15);
+    .manager-chevron {
+        color: #94a3b8;
+        font-size: 10px;
+        transition: transform 0.25s ease;
     }
 
-    .pw-sidebar-footer {
-        margin: 15px 0 0;
-        color: #6F7581;
-        font-size: 9px;
+    .manager-submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+        padding-left: 6px;
+    }
+
+    .manager-dropdown-group.open .manager-submenu {
+        max-height: 300px;
+    }
+
+    .manager-dropdown-group.open .manager-chevron {
+        transform: rotate(180deg);
+        color: #34d399;
+    }
+
+    .manager-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 3px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .manager-nav-link:hover {
+        background: rgba(52, 211, 153, 0.1);
+        color: #34d399;
+        transform: translateX(2px);
+    }
+
+    .manager-nav-link.active {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.25), rgba(11, 83, 91, 0.4));
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        color: #34d399;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .manager-nav-icon {
+        width: 18px;
+        flex-shrink: 0;
         text-align: center;
-        letter-spacing: 0.4px;
+        font-size: 13px;
+        color: #34d399;
+    }
+
+    .manager-nav-link.active .manager-nav-icon {
+        color: #34d399;
+    }
+
+    .manager-divider {
+        margin: 14px 10px;
+        border-top: 1px solid rgba(52, 211, 153, 0.15);
+    }
+
+    .manager-sidebar-footer {
+        padding: 16px 20px;
+        border-top: 1px solid rgba(52, 211, 153, 0.15);
+        background: rgba(5, 44, 48, 0.6);
+    }
+
+    .manager-footer-caption {
+        margin-bottom: 12px;
+        color: #94a3b8;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .manager-logout-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid rgba(252, 165, 165, 0.3);
+        border-radius: 8px;
+        background: rgba(127, 29, 29, 0.25);
+        color: #fca5a5;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .manager-logout-button:hover {
+        background: rgba(127, 29, 29, 0.45);
+        border-color: rgba(252, 165, 165, 0.5);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .manager-logout-icon {
+        font-size: 12px;
     }
 
     @media (max-width: 768px) {
-        .pw-admin-sidebar {
+        .manager-sidebar {
             width: 100%;
             min-width: 0;
-            min-height: auto;
-        }
-
-        .pw-sidebar-spacer {
-            min-height: 16px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .pw-nav-link,
-        .pw-signout {
-            transition: none;
+            height: auto;
+            position: relative;
         }
     }
 </style>
 
-<aside class="pw-admin-sidebar" aria-label="Administrator navigation">
-
-    <!-- Brand -->
-    <div class="pw-brand">
-        <div class="pw-brand-mark" aria-hidden="true">P</div>
-        <div>
-            <h2 class="pw-brand-name">PRIVATE WEALTH</h2>
-            <p class="pw-brand-caption">ADMINISTRATION</p>
-        </div>
-    </div>
-
-    <!-- Current user -->
-    <div class="pw-profile">
-        <div class="pw-avatar" aria-hidden="true">
-            {{ request.user.username|first|upper }}
-        </div>
-
-        <div class="pw-profile-info">
-            <p class="pw-profile-name">
-                {{ request.user.get_full_name|default:request.user.username }}
-            </p>
-
-            <span class="pw-profile-role">
-                {% if request.user.is_superuser %}
-                    SUPERUSER
-                {% elif request.user.is_admin %}
-                    ADMINISTRATOR
-                {% else %}
-                    AUTHORIZED USER
-                {% endif %}
-            </span>
-        </div>
-    </div>
-
-    <!-- Main navigation -->
-    <p class="pw-section-label">Workspace</p>
-
-    <nav class="pw-nav" aria-label="Main menu">
-
-        <a href="{% url 'dashboards:admin_dashboard' %}"
-           class="pw-nav-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}"
-           {% if request.resolver_match.url_name == 'admin_dashboard' %}aria-current="page"{% endif %}>
-            <span class="pw-nav-icon" aria-hidden="true">&#9633;</span>
-            <span>Admin Dashboard</span>
-        </a>
-
-        <a href="{% url 'dashboards:admin_manage_users' %}"
-           class="pw-nav-link{% if request.resolver_match.url_name == 'admin_manage_users' %} active{% endif %}"
-           {% if request.resolver_match.url_name == 'admin_manage_users' %}aria-current="page"{% endif %}>
-            <span class="pw-nav-icon" aria-hidden="true">&#9787;</span>
-            <span>User Management</span>
-        </a>
-
-        {% if request.user.is_staff %}
-        <a href="{% url 'admin:index' %}" class="pw-nav-link">
-            <span class="pw-nav-icon" aria-hidden="true">&#9881;</span>
-            <span>Django Administration</span>
-        </a>
-        {% endif %}
-
-    </nav>
-
-    <!-- Bottom section -->
-    <div class="pw-sidebar-spacer"></div>
-
-    <div class="pw-system-status">
-        <span class="pw-status-dot" aria-hidden="true"></span>
-        <div>
-            <span class="pw-status-text">Application Access</span>
-            <span class="pw-status-caption">Authenticated session</span>
-        </div>
-    </div>
-
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="pw-signout">
-            <span aria-hidden="true">&#10140;</span>
-            <span>Sign Out</span>
-        </button>
-    </form>
-
-    <p class="pw-sidebar-footer">
-        PRIVATE WEALTH PORTAL
-    </p>
-
-</aside>
+<script>
+    function toggleDropdown(button) {
+        const group = button.closest('.manager-dropdown-group');
+        group.classList.toggle('open');
+    }
+</script>

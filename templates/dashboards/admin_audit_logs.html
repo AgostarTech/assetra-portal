@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}System Audit Logs | Admin Control Hub{% endblock %}
+
+{% block content %}
+<div class="pwh-dashboard">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / SECURITY</div>
+            <h1>System Audit Logs</h1>
+            <p class="pwh-subtitle">Track recorded security actions and user operations across the portal.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Recorded Activities</h2>
+                <p>Chronological system event ledger</p>
+            </div>
+            <span class="pwh-badge">AUDIT TRAIL</span>
+        </div>
+
+        {% if audit_logs %}
+            {% for log in audit_logs %}
+            <article class="pwh-audit-item">
+                <div class="pwh-audit-title">
+                    <strong>{{ log.action|default:"System activity" }}</strong>
+                    <span class="pwh-muted">
+                        {% if log.timestamp %}{{ log.timestamp|date:"d M Y, H:i" }}{% endif %}
+                    </span>
+                </div>
+                <p>{{ log.details|default:"No additional details recorded." }}</p>
+                <span class="pwh-muted">
+                    {% if log.user %}User: {{ log.user.email }}{% else %}System event{% endif %}
+                </span>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="pwh-empty">No audit logs recorded yet.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,25 +1,402 @@
-<footer class="bg-brand-black text-slate-400 py-12 border-t border-brand-gold/30 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div>
-            <h3 class="text-brand-gold font-bold text-lg mb-4 uppercase tracking-widest">Asset Portal</h3>
-            <p class="text-sm leading-relaxed">Institutional-grade portfolio tracking and compliance management for high-net-worth individuals.</p>
+<!-- =====================================================
+     ASSETRA — ANIMATED SYSTEM TEAL FOOTER
+     ===================================================== -->
+<footer class="assetra-footer" id="assetraFooter">
+    <!-- Ambient Drifting Aurora Orbs -->
+    <div class="footer-aurora footer-aurora-1" aria-hidden="true"></div>
+    <div class="footer-aurora footer-aurora-2" aria-hidden="true"></div>
+
+    <!-- Kinetic Top Border Light Beam -->
+    <div class="footer-laser-beam" aria-hidden="true"></div>
+
+    <div class="assetra-footer-container">
+        <div class="assetra-footer-col reveal-col" style="--delay: 0ms;">
+            <h3 class="assetra-footer-brand">
+                <span class="brand-pulse-bar" aria-hidden="true"></span>
+                Asset Portal
+            </h3>
+            <p class="assetra-footer-desc">
+                Institutional-grade portfolio tracking and compliance management for high-net-worth individuals.
+            </p>
         </div>
-        <div>
-            <h4 class="text-white font-semibold mb-4 tracking-wide">Platform</h4>
-            <ul class="space-y-2 text-sm">
-                <li><a href="#" class="hover:text-brand-gold transition">Enterprise Security</a></li>
-                <li><a href="#" class="hover:text-brand-gold transition">Compliance SLA</a></li>
+
+        <div class="assetra-footer-col reveal-col" style="--delay: 120ms;">
+            <h4 class="assetra-footer-heading">Platform</h4>
+            <ul class="assetra-footer-links">
+                <li>
+                    <a href="#" class="assetra-footer-link">
+                        <span class="footer-link-dot"></span>
+                        <span class="footer-link-text">Enterprise Security</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="assetra-footer-link">
+                        <span class="footer-link-dot"></span>
+                        <span class="footer-link-text">Compliance SLA</span>
+                    </a>
+                </li>
             </ul>
         </div>
-        <div>
-            <h4 class="text-white font-semibold mb-4 tracking-wide">Legal</h4>
-            <ul class="space-y-2 text-sm">
-                <li><a href="#" class="hover:text-brand-gold transition">Terms of Service</a></li>
-                <li><a href="#" class="hover:text-brand-gold transition">Privacy Policy</a></li>
+
+        <div class="assetra-footer-col reveal-col" style="--delay: 240ms;">
+            <h4 class="assetra-footer-heading">Legal</h4>
+            <ul class="assetra-footer-links">
+                <li>
+                    <a href="#" class="assetra-footer-link">
+                        <span class="footer-link-dot"></span>
+                        <span class="footer-link-text">Terms of Service</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="assetra-footer-link">
+                        <span class="footer-link-dot"></span>
+                        <span class="footer-link-text">Privacy Policy</span>
+                    </a>
+                </li>
             </ul>
         </div>
-        <div class="flex flex-col justify-end">
-            <p class="text-sm text-slate-500">&copy; {% now "Y" %} Enterprise Asset Portal.<br>All rights reserved.</p>
+
+        <div class="assetra-footer-col assetra-footer-meta reveal-col" style="--delay: 360ms;">
+            <div class="assetra-status-pill">
+                <span class="status-dot-wrapper" aria-hidden="true">
+                    <span class="status-dot-ping"></span>
+                    <span class="status-dot-core"></span>
+                </span>
+                <span>Portal Systems Operational</span>
+            </div>
+
+            <p class="assetra-footer-copy">
+                &copy; {% now "Y" %} Enterprise Asset Portal.<br>
+                All rights reserved.
+            </p>
         </div>
     </div>
 </footer>
+
+<style>
+    .assetra-footer,
+    .assetra-footer * {
+        box-sizing: border-box;
+    }
+
+    .assetra-footer {
+        position: relative;
+        margin-top: auto;
+        width: 100%;
+        background: linear-gradient(180deg, #0b535b 0%, #073c42 100%);
+        color: rgba(255, 255, 255, 0.78);
+        border-top: 1px solid rgba(255, 255, 255, 0.16);
+        padding: 56px 0;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    /* 1. Ambient Drifting Aurora Orbs */
+    .footer-aurora {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px);
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.25;
+    }
+
+    .footer-aurora-1 {
+        width: 340px;
+        height: 340px;
+        background: #34d399;
+        top: -140px;
+        left: -80px;
+        animation: auroraDrift1 14s ease-in-out infinite alternate;
+    }
+
+    .footer-aurora-2 {
+        width: 280px;
+        height: 280px;
+        background: #059669;
+        bottom: -120px;
+        right: -60px;
+        animation: auroraDrift2 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes auroraDrift1 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(90px, 40px) scale(1.15); }
+    }
+
+    @keyframes auroraDrift2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(-80px, -30px) scale(1.2); }
+    }
+
+    /* 2. Kinetic Top Laser Beam */
+    .footer-laser-beam {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #34d399, #ffffff, transparent);
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.7);
+        animation: footerLaserSweep 5.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        z-index: 2;
+    }
+
+    @keyframes footerLaserSweep {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    .assetra-footer-container {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 32px;
+    }
+
+    /* 3. Scroll-Triggered Staggered Column Reveal */
+    .reveal-col {
+        opacity: 0;
+        transform: translateY(22px);
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--delay, 0ms);
+    }
+
+    .reveal-col.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .assetra-footer-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 14px;
+        color: #34d399;
+        font-size: 1.05rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .brand-pulse-bar {
+        width: 4px;
+        height: 16px;
+        border-radius: 2px;
+        background: #34d399;
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.8);
+        animation: barBreathe 2.8s ease-in-out infinite;
+    }
+
+    @keyframes barBreathe {
+        0%, 100% { opacity: 1; transform: scaleY(1); }
+        50% { opacity: 0.45; transform: scaleY(0.7); }
+    }
+
+    .assetra-footer-desc {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.65;
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .assetra-footer-heading {
+        margin: 0 0 14px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    .assetra-footer-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* 4. Magnetic Link Hover + Sliding Underline */
+    .assetra-footer-link {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.875rem;
+        text-decoration: none;
+        padding: 2px 0;
+        transition: color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .footer-link-text {
+        position: relative;
+    }
+
+    .footer-link-text::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 100%;
+        height: 1px;
+        background: #34d399;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .footer-link-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #34d399;
+        opacity: 0.45;
+        transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .assetra-footer-link:hover,
+    .assetra-footer-link:focus-visible {
+        color: #ffffff;
+        transform: translateX(6px);
+    }
+
+    .assetra-footer-link:hover .footer-link-text::after,
+    .assetra-footer-link:focus-visible .footer-link-text::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+
+    .assetra-footer-link:hover .footer-link-dot,
+    .assetra-footer-link:focus-visible .footer-link-dot {
+        opacity: 1;
+        transform: scale(1.4);
+        box-shadow: 0 0 8px #34d399;
+    }
+
+    /* 5. Live System Status Pill */
+    .assetra-footer-meta {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+    }
+
+    .assetra-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 7px 13px;
+        border-radius: 999px;
+        background: rgba(5, 44, 48, 0.55);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        backdrop-filter: blur(8px);
+    }
+
+    .status-dot-wrapper {
+        position: relative;
+        width: 8px;
+        height: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-dot-core {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+    }
+
+    .status-dot-ping {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: #34d399;
+        animation: statusPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes statusPing {
+        0% { transform: scale(1); opacity: 0.8; }
+        75%, 100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    .assetra-footer-copy {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.58);
+    }
+
+    @media (max-width: 900px) {
+        .assetra-footer-container {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 560px) {
+        .assetra-footer {
+            padding: 40px 0;
+        }
+        .assetra-footer-container {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .footer-aurora,
+        .footer-laser-beam,
+        .brand-pulse-bar,
+        .status-dot-ping,
+        .reveal-col,
+        .assetra-footer-link,
+        .footer-link-text::after,
+        .footer-link-dot {
+            animation: none !important;
+            transition: none !important;
+        }
+        .reveal-col {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    }
+</style>
+
+<script>
+    (() => {
+        const footer = document.getElementById("assetraFooter");
+        if (!footer) return;
+
+        const cols = footer.querySelectorAll(".reveal-col");
+        if (!("IntersectionObserver" in window)) {
+            cols.forEach(col => col.classList.add("is-visible"));
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    cols.forEach(col => col.classList.add("is-visible"));
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        observer.observe(footer);
+    })();
+</script>

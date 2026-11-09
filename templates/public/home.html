@@ -1,1005 +1,454 @@
-
 {% extends "base_public.html" %}
 {% load static %}
 
-{% block title %}Private Wealth | Intelligent Asset Management{% endblock %}
+{% block title %}Assetra Africa Portal | Intelligent Asset Management{% endblock %}
 
 {% block content %}
 
 <style>
     :root {
-        --pw-bg: #080d17;
-        --pw-panel: #101827;
-        --pw-panel-light: #151f30;
-        --pw-gold: #d7b77a;
-        --pw-gold-light: #f0d9a5;
-        --pw-text: #f5f4ef;
-        --pw-muted: #a2adbd;
-        --pw-border: rgba(215, 183, 122, .20);
+        --asset-bg: #f4f7f9;
+        --asset-surface: #ffffff;
+        --asset-teal: #0b535b;
+        --asset-teal-hover: #073c42;
+        --asset-teal-soft: rgba(11, 83, 91, 0.08);
+        --asset-emerald: #059669;
+        --asset-text: #0f172a;
+        --asset-muted: #64748b;
+        --asset-border: rgba(15, 23, 42, 0.08);
     }
 
-    .pw-home {
-        background: var(--pw-bg);
-        color: var(--pw-text);
-        font-family: inherit;
-        overflow: hidden;
+    .asset-home {
+        background: var(--asset-bg);
+        color: var(--asset-text);
+        font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+        overflow-x: hidden;
     }
 
-    .pw-home * {
+    .asset-home * {
         box-sizing: border-box;
     }
 
-    .pw-container {
-        width: min(1180px, calc(100% - 40px));
+    .asset-container {
+        width: min(1140px, calc(100% - 40px));
         margin-inline: auto;
+        position: relative;
+        z-index: 2;
     }
 
-    .pw-eyebrow {
+    .asset-eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        color: var(--pw-gold);
-        font-size: .72rem;
-        font-weight: 700;
-        letter-spacing: .22em;
-        text-transform: uppercase;
-    }
-
-    .pw-eyebrow::before {
-        content: "";
-        width: 27px;
-        height: 1px;
-        background: var(--pw-gold);
-    }
-
-    .pw-hero {
-        position: relative;
-        isolation: isolate;
-        padding: 105px 0 90px;
-        border-bottom: 1px solid var(--pw-border);
-        background:
-            radial-gradient(ellipse at 80% 30%,
-                rgba(45, 65, 92, .30), transparent 42%),
-            radial-gradient(ellipse at 5% 95%,
-                rgba(133, 101, 53, .10), transparent 35%),
-            var(--pw-bg);
-    }
-
-    .pw-hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        opacity: .18;
-        background-image:
-            linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-        background-size: 54px 54px;
-        mask-image: linear-gradient(to bottom, black, transparent 90%);
-    }
-
-    .pw-hero-grid {
-        display: grid;
-        grid-template-columns: 1.05fr .95fr;
-        gap: 72px;
-        align-items: center;
-    }
-
-    .pw-hero h1 {
-        margin: 25px 0;
-        max-width: 690px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(3rem, 6.2vw, 5.6rem);
-        font-weight: 400;
-        line-height: 1.02;
-        letter-spacing: -.055em;
-    }
-
-    .pw-hero h1 em {
-        color: var(--pw-gold);
-        font-weight: 400;
-    }
-
-    .pw-lead {
-        max-width: 540px;
-        color: var(--pw-muted);
-        font-size: 1.04rem;
-        line-height: 1.9;
-    }
-
-    .pw-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-        margin-top: 34px;
-    }
-
-    .pw-button {
-        min-height: 52px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 14px 23px;
-        border: 1px solid transparent;
-        border-radius: 3px;
-        text-decoration: none;
-        text-align: center;
-        font-size: .78rem;
+        color: var(--asset-teal);
+        font-size: 0.72rem;
         font-weight: 800;
-        letter-spacing: .09em;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
-        transition: transform .2s ease, background .2s ease,
-                    border-color .2s ease;
-    }
-
-    .pw-button:hover {
-        transform: translateY(-2px);
-    }
-
-    .pw-button-primary {
-        color: #15120b;
-        background: linear-gradient(120deg, var(--pw-gold-light), var(--pw-gold));
-        box-shadow: 0 10px 35px rgba(215,183,122,.13);
-    }
-
-    .pw-button-primary:hover {
-        color: #15120b;
-        background: #f3dfb3;
-    }
-
-    .pw-button-secondary {
-        color: var(--pw-text);
-        border-color: rgba(255,255,255,.20);
-        background: rgba(255,255,255,.025);
-    }
-
-    .pw-button-secondary:hover {
-        color: var(--pw-gold-light);
-        border-color: var(--pw-gold);
-    }
-
-    .pw-trust-line {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin-top: 30px;
-        color: #b5bfcc;
-        font-size: .78rem;
-    }
-
-    .pw-trust-line span {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .pw-check {
-        color: var(--pw-gold);
-        font-weight: 900;
-    }
-
-    /* Illustrative portfolio dashboard */
-    .pw-visual {
-        position: relative;
-        padding: 22px;
-        border: 1px solid rgba(215,183,122,.25);
-        border-radius: 8px;
-        background: linear-gradient(145deg,
-            rgba(23,34,51,.98), rgba(10,16,27,.98));
-        box-shadow: 0 30px 100px rgba(0,0,0,.35);
-    }
-
-    .pw-visual::before {
-        content: "";
-        position: absolute;
-        inset: -12px 12px 12px -12px;
-        z-index: -1;
-        border: 1px solid rgba(215,183,122,.10);
-        border-radius: 8px;
-    }
-
-    .pw-visual-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding-bottom: 18px;
-        border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .pw-small-label {
-        color: var(--pw-muted);
-        font-size: .68rem;
-        letter-spacing: .12em;
-        text-transform: uppercase;
-    }
-
-    .pw-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        color: #b8d8bd;
-        font-size: .68rem;
-    }
-
-    .pw-status::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #83c995;
-        box-shadow: 0 0 10px rgba(131,201,149,.45);
-    }
-
-    .pw-visual-heading {
-        margin: 23px 0 5px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 1.1rem;
-        font-weight: 400;
-    }
-
-    .pw-visual-subtitle {
-        margin: 0;
-        color: var(--pw-muted);
-        font-size: .76rem;
-    }
-
-    .pw-chart {
-        width: 100%;
-        height: auto;
-        display: block;
-        margin: 22px 0 10px;
-    }
-
-    .pw-asset-list {
-        display: grid;
-        gap: 0;
-        margin-top: 16px;
-    }
-
-    .pw-asset-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        padding: 14px 0;
-        border-top: 1px solid rgba(255,255,255,.075);
-    }
-
-    .pw-asset-name {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        color: #e5e8ee;
-        font-size: .82rem;
-    }
-
-    .pw-asset-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 2px;
-        background: var(--pw-gold);
-    }
-
-    .pw-asset-dot.blue { background: #7596c7; }
-    .pw-asset-dot.green { background: #80b59a; }
-
-    .pw-asset-type {
-        display: block;
-        margin-top: 3px;
-        color: var(--pw-muted);
-        font-size: .68rem;
-    }
-
-    .pw-asset-value {
-        color: #f5f4ef;
-        font-size: .82rem;
-        font-weight: 700;
-        text-align: right;
-    }
-
-    .pw-asset-share {
-        display: block;
-        margin-top: 4px;
-        color: var(--pw-muted);
-        font-size: .68rem;
-        font-weight: 400;
-    }
-
-    .pw-demo-note {
-        margin: 18px 0 0;
-        color: #8995a7;
-        font-size: .67rem;
-        line-height: 1.6;
-    }
-
-    /* Shared section styling */
-    .pw-section {
-        padding: 88px 0;
-    }
-
-    .pw-section-heading {
-        max-width: 690px;
-        margin: 0 auto 48px;
-        text-align: center;
-    }
-
-    .pw-section-heading h2 {
-        margin: 18px 0;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2.1rem, 4vw, 3.5rem);
-        font-weight: 400;
-        line-height: 1.15;
-        letter-spacing: -.035em;
-    }
-
-    .pw-section-heading p {
-        color: var(--pw-muted);
-        line-height: 1.8;
-    }
-
-    .pw-capabilities {
-        background: #0b111d;
-        border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .pw-card-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
-    }
-
-    .pw-card {
-        padding: 28px;
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 5px;
-        background: linear-gradient(145deg,
-            rgba(255,255,255,.035), rgba(255,255,255,.012));
-        transition: border-color .2s ease, transform .2s ease;
-    }
-
-    .pw-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(215,183,122,.45);
-    }
-
-    .pw-card-icon {
-        width: 48px;
-        height: 48px;
-        display: grid;
-        place-items: center;
-        margin-bottom: 24px;
-        color: var(--pw-gold);
-        border: 1px solid rgba(215,183,122,.30);
-        background: rgba(215,183,122,.06);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 4px 10px;
         border-radius: 4px;
     }
 
-    .pw-card h3 {
-        margin: 0 0 12px;
-        font-size: 1rem;
-        font-weight: 700;
+    .asset-eyebrow::before {
+        content: "";
+        width: 20px;
+        height: 2px;
+        background: var(--asset-teal);
     }
 
-    .pw-card p {
-        margin: 0;
-        color: var(--pw-muted);
-        font-size: .88rem;
-        line-height: 1.85;
-    }
-
-    .pw-approach {
-        display: grid;
-        grid-template-columns: .85fr 1.15fr;
-        align-items: center;
-        gap: 75px;
-    }
-
-    .pw-approach h2 {
-        margin: 20px 0;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2.3rem, 4vw, 3.8rem);
-        font-weight: 400;
-        line-height: 1.12;
-        letter-spacing: -.04em;
-    }
-
-    .pw-approach-copy {
-        color: var(--pw-muted);
-        line-height: 1.9;
-    }
-
-    .pw-principles {
-        display: grid;
-        gap: 0;
-    }
-
-    .pw-principle {
-        display: grid;
-        grid-template-columns: 48px 1fr;
-        gap: 18px;
-        padding: 23px 0;
-        border-bottom: 1px solid rgba(255,255,255,.10);
-    }
-
-    .pw-principle-number {
-        color: var(--pw-gold);
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 1.5rem;
-    }
-
-    .pw-principle h3 {
-        margin: 0 0 7px;
-        font-size: .95rem;
-    }
-
-    .pw-principle p {
-        margin: 0;
-        color: var(--pw-muted);
-        font-size: .85rem;
-        line-height: 1.8;
-    }
-
-    .pw-security {
-        padding: 65px 0;
-        border-block: 1px solid var(--pw-border);
-        background:
-            radial-gradient(ellipse at 50% 0,
-                rgba(215,183,122,.09), transparent 65%),
-            #0d1421;
-    }
-
-    .pw-security-inner {
+    /* FULL-SCREEN HERO WITH SLIDING BACKGROUND CAROUSEL */
+    .asset-hero {
+        position: relative;
+        min-height: 580px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 40px;
+        padding: 90px 0;
+        overflow: hidden;
+        border-bottom: 1px solid var(--asset-border);
     }
 
-    .pw-security-copy {
-        max-width: 700px;
+    /* BACKGROUND SLIDER STYLES */
+    .asset-bg-slider {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
     }
 
-    .pw-security h2 {
-        margin: 14px 0;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(1.9rem, 3.3vw, 2.8rem);
-        font-weight: 400;
+    .asset-bg-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out, transform 6s ease-out;
+        transform: scale(1.05);
     }
 
-    .pw-security p {
-        margin: 0;
-        color: var(--pw-muted);
-        line-height: 1.85;
+    .asset-bg-slide.active {
+        opacity: 1;
+        transform: scale(1);
     }
 
-    .pw-final {
-        padding: 92px 0;
+    .asset-bg-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* LIGHT OVERLAY FOR PERFECT READABILITY */
+    .asset-bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(244, 247, 249, 0.96) 0%, rgba(244, 247, 249, 0.85) 50%, rgba(244, 247, 249, 0.6) 100%);
+        z-index: 1;
+    }
+
+    .asset-hero-content {
+        max-width: 620px;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .asset-hero h1 {
+        margin: 18px 0;
+        font-size: clamp(2.5rem, 5vw, 4.2rem);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        color: var(--asset-text);
+    }
+
+    .asset-hero h1 span {
+        color: var(--asset-teal);
+    }
+
+    .asset-lead {
+        color: var(--asset-muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 30px;
+        font-weight: 500;
+    }
+
+    .asset-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .asset-button {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .asset-button-primary {
+        color: #ffffff;
+        background: var(--asset-teal);
+        box-shadow: 0 8px 22px rgba(11, 83, 91, 0.25);
+    }
+
+    .asset-button-primary:hover {
+        background: var(--asset-teal-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(11, 83, 91, 0.35);
+    }
+
+    .asset-button-secondary {
+        color: var(--asset-teal);
+        border: 2px solid var(--asset-teal);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .asset-button-secondary:hover {
+        background: var(--asset-teal-soft);
+        transform: translateY(-3px);
+    }
+
+    /* SLIDER INDICATOR DOTS */
+    .asset-bg-dots {
+        position: absolute;
+        bottom: 25px;
+        right: 40px;
+        display: flex;
+        gap: 8px;
+        z-index: 3;
+    }
+
+    .asset-bg-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.3);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .asset-bg-dot.active {
+        background: var(--asset-teal);
+        width: 26px;
+        border-radius: 5px;
+    }
+
+    /* CORE CAPABILITIES SECTION */
+    .asset-section {
+        padding: 70px 0;
+        background: var(--asset-bg);
+    }
+
+    .asset-section-heading {
+        max-width: 580px;
+        margin: 0 auto 40px;
         text-align: center;
     }
 
-    .pw-final h2 {
-        max-width: 750px;
-        margin: 18px auto;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2.5rem, 5vw, 4.5rem);
-        font-weight: 400;
-        line-height: 1.1;
-        letter-spacing: -.04em;
+    .asset-section-heading h2 {
+        margin: 10px 0;
+        font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--asset-text);
     }
 
-    .pw-final p {
-        max-width: 600px;
-        margin: 0 auto;
-        color: var(--pw-muted);
-        line-height: 1.8;
+    .asset-section-heading p {
+        color: var(--asset-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
     }
 
-    .pw-final .pw-actions {
-        justify-content: center;
+    .asset-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .asset-card {
+        padding: 24px;
+        border: 1px solid var(--asset-border);
+        border-radius: 10px;
+        background: var(--asset-surface);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .asset-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--asset-teal);
+        box-shadow: 0 10px 25px rgba(11, 83, 91, 0.08);
+    }
+
+    .asset-card-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 16px;
+        color: var(--asset-teal);
+        background: var(--asset-teal-soft);
+        border-radius: 8px;
+    }
+
+    .asset-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--asset-text);
+    }
+
+    .asset-card p {
+        margin: 0;
+        color: var(--asset-muted);
+        font-size: 0.86rem;
+        line-height: 1.6;
+    }
+
+    /* SECURITY HIGHLIGHT STRIP */
+    .asset-security-strip {
+        background: var(--asset-teal);
+        color: #ffffff;
+        padding: 45px 0;
+    }
+
+    .asset-security-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+    }
+
+    .asset-security-flex h2 {
+        margin: 6px 0;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+    .asset-security-flex p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.92rem;
+        max-width: 580px;
+        line-height: 1.6;
     }
 
     @media (max-width: 900px) {
-        .pw-hero {
-            padding: 75px 0;
+        .asset-hero {
+            min-height: auto;
+            padding: 70px 0;
         }
-
-        .pw-hero-grid {
+        .asset-grid-3 {
             grid-template-columns: 1fr;
-            gap: 50px;
         }
-
-        .pw-hero-copy {
-            text-align: center;
-        }
-
-        .pw-hero .pw-lead {
-            margin-inline: auto;
-        }
-
-        .pw-hero .pw-actions,
-        .pw-trust-line {
-            justify-content: center;
-        }
-
-        .pw-visual {
-            width: min(100%, 540px);
-            margin-inline: auto;
-        }
-
-        .pw-card-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .pw-approach {
-            grid-template-columns: 1fr;
-            gap: 30px;
-        }
-
-        .pw-security-inner {
+        .asset-security-flex {
+            flex-direction: column;
             align-items: flex-start;
-            flex-direction: column;
-        }
-    }
-
-    @media (max-width: 560px) {
-        .pw-container {
-            width: min(100% - 28px, 1180px);
-        }
-
-        .pw-hero {
-            padding: 58px 0;
-        }
-
-        .pw-hero h1 {
-            font-size: clamp(2.8rem, 13vw, 4rem);
-        }
-
-        .pw-lead {
-            font-size: .94rem;
-        }
-
-        .pw-actions {
-            flex-direction: column;
-        }
-
-        .pw-button {
-            width: 100%;
-        }
-
-        .pw-trust-line {
-            gap: 12px;
-            font-size: .72rem;
-        }
-
-        .pw-visual {
-            padding: 17px;
-        }
-
-        .pw-section {
-            padding: 65px 0;
-        }
-
-        .pw-card-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .pw-card {
-            padding: 23px;
-        }
-
-        .pw-security {
-            padding: 48px 0;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .pw-home *,
-        .pw-home *::before,
-        .pw-home *::after {
-            scroll-behavior: auto !important;
-            transition-duration: .01ms !important;
-            animation-duration: .01ms !important;
-            animation-iteration-count: 1 !important;
         }
     }
 </style>
 
-<main class="pw-home">
+<main class="asset-home">
 
-    <!-- HERO -->
-    <section class="pw-hero">
-        <div class="pw-container pw-hero-grid">
+    <!-- HERO SECTION WITH SLIDING BACKGROUND CAROUSEL -->
+    <section class="asset-hero">
+        <!-- BACKGROUND SLIDER -->
+        <div class="asset-bg-slider" id="bgSlider">
+            <div class="asset-bg-slide active">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80" alt="Modern corporate building architecture">
+            </div>
+            <div class="asset-bg-slide">
+                <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1920&q=80" alt="Professional financial planning session">
+            </div>
+            <div class="asset-bg-slide">
+                <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1920&q=80" alt="Corporate financial analytics">
+            </div>
+        </div>
+        <div class="asset-bg-overlay"></div>
 
-            <div class="pw-hero-copy">
-                <span class="pw-eyebrow">
-                    Private Wealth Management
-                </span>
-
-                <h1>
-                    Your wealth.<br>
-                    Your vision.<br>
-                    <em>One perspective.</em>
-                </h1>
-
-                <p class="pw-lead">
-                    Bring your financial assets into focus. Organize
-                    your portfolio, monitor investments, and manage
-                    your wealth through one considered digital experience.
+        <div class="asset-container">
+            <div class="asset-hero-content">
+                <span class="asset-eyebrow">Assetra Africa Portal</span>
+                <h1>Secure Wealth &amp; <span>Asset Control</span></h1>
+                <p class="asset-lead">
+                    Centralize your asset records, monitor portfolio growth, and manage institutional-grade security with complete clarity.
                 </p>
-
-                <div class="pw-actions">
-                    <a href="{% url 'signup' %}"
-                       class="pw-button pw-button-primary">
-                        Begin your application
-                        <span aria-hidden="true">↗</span>
+                <div class="asset-actions">
+                    <a href="{% url 'accounts:signup' %}" class="asset-button asset-button-primary">
+                        Get Started <span aria-hidden="true">↗</span>
                     </a>
-
-                    <a href="{% url 'login' %}"
-                       class="pw-button pw-button-secondary">
-                        Client sign in
-                        <span aria-hidden="true">→</span>
+                    <a href="{% url 'accounts:login' %}" class="asset-button asset-button-secondary">
+                        Client Sign In <span aria-hidden="true">→</span>
                     </a>
                 </div>
-
-                <div class="pw-trust-line">
-                    <span><b class="pw-check">✓</b> Centralized portfolio view</span>
-                    <span><b class="pw-check">✓</b> Role-based access</span>
-                    <span><b class="pw-check">✓</b> Structured asset records</span>
-                </div>
             </div>
+        </div>
 
-            <!-- Illustrative portfolio preview -->
-            <div class="pw-visual" aria-label="Illustrative portfolio dashboard preview">
-                <div class="pw-visual-top">
-                    <div>
-                        <div class="pw-small-label">Portfolio overview</div>
-                        <div class="pw-visual-heading">Your assets, in perspective</div>
-                    </div>
-                    <span class="pw-status">Dashboard concept</span>
-                </div>
-
-                <p class="pw-visual-subtitle">
-                    A unified view of different asset classes
-                </p>
-
-                <svg class="pw-chart" viewBox="0 0 500 190"
-                     role="img" aria-label="Illustrative portfolio trend chart">
-                    <defs>
-                        <linearGradient id="pwChartFill" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#d7b77a" stop-opacity=".30"/>
-                            <stop offset="100%" stop-color="#d7b77a" stop-opacity="0"/>
-                        </linearGradient>
-                    </defs>
-
-                    <g stroke="#ffffff" stroke-opacity=".08" stroke-width="1">
-                        <line x1="15" y1="25" x2="485" y2="25"/>
-                        <line x1="15" y1="65" x2="485" y2="65"/>
-                        <line x1="15" y1="105" x2="485" y2="105"/>
-                        <line x1="15" y1="145" x2="485" y2="145"/>
-                    </g>
-
-                    <path d="M15 143
-                             C45 136, 52 115, 80 123
-                             S120 101, 145 112
-                             S182 75, 210 89
-                             S245 103, 273 70
-                             S320 82, 345 52
-                             S385 68, 410 42
-                             S455 46, 485 20
-                             L485 170 L15 170 Z"
-                          fill="url(#pwChartFill)"/>
-
-                    <path d="M15 143
-                             C45 136, 52 115, 80 123
-                             S120 101, 145 112
-                             S182 75, 210 89
-                             S245 103, 273 70
-                             S320 82, 345 52
-                             S385 68, 410 42
-                             S455 46, 485 20"
-                          fill="none" stroke="#d7b77a"
-                          stroke-width="2.5" stroke-linecap="round"/>
-
-                    <circle cx="485" cy="20" r="5"
-                            fill="#f0d9a5" stroke="#d7b77a" stroke-width="2"/>
-                </svg>
-
-                <div class="pw-asset-list">
-                    <div class="pw-asset-row">
-                        <div class="pw-asset-name">
-                            <span class="pw-asset-dot"></span>
-                            <div>
-                                Equities
-                                <span class="pw-asset-type">Listed investments</span>
-                            </div>
-                        </div>
-                        <div class="pw-asset-value">
-                            Portfolio records
-                            <span class="pw-asset-share">Track holdings</span>
-                        </div>
-                    </div>
-
-                    <div class="pw-asset-row">
-                        <div class="pw-asset-name">
-                            <span class="pw-asset-dot blue"></span>
-                            <div>
-                                Real estate
-                                <span class="pw-asset-type">Property assets</span>
-                            </div>
-                        </div>
-                        <div class="pw-asset-value">
-                            Asset records
-                            <span class="pw-asset-share">Organize properties</span>
-                        </div>
-                    </div>
-
-                    <div class="pw-asset-row">
-                        <div class="pw-asset-name">
-                            <span class="pw-asset-dot green"></span>
-                            <div>
-                                Other assets
-                                <span class="pw-asset-type">Additional holdings</span>
-                            </div>
-                        </div>
-                        <div class="pw-asset-value">
-                            Consolidated view
-                            <span class="pw-asset-share">Review allocations</span>
-                        </div>
-                    </div>
-                </div>
-
-                <p class="pw-demo-note">
-                    Illustrative interface only. Values and performance
-                    are not live financial data or investment advice.
-                </p>
-            </div>
-
+        <div class="asset-bg-dots">
+            <span class="asset-bg-dot active" onclick="currentBgSlide(0)"></span>
+            <span class="asset-bg-dot" onclick="currentBgSlide(1)"></span>
+            <span class="asset-bg-dot" onclick="currentBgSlide(2)"></span>
         </div>
     </section>
 
-    <!-- PLATFORM CAPABILITIES -->
-    <section class="pw-section pw-capabilities">
-        <div class="pw-container">
-
-            <div class="pw-section-heading">
-                <span class="pw-eyebrow">A clearer picture</span>
-                <h2>Everything connected.<br>Nothing overlooked.</h2>
-                <p>
-                    A structured workspace for keeping asset information
-                    organized, understanding portfolio composition, and
-                    managing access to sensitive financial records.
-                </p>
+    <!-- CORE CAPABILITIES -->
+    <section class="asset-section">
+        <div class="asset-container">
+            <div class="asset-section-heading">
+                <span class="asset-eyebrow" style="background: transparent; padding: 0;">Core Architecture</span>
+                <h2>Engineered for Precision</h2>
+                <p>Eliminate spreadsheet clutter and gain single-pane visibility over your traditional wealth holdings.</p>
             </div>
 
-            <div class="pw-card-grid">
-
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="3" y="4" width="18" height="16" rx="2"/>
-                            <path d="M3 10h18M9 10v10M15 10v10"/>
-                        </svg>
+            <div class="asset-grid-3">
+                <article class="asset-card">
+                    <div class="asset-card-icon">
+                        <i class="fa-solid fa-folder-tree fa-lg"></i>
                     </div>
                     <h3>Unified Asset Records</h3>
-                    <p>
-                        Bring supported asset categories into a structured
-                        workspace instead of relying on scattered records
-                        and disconnected spreadsheets.
-                    </p>
+                    <p>Consolidate supported asset categories, ownership metrics, and audit documentation into one secure workspace.</p>
                 </article>
 
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M3 20h18M5 16l4-5 4 3 6-9"/>
-                            <path d="M14 5h5v5"/>
-                        </svg>
+                <article class="asset-card">
+                    <div class="asset-card-icon">
+                        <i class="fa-solid fa-shield-halved fa-lg"></i>
                     </div>
-                    <h3>Portfolio Visibility</h3>
-                    <p>
-                        Review asset composition and available portfolio
-                        summaries in a dashboard designed to make
-                        information easier to interpret.
-                    </p>
+                    <h3>Role-Based Access</h3>
+                    <p>Enforce strict permission boundaries partitioning users into secure operational access tiers.</p>
                 </article>
 
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4z"/>
-                            <path d="M9 12l2 2 4-4"/>
-                        </svg>
+                <article class="asset-card">
+                    <div class="asset-card-icon">
+                        <i class="fa-solid fa-chart-line fa-lg"></i>
                     </div>
-                    <h3>Controlled Access</h3>
-                    <p>
-                        Structure the experience around user roles and
-                        permissions so access to sensitive records can
-                        be managed according to your application rules.
-                    </p>
+                    <h3>Transparent Visibility</h3>
+                    <p>Review comprehensive portfolio distribution and summary metrics optimized for rapid analysis.</p>
                 </article>
-
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M4 5h16v14H4z"/>
-                            <path d="M8 9h8M8 12h8M8 15h5"/>
-                        </svg>
-                    </div>
-                    <h3>Document Organization</h3>
-                    <p>
-                        Keep relevant supporting documents associated
-                        with the appropriate records, subject to the
-                        permissions implemented in the system.
-                    </p>
-                </article>
-
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path d="M12 7v5l3 2"/>
-                        </svg>
-                    </div>
-                    <h3>Accountability</h3>
-                    <p>
-                        Support traceability through activity records
-                        and audit features where these are enabled
-                        and configured in the application.
-                    </p>
-                </article>
-
-                <article class="pw-card">
-                    <div class="pw-card-icon" aria-hidden="true">
-                        <svg width="25" height="25" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M4 19V5M4 19h16"/>
-                            <rect x="7" y="11" width="3" height="5"/>
-                            <rect x="12" y="8" width="3" height="8"/>
-                            <rect x="17" y="5" width="3" height="11"/>
-                        </svg>
-                    </div>
-                    <h3>Informed Reviews</h3>
-                    <p>
-                        Present available portfolio information in
-                        a more consistent format to support reviews
-                        and better-informed financial discussions.
-                    </p>
-                </article>
-
             </div>
         </div>
     </section>
 
-    <!-- MANAGEMENT APPROACH -->
-    <section class="pw-section">
-        <div class="pw-container pw-approach">
-
+    <!-- SECURITY HIGHLIGHT STRIP -->
+    <section class="asset-security-strip">
+        <div class="asset-container asset-security-flex">
             <div>
-                <span class="pw-eyebrow">Designed with purpose</span>
-
-                <h2>A disciplined approach to managing your assets.</h2>
-
-                <p class="pw-approach-copy">
-                    Wealth management begins with a reliable understanding
-                    of what you own, where information is held, and who
-                    is authorized to access it. The platform brings those
-                    priorities into one organized digital environment.
-                </p>
-
-                <a href="{% url 'signup' %}"
-                   class="pw-button pw-button-primary"
-                   style="margin-top: 20px;">
-                    Create an account <span aria-hidden="true">↗</span>
-                </a>
+                <span class="asset-eyebrow" style="color: #ffffff; background: rgba(255,255,255,0.15);">Enterprise Standard</span>
+                <h2>Encrypted Sessions &amp; Strict Compliance</h2>
+                <p>Built with robust data controls and secure workflows tailored for professional asset managers in Tanzania.</p>
             </div>
-
-            <div class="pw-principles">
-                <article class="pw-principle">
-                    <div class="pw-principle-number">01</div>
-                    <div>
-                        <h3>Organize</h3>
-                        <p>
-                            Maintain structured records for assets,
-                            ownership information, and related documents.
-                        </p>
-                    </div>
-                </article>
-
-                <article class="pw-principle">
-                    <div class="pw-principle-number">02</div>
-                    <div>
-                        <h3>Understand</h3>
-                        <p>
-                            Use available summaries and portfolio views
-                            to review your recorded holdings.
-                        </p>
-                    </div>
-                </article>
-
-                <article class="pw-principle">
-                    <div class="pw-principle-number">03</div>
-                    <div>
-                        <h3>Govern</h3>
-                        <p>
-                            Apply clear account permissions and
-                            appropriate oversight to sensitive information.
-                        </p>
-                    </div>
-                </article>
-
-                <article class="pw-principle">
-                    <div class="pw-principle-number">04</div>
-                    <div>
-                        <h3>Review</h3>
-                        <p>
-                            Keep information accessible for regular
-                            portfolio reviews and record maintenance.
-                        </p>
-                    </div>
-                </article>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SECURITY -->
-    <section class="pw-security">
-        <div class="pw-container pw-security-inner">
-
-            <div class="pw-security-copy">
-                <span class="pw-eyebrow">Privacy by design</span>
-                <h2>Financial information deserves careful handling.</h2>
-                <p>
-                    Access controls, secure authentication, responsible
-                    document handling, and appropriate audit practices
-                    should form part of a trustworthy wealth management
-                    environment.
-                </p>
-            </div>
-
-            <a href="{% url 'login' %}"
-               class="pw-button pw-button-secondary">
-                Access your account <span aria-hidden="true">→</span>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- FINAL CALL TO ACTION -->
-    <section class="pw-final">
-        <div class="pw-container">
-            <span class="pw-eyebrow">Your next chapter</span>
-
-            <h2>Bring your financial picture into focus.</h2>
-
-            <p>
-                Start building a more organized view of your assets
-                through a dedicated portfolio management workspace.
-            </p>
-
-            <div class="pw-actions">
-                <a href="{% url 'signup' %}"
-                   class="pw-button pw-button-primary">
-                    Begin your application
-                    <span aria-hidden="true">↗</span>
-                </a>
-
-                <a href="{% url 'login' %}"
-                   class="pw-button pw-button-secondary">
-                    Existing client sign in
+            <div>
+                <a href="{% url 'accounts:login' %}" class="asset-button" style="background: #ffffff; color: var(--asset-teal);">
+                    Access Portal <span aria-hidden="true">→</span>
                 </a>
             </div>
         </div>
     </section>
 
 </main>
+
+<script>
+    let bgSlideIndex = 0;
+    const bgSlides = document.querySelectorAll('.asset-bg-slide');
+    const bgDots = document.querySelectorAll('.asset-bg-dot');
+    let bgSlideInterval;
+
+    function showBgSlide(n) {
+        bgSlides.forEach(slide => slide.classList.remove('active'));
+        bgDots.forEach(dot => dot.classList.remove('active'));
+        
+        bgSlideIndex = (n + bgSlides.length) % bgSlides.length;
+        bgSlides[bgSlideIndex].classList.add('active');
+        bgDots[bgSlideIndex].classList.add('active');
+    }
+
+    function nextBgSlide() {
+        showBgSlide(bgSlideIndex + 1);
+    }
+
+    function currentBgSlide(n) {
+        showBgSlide(n);
+        resetBgTimer();
+    }
+
+    function resetBgTimer() {
+        clearInterval(bgSlideInterval);
+        bgSlideInterval = setInterval(nextBgSlide, 5000);
+    }
+
+    // Start auto slide rotation every 5 seconds
+    bgSlideInterval = setInterval(nextBgSlide, 5000);
+</script>
 
 {% endblock %}

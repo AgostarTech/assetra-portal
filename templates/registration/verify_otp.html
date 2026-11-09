@@ -1,0 +1,464 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Verify Security Code | Assetra Africa Portal{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --otp-bg: #f4f7f9;
+        --otp-surface: #ffffff;
+        --otp-card-bg: rgba(255, 255, 255, 0.94);
+        --otp-teal: #0b535b;
+        --otp-teal-hover: #073c42;
+        --otp-emerald: #059669;
+        --otp-emerald-bright: #047857;
+        --otp-text: #0f172a;
+        --otp-muted: #64748b;
+        --otp-border: rgba(11, 83, 91, 0.15);
+        --otp-danger: #dc2626;
+        --otp-success: #059669;
+    }
+
+    .otp-page, .otp-page * { box-sizing: border-box; }
+
+    .otp-page {
+        position: relative;
+        min-height: calc(100dvh - 86px);
+        padding: 50px 16px;
+        background: #f4f7f9;
+        color: var(--otp-text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* LOW-OPACITY SLIDING BACKGROUND IMAGES */
+    .otp-page__bg-slider {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .otp-page__bg-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transform: scale(1);
+        animation: bgSlideFade 24s infinite ease-in-out;
+        filter: grayscale(20%) contrast(1.05);
+    }
+
+    .otp-page__bg-slide:nth-child(1) {
+        background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80');
+        animation-delay: 0s;
+    }
+    .otp-page__bg-slide:nth-child(2) {
+        background-image: url('https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=1920&q=80');
+        animation-delay: 6s;
+    }
+    .otp-page__bg-slide:nth-child(3) {
+        background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
+        animation-delay: 12s;
+    }
+    .otp-page__bg-slide:nth-child(4) {
+        background-image: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1920&q=80');
+        animation-delay: 18s;
+    }
+
+    @keyframes bgSlideFade {
+        0%   { opacity: 0; transform: scale(1); }
+        6%   { opacity: 0.12; }
+        25%  { opacity: 0.12; transform: scale(1.06); }
+        31%  { opacity: 0; transform: scale(1.08); }
+        100% { opacity: 0; transform: scale(1); }
+    }
+
+    /* FLOATING AMBIENT GLOW ORBS */
+    .otp-page::before, .otp-page::after {
+        content: "";
+        position: absolute;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.2;
+    }
+    .otp-page::before {
+        background: #0b535b;
+        top: -100px;
+        left: -100px;
+        animation: authOrbFloat1 12s ease-in-out infinite alternate;
+    }
+    .otp-page::after {
+        background: #059669;
+        bottom: -100px;
+        right: -100px;
+        animation: authOrbFloat2 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes authOrbFloat1 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(60px, 50px) scale(1.2); }
+    }
+    @keyframes authOrbFloat2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(-70px, -50px) scale(1.15); }
+    }
+
+    .otp-container {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        align-items: stretch;
+        overflow: hidden;
+        border: 1px solid var(--otp-border);
+        border-radius: 20px;
+        background: var(--otp-card-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 25px 50px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        animation: cardEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes cardEntrance {
+        from { opacity: 0; transform: translateY(25px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .otp-aside {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 44px 36px;
+        border-right: 1px solid var(--otp-border);
+        background: linear-gradient(155deg, rgba(11, 83, 91, 0.06), transparent 42%), #ffffff;
+    }
+
+    .otp-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--otp-teal);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .otp-aside-content {
+        margin: 40px 0;
+    }
+
+    .otp-aside h1 {
+        margin: 0 0 16px;
+        color: var(--otp-text);
+        font-family: Georgia, serif;
+        font-size: clamp(28px, 3.5vw, 38px);
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .otp-aside p {
+        color: var(--otp-muted);
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .otp-aside-footer {
+        padding-top: 20px;
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+        color: var(--otp-muted);
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .otp-form-panel {
+        padding: 44px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    .otp-step {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        padding: 6px 12px;
+        border: 1px solid var(--otp-border);
+        border-radius: 6px;
+        background: rgba(11, 83, 91, 0.06);
+        color: var(--otp-teal);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+    }
+
+    .otp-step-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--otp-teal);
+    }
+
+    .otp-form-header h2 {
+        margin: 0 0 8px;
+        color: var(--otp-text);
+        font-family: Georgia, serif;
+        font-size: clamp(24px, 2.8vw, 30px);
+        font-weight: 400;
+    }
+
+    .otp-form-header p {
+        margin: 0 0 20px;
+        color: var(--otp-muted);
+        font-size: 12.5px;
+        line-height: 1.6;
+    }
+
+    .otp-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .otp-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .otp-input-icon {
+        position: absolute;
+        left: 16px;
+        color: var(--otp-muted);
+        font-size: 16px;
+        pointer-events: none;
+        transition: color 0.25s ease;
+    }
+
+    .otp-input {
+        display: block;
+        width: 100%;
+        min-height: 52px;
+        padding: 12px 16px 12px 48px;
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        border-radius: 10px;
+        outline: none;
+        background: #ffffff;
+        color: var(--otp-text);
+        font-family: monospace, inherit;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        text-align: center;
+        box-sizing: border-box;
+        transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .otp-input:focus {
+        border-color: var(--otp-teal);
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(11, 83, 91, 0.15);
+    }
+    .otp-input:focus ~ .otp-input-icon {
+        color: var(--otp-teal);
+    }
+
+    .otp-submit {
+        position: relative;
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 1px solid var(--otp-teal);
+        border-radius: 10px;
+        background: var(--otp-teal);
+        color: #ffffff;
+        font-size: 11.5px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(11, 83, 91, 0.25);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .otp-submit::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+        transform: skewX(-20deg);
+        animation: submitShimmer 5s infinite;
+    }
+
+    @keyframes submitShimmer {
+        0% { left: -150%; }
+        20% { left: 150%; }
+        100% { left: 150%; }
+    }
+
+    .otp-submit:hover {
+        background: var(--otp-teal-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(11, 83, 91, 0.35);
+    }
+
+    .otp-messages {
+        margin-bottom: 14px;
+    }
+
+    .otp-message {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 11.5px;
+        line-height: 1.6;
+        margin-bottom: 8px;
+        border: 1px solid var(--otp-border);
+        background: rgba(11, 83, 91, 0.06);
+        color: var(--otp-teal);
+    }
+
+    .otp-message.error {
+        border-color: rgba(220, 38, 38, 0.3);
+        background: rgba(220, 38, 38, 0.08);
+        color: var(--otp-danger);
+    }
+
+    .otp-message.success {
+        border-color: rgba(5, 150, 105, 0.3);
+        background: rgba(5, 150, 105, 0.08);
+        color: var(--otp-success);
+    }
+
+    .otp-footer-links {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+        text-align: center;
+        color: var(--otp-muted);
+        font-size: 11.5px;
+    }
+
+    .otp-link {
+        color: var(--otp-teal);
+        font-weight: 750;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .otp-link:hover {
+        color: var(--otp-teal-hover);
+        text-decoration: underline;
+    }
+
+    @media (max-width: 850px) {
+        .otp-container { grid-template-columns: 1fr; max-width: 540px; }
+        .otp-aside { padding: 28px; border-right: 0; border-bottom: 1px solid var(--otp-border); }
+        .otp-form-panel { padding: 32px 28px; }
+    }
+</style>
+
+<section class="otp-page">
+    <!-- 4-Image Low-Opacity Sliding Background -->
+    <div class="otp-page__bg-slider" aria-hidden="true">
+        <div class="otp-page__bg-slide"></div>
+        <div class="otp-page__bg-slide"></div>
+        <div class="otp-page__bg-slide"></div>
+        <div class="otp-page__bg-slide"></div>
+    </div>
+
+    <div class="otp-container">
+        <!-- ASIDE PANEL -->
+        <aside class="otp-aside">
+            <div class="otp-brand">
+                <i class="fa-solid fa-shield-halved" style="color: var(--otp-teal);"></i> Assetra Africa
+            </div>
+            <div class="otp-aside-content">
+                <h1>Dual-Channel Verification.</h1>
+                <p>
+                    A 6-character alphanumeric security code has been securely dispatched to both your registered email address and mobile phone number.
+                </p>
+            </div>
+            <div class="otp-aside-footer">
+                INSTITUTIONAL SECURITY GATEWAY
+            </div>
+        </aside>
+
+        <!-- FORM PANEL -->
+        <div class="otp-form-panel">
+            <header class="otp-form-header">
+                <div class="otp-step">
+                    <span class="otp-step-dot"></span>
+                    Authentication · Step 02
+                </div>
+                <h2>Enter Security Code</h2>
+                <p>Enter the 6-character verification code to complete your secure sign-in.</p>
+            </header>
+
+            {% if messages %}
+                <div class="otp-messages" role="status" aria-live="polite">
+                    {% for message in messages %}
+                        <div class="otp-message {% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% endif %}">
+                            <i class="fa-solid fa-circle-info" style="margin-right: 6px;"></i>{{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="otp-form" id="otpForm">
+                {% csrf_token %}
+                <div class="otp-input-wrap">
+                    <input type="text" name="otp_code" id="otp_code" class="otp-input" placeholder="ABC123" maxlength="6" autocomplete="one-time-code" autofocus required style="text-transform: uppercase;">
+                    <i class="fa-solid fa-key otp-input-icon" aria-hidden="true"></i>
+                </div>
+
+                <button type="submit" class="otp-submit" id="otpSubmit">
+                    <span id="otpSubmitLabel">Verify & Enter Portal</span>
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <div class="otp-footer-links">
+                Didn't receive the code?
+                <a href="{% url 'accounts:login' %}" class="otp-link">Return to sign in</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById("otpForm").addEventListener("submit", function() {
+        const btn = document.getElementById("otpSubmit");
+        const lbl = document.getElementById("otpSubmitLabel");
+        if(btn) btn.disabled = true;
+        if(lbl) lbl.textContent = "Verifying code...";
+    });
+</script>
+{% endblock %}

@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
 
     # Project applications
     "accounts",
@@ -90,9 +91,13 @@ DATABASES = {
 }
 
 # --------------------------------------------------
-# CUSTOM USER MODEL
+# CUSTOM USER MODEL & BACKENDS
 # --------------------------------------------------
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # --------------------------------------------------
 # AUTHENTICATION AND REDIRECTS
@@ -146,8 +151,16 @@ JAZZMIN_UI_TWEAKS = {
     "accent": "accent-warning",
 }
 
-# --------------------------------------------------
-# EMAIL CONFIGURATION
-# --------------------------------------------------
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "Private Wealth Support <noreply@example.com>"
+
+# Email Configuration (SMTP Real Delivery)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'aroycetom@gmail.com'
+EMAIL_HOST_PASSWORD = 'budxqijmyzqaziaq'
+DEFAULT_FROM_EMAIL = 'Assetra Africa <aroycetom@gmail.com>'
+
+# Africa's Talking SMS Configuration
+AT_USERNAME = os.environ.get('AT_USERNAME', 'sandbox')
+AT_API_KEY = os.environ.get('AT_API_KEY', 'atsk_2d7c42af1c97dab732786631f714aa99a64e4961983cade49a510c61403165b19705448d')

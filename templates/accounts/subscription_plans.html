@@ -1,0 +1,71 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}Subscription &amp; Billing - Private Wealth Portal{% endblock %}
+{% block view_header %}Account Plan &amp; Secure Billing Center{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+    .billing-container { max-width: 900px; margin: 0 auto; color: var(--asset-text); }
+    .alert-banner { background: rgba(220, 38, 38, 0.1); border: 1px solid #dc2626; color: #dc2626; padding: 18px; border-radius: var(--asset-radius); margin-bottom: 25px; font-weight: 700; font-size: 13.5px; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .plan-card { background: #fff; border: 1px solid var(--asset-border); border-radius: var(--asset-radius); padding: 25px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 12px rgba(15, 23, 42, .03); }
+    .plan-card.featured { border-color: var(--asset-primary); box-shadow: 0 6px 20px rgba(8, 96, 112, 0.15); }
+    .plan-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 800; color: var(--asset-text); }
+    .price { font-size: 24px; font-weight: 800; color: var(--asset-primary); margin-bottom: 15px; }
+    .btn-plan { background: var(--asset-primary); color: #fff; padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; border: none; cursor: pointer; text-decoration: none; display: block; width: 100%; transition: background 0.2s; }
+    .btn-plan:hover { background: var(--asset-primary-hover); color: #fff; }
+</style>
+
+<div class="billing-container">
+    {% if subscription.is_locked %}
+    <div class="alert-banner">
+        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 8px;"></i> Your 30-day free trial has expired. Account data access is currently restricted until a subscription plan is activated.
+    </div>
+    {% endif %}
+
+    <div style="background: #fff; border: 1px solid var(--asset-border); border-radius: var(--asset-radius); padding: 25px; margin-bottom: 25px;">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 800;">Current Plan Status</h3>
+        <p style="margin: 5px 0; font-size: 13px; color: var(--asset-muted);">Plan Tier: <strong>{{ subscription.get_plan_type_display }}</strong></p>
+        <p style="margin: 5px 0; font-size: 13px; color: var(--asset-muted);">Status: <strong style="color: {% if subscription.status == 'ACTIVE' %}#16845b{% else %}#dc2626{% endif %};">{{ subscription.get_status_display }}</strong></p>
+        <p style="margin: 5px 0; font-size: 13px; color: var(--asset-muted);">Expiration Date: <strong>{{ subscription.expiry_date|date:"F d, Y - P" }}</strong></p>
+    </div>
+
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 15px;">Select Your Subscription Plan</h3>
+    
+    <div class="plans-grid">
+        <div class="plan-card">
+            <div>
+                <h3>Monthly Access</h3>
+                <div class="price">10,000 <span style="font-size: 12px; font-weight: 600;">TZS / mo</span></div>
+                <p style="font-size: 13px; color: var(--asset-muted); line-height: 1.5;">Full portal access, live asset tracking, document vaults, and support desk.</p>
+            </div>
+            <form method="GET" action="{% url 'accounts:select_payment_method' %}">
+                <input type="hidden" name="plan" value="MONTHLY">
+                <button type="submit" class="btn-plan">Select Monthly Plan</button>
+            </form>
+        </div>
+
+        <div class="plan-card featured">
+            <div>
+                <span style="background: rgba(8,96,112,0.1); color: var(--asset-primary); font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">Best Value (Save 16%)</span>
+                <h3>Annual Access</h3>
+                <div class="price">100,000 <span style="font-size: 12px; font-weight: 600;">TZS / yr</span></div>
+                <p style="font-size: 13px; color: var(--asset-muted); line-height: 1.5;">Continuous uninterrupted portal access with priority advisory and VIP support.</p>
+            </div>
+            <form method="GET" action="{% url 'accounts:select_payment_method' %}">
+                <input type="hidden" name="plan" value="ANNUAL">
+                <button type="submit" class="btn-plan">Select Annual Plan</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

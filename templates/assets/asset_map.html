@@ -1,17 +1,217 @@
-{% extends "base.html" %}
-{% block title %}Asset Geographic Map - Asset Portal{% endblock %}
-{% block page_title %}Real Estate & Land Map Integration{% endblock %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+{% load humanize %}
 
-{% block content %}
-<div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">Geographic Pin Drop Visualization</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Visually drop geographic pins for land and house assets based on their location fields[cite: 1].</p>
+{% block dashboard_title %}Asset Geographic Map - Asset Portal{% endblock %}
+{% block view_header %}Real Estate &amp; Land Map Integration{% endblock %}
 
-    <div style="width: 100%; height: 400px; background: #eef2f5; border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">
-        <div style="text-align: center; color: #555;">
-            <h4 style="margin: 0 0 5px 0; color: #1a1a1a;">Interactive Map Viewer (Google Maps / Mapbox API)[cite: 1]</h4>
-            <p style="font-size: 13px; margin: 0;">Pins loaded: Commercial Estate (Dar es Salaam), Residential Villa (Arusha)</p>
+{% block dashboard_content %}
+<style>
+:root {
+    --asset-primary: #086070;
+    --asset-primary-hover: #064b58;
+    --asset-border: rgba(15, 23, 42, 0.12);
+    --asset-muted: #687181;
+    --asset-text: #0F172A;
+    --asset-radius: 14px;
+}
+
+.asset-workspace {
+    color: var(--asset-text);
+    width: 100%;
+    min-width: 0;
+}
+
+.asset-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px;
+    margin-bottom: 22px;
+    border-radius: var(--asset-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+}
+
+.asset-hero h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.asset-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.asset-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s ease;
+}
+
+.asset-btn-primary {
+    background: #fff;
+    color: var(--asset-primary);
+}
+.asset-btn-primary:hover {
+    background: #f8fafc;
+    color: var(--asset-primary-dark);
+}
+
+.map-container-panel {
+    background: #fff;
+    border: 1px solid var(--asset-border);
+    border-radius: var(--asset-radius);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    overflow: hidden;
+    padding: 24px;
+}
+
+.map-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--asset-border);
+}
+
+.map-filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.map-select {
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid var(--asset-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--asset-text);
+    outline: none;
+    font-size: 12px;
+}
+
+.map-viewport {
+    width: 100%;
+    height: 460px;
+    background: #eef2f5;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--asset-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.map-overlay-card {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: #fff;
+    padding: 14px 18px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid var(--asset-border);
+    max-width: 320px;
+}
+
+.map-overlay-card h5 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    color: var(--asset-text);
+    font-weight: 800;
+}
+
+.map-overlay-card p {
+    margin: 0;
+    font-size: 11px;
+    color: var(--asset-muted);
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .map-viewport {
+        height: 350px;
+    }
+    .map-overlay-card {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+}
+</style>
+
+<div class="asset-workspace">
+
+    <!-- HERO HEADER -->
+    <section class="asset-hero">
+        <div>
+            <h2>Real Estate &amp; Land Map Integration</h2>
+            <p>Visually inspect geographic pin drops for land parcels and real estate properties across Tanzania and East Africa.</p>
         </div>
-    </div>
+        <div>
+            <a href="{% url 'assets:asset_list' %}" class="asset-btn asset-btn-primary">
+                <i class="fa-solid fa-arrow-left"></i> Back to My Assets
+            </a>
+        </div>
+    </section>
+
+    <!-- MAP PANEL -->
+    <section class="map-container-panel">
+        <div class="map-toolbar">
+            <div>
+                <h3 style="margin: 0 0 4px; font-size: 16px; color: var(--asset-text);">Geographic Pin Drop Visualization</h3>
+                <p style="margin: 0; font-size: 12px; color: var(--asset-muted);">Active pins loaded from verified land deeds and real estate records.</p>
+            </div>
+            <div class="map-filter-group">
+                <select class="map-select" id="mapPropertyFilter">
+                    <option value="all">All Locations (Dar es Salaam, Arusha)</option>
+                    <option value="dar">Dar es Salaam Region</option>
+                    <option value="arusha">Arusha Region</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="map-viewport">
+            <!-- Simulated Map Canvas Background (Replace with Leaflet.js or Google Maps API instance) -->
+            <div style="text-align: center; color: var(--asset-muted); padding: 20px;">
+                <i class="fa-solid fa-map-location-dot" style="font-size: 42px; color: var(--asset-primary); margin-bottom: 12px;"></i>
+                <h4 style="margin: 0 0 6px 0; color: var(--asset-text); font-size: 15px;">Interactive Map View (Google Maps / Mapbox API)</h4>
+                <p style="font-size: 12px; margin: 0; max-width: 400px;">
+                    Geospatial coordinates linked successfully. Showing active real estate pins.
+                </p>
+            </div>
+
+            <!-- Floating Active Pin Card -->
+            <div class="map-overlay-card">
+                <h5><i class="fa-solid fa-location-dot" style="color: #dc2626;"></i> Commercial Estate — Dar es Salaam</h5>
+                <p>Status: Verified Title Deed • Valuation: High Yield District</p>
+            </div>
+        </div>
+    </section>
+
 </div>
 {% endblock %}

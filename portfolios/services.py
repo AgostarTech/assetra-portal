@@ -90,3 +90,5 @@ class PortfolioEngine:
         one_year_ago = timezone.now() - timedelta(days=365)
         stale_assets = Asset.objects.filter(updated_at__lt=one_year_ago)
         return stale_assets
+
+

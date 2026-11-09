@@ -1,29 +1,90 @@
-{% extends "base.html" %}
-{% block title %}Ticket Escalation - Asset Portal{% endblock %}
-{% block page_title %}Help Desk Ticket Escalation Workflow{% endblock %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 
-{% block content %}
-<div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">Security & Complex Issue Escalation</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Automatically route highly complex or security-related tickets from the help desk to system administrators[cite: 1].</p>
+{% block dashboard_title %}Ticket Escalation - Private Wealth Portal{% endblock %}
+{% block view_header %}Help Desk Ticket Escalation Workflow{% endblock %}
 
-    <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1a1a1a;">Escalate Active Ticket #104</h4>
-        <form method="POST" onsubmit="alert('Ticket successfully escalated to System Administrators (ROLE_ADMIN)!'); return false;">
-            {% csrf_token %}
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 6px; font-size: 13px;">Escalation Tier:</label>
-                <select name="escalate_tier" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
-                    <option value="admin">System Administrator (ROLE_ADMIN) - Security & Infrastructure</option>
-                    <option value="compliance">Chief Compliance Officer - Legal Audit Review</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 6px; font-size: 13px;">Escalation Reason / Notes:</label>
-                <textarea name="reason" rows="3" placeholder="Describe why this support ticket requires escalation..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required></textarea>
-            </div>
-            <button type="submit" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Escalate to Admin Tier</button>
-        </form>
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; max-width: 900px; margin: 0 auto; }
+
+    .asset-hero {
+        padding: 24px; margin-bottom: 22px; border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .panel {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); padding: 30px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+    }
+
+    .escalation-box {
+        background: #f8fafc; border: 1px solid rgba(8, 96, 112, 0.2);
+        padding: 24px; border-radius: 10px; margin-top: 20px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--asset-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group select, .form-group textarea {
+        width: 100%; padding: 11px 14px; border: 1px solid var(--asset-border); border-radius: 8px;
+        font-size: 13.5px; color: var(--asset-text); background: #fff; outline: none; transition: border-color 0.2s;
+    }
+    .form-group select:focus, .form-group textarea:focus { border-color: var(--asset-primary); }
+
+    .btn-escalate {
+        background: var(--asset-primary); color: #fff; border: none; padding: 12px 24px;
+        border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-escalate:hover { background: var(--asset-primary-hover); }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <h2>Security &amp; Complex Issue Escalation</h2>
+        <p>Automatically route highly complex or security-related tickets from the help desk to system administrators and compliance officers.</p>
+    </section>
+
+    <div class="panel">
+        <h3 style="margin-top: 0; font-size: 17px; color: var(--asset-text); font-weight: 800; margin-bottom: 8px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--asset-primary); margin-right: 8px;"></i> Escalate Active Ticket #104
+        </h3>
+        <p style="color: var(--asset-muted); font-size: 13px; margin-bottom: 20px;">
+            Select the appropriate escalation tier and provide a detailed audit note for administrative review.
+        </p>
+
+        <div class="escalation-box">
+            <form method="POST" onsubmit="alert('Ticket successfully escalated to System Administrators (ROLE_ADMIN)!'); return true;">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Escalation Tier:</label>
+                    <select name="escalate_tier" required>
+                        <option value="admin">System Administrator (ROLE_ADMIN) - Security &amp; Infrastructure</option>
+                        <option value="compliance">Chief Compliance Officer - Legal Audit Review</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Escalation Reason / Notes:</label>
+                    <textarea name="reason" rows="4" placeholder="Describe why this support ticket requires escalation..." required></textarea>
+                </div>
+                <button type="submit" class="btn-escalate">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Escalate to Admin Tier
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

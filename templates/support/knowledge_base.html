@@ -1,24 +1,96 @@
-{% extends "base.html" %}
-{% block title %}Knowledge Base FAQ - Asset Portal{% endblock %}
-{% block page_title %}Integrated Knowledge Base & FAQ{% endblock %}
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 
-{% block content %}
-<div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">Frequently Asked Questions</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Browse our verified self-service documentation to quickly resolve asset management and compliance questions before submitting a support ticket[cite: 1].</p>
+{% block dashboard_title %}Knowledge Base - Private Wealth Portal{% endblock %}
+{% block view_header %}Client Knowledge Base &amp; FAQ{% endblock %}
 
-    <div style="display: flex; flex-direction: column; gap: 15px;">
-        <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 15px; border-radius: 6px;">
-            <h4 style="margin: 0 0 5px 0; color: #1a1a1a; font-size: 15px;">How do I upload compliance identity documents?</h4>
-            <p style="margin: 0; font-size: 13px; color: #666;">Navigate to the Documents module, use the drag-and-drop upload zone to select your PDF or PNG file, and submit it for compliance officer review.</p>
+{% block dashboard_content %}
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(15, 23, 42, 0.12);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 14px;
+    }
+
+    .asset-workspace { color: var(--asset-text); width: 100%; }
+
+    .asset-hero {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 20px; flex-wrap: wrap; padding: 24px; margin-bottom: 22px;
+        border-radius: var(--asset-radius); color: #fff;
+        background: linear-gradient(135deg, #086070, #097c92);
+        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
+    }
+    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
+    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
+
+    .kb-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .kb-card {
+        background: #fff; border: 1px solid var(--asset-border);
+        border-radius: var(--asset-radius); padding: 24px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+        display: flex; flex-direction: column; justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kb-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06); }
+    .kb-card h4 { margin: 0 0 10px; font-size: 16px; color: var(--asset-text); font-weight: 800; }
+    .kb-card p { margin: 0 0 16px; color: var(--asset-muted); font-size: 13px; line-height: 1.5; }
+
+    .kb-link {
+        color: var(--asset-primary); font-weight: 700; font-size: 12.5px;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .kb-link:hover { color: var(--asset-primary-hover); }
+</style>
+
+<div class="asset-workspace">
+    <section class="asset-hero">
+        <div>
+            <h2>Knowledge Base &amp; Guides</h2>
+            <p>Explore official documentation, asset valuation criteria, and security compliance instructions.</p>
         </div>
-        <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 15px; border-radius: 6px;">
-            <h4 style="margin: 0 0 5px 0; color: #1a1a1a; font-size: 15px;">How is my total portfolio net worth calculated?</h4>
-            <p style="margin: 0; font-size: 13px; color: #666;">The platform aggregates all active asset valuations in real time and applies currency conversion standards to display your net worth instantly.</p>
+        <div>
+            <a href="{% url 'support:create_ticket' %}" style="background: #fff; color: var(--asset-primary); padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-headset"></i> Contact Support
+            </a>
         </div>
-        <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 15px; border-radius: 6px;">
-            <h4 style="margin: 0 0 5px 0; color: #1a1a1a; font-size: 15px;">What should I do if my valuation is flagged as stale?</h4>
-            <p style="margin: 0; font-size: 13px; color: #666;">Assets unvalued for over 12 months trigger compliance alerts. Update the asset valuation via the inline editing table or request an appraisal review.</p>
+    </section>
+
+    <div class="kb-grid">
+        <div class="kb-card">
+            <div>
+                <div style="color: var(--asset-primary); font-size: 20px; margin-bottom: 12px;"><i class="fa-solid fa-vault"></i></div>
+                <h4>Asset Registration &amp; Valuations</h4>
+                <p>Learn how to properly record vehicles, real estate parcels, stocks, and government bonds with accurate market valuation dates.</p>
+            </div>
+            <a href="#" class="kb-link">Read Guide <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="kb-card">
+            <div>
+                <div style="color: var(--asset-primary); font-size: 20px; margin-bottom: 12px;"><i class="fa-solid fa-file-pdf"></i></div>
+                <h4>Certified Financial Statements</h4>
+                <p>Understand how the PortfolioEngine compiles net worth, multi-currency conversions, and official downloadable PDF audit reports.</p>
+            </div>
+            <a href="#" class="kb-link">Read Guide <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="kb-card">
+            <div>
+                <div style="color: var(--asset-primary); font-size: 20px; margin-bottom: 12px;"><i class="fa-solid fa-shield-halved"></i></div>
+                <h4>Security &amp; Role-Based Access</h4>
+                <p>Guidelines on keeping your private wealth portal account secure, managing login sessions, and two-factor authentication.</p>
+            </div>
+            <a href="#" class="kb-link">Read Guide <i class="fa-solid fa-arrow-right"></i></a>
         </div>
     </div>
 </div>

@@ -1,0 +1,52 @@
+{% extends 'dashboards/base_dashboard.html' %}
+
+{% block dashboard_title %}Support Center{% endblock %}
+{% block view_header %}Concierge & Support Center{% endblock %}
+
+{% block dashboard_content %}
+<div class="panel" style="background:#FFFFFF; border:1px solid rgba(15,23,42,0.12); border-radius:14px; padding:24px; box-shadow:0 3px 12px rgba(15,23,42,.03);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+            <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Your Support Tickets</h3>
+            <p style="margin:0; color:#687181; font-size:13px;">Reach out to your dedicated wealth concierge or track open inquiries.</p>
+        </div>
+        <a href="#" class="btn-primary" style="background:#086070; color:#FFF; padding:10px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:700;">
+            <i class="fa-solid fa-plus"></i> New Support Ticket
+        </a>
+    </div>
+
+    <div class="table-wrapper" style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+                <tr style="background:#F8FAFC; border-bottom:1px solid rgba(15,23,42,0.08);">
+                    <th style="padding:12px; text-align:left; color:#687181;">Subject</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Priority</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Status</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Date Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr style="border-bottom:1px solid #edf0f5;">
+                    <td style="padding:12px; font-weight:600; color:#0F172A;">{{ ticket.subject }}</td>
+                    <td style="padding:12px; color:#687181;">{{ ticket.get_priority_display }}</td>
+                    <td style="padding:12px;">
+                        <span style="padding:4px 8px; border-radius:20px; font-size:10px; font-weight:700; background:#fef3c7; color:#92400e;">
+                            {{ ticket.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="padding:12px; color:#687181;">{{ ticket.created_at|date:"d M Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:40px; color:#687181;">
+                        <i class="fa-solid fa-headset" style="font-size:24px; margin-bottom:8px; display:block;"></i>
+                        No support tickets submitted.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

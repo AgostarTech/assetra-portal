@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import path, include, reverse_lazy
 from django.views.generic import RedirectView, TemplateView
@@ -35,7 +34,7 @@ urlpatterns = [
     ),
 
     # --------------------------------------------------
-    # AUTHENTICATION AND REGISTRATION
+    # AUTHENTICATION AND REGISTRATION (NAMESPACED)
     # --------------------------------------------------
     path(
         "signup/",
@@ -43,11 +42,17 @@ urlpatterns = [
         name="signup",
     ),
 
-    # Django built-in login, logout, password change,
-    # and other authentication routes.
+    # Includes login, verify-otp, and other custom account views with namespace 'accounts'
     path(
         "accounts/",
-        include("django.contrib.auth.urls"),
+        include(("accounts.urls", "accounts"), namespace="accounts"),
+    ),
+
+    # Global Logout endpoint matching the sidebar template request
+    path(
+        "accounts/logout/",
+        auth_views.LogoutView.as_view(next_page="/accounts/login/"),
+        name="logout",
     ),
 
     # --------------------------------------------------

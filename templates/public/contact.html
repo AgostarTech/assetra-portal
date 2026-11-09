@@ -1,26 +1,36 @@
 {% extends "base_public.html" %}
-{% block title %}Contact Support | Private Wealth{% endblock %}
+{% load static %}
+
+{% block title %}Contact Support | Assetra Africa Portal{% endblock %}
+
 {% block content %}
 
 <style>
-    .cs-page {
-        --cs-bg: #080d17;
-        --cs-panel: #101827;
-        --cs-gold: #d7b77a;
-        --cs-gold-light: #f0d9a5;
-        --cs-text: #f5f4ef;
-        --cs-muted: #a2adbd;
-        --cs-border: rgba(215,183,122,.20);
-        background: var(--cs-bg);
-        color: var(--cs-text);
-        font-family: inherit;
-        overflow: hidden;
+    :root {
+        --cs-bg: #f4f7f9;
+        --cs-surface: #ffffff;
+        --cs-teal: #0b535b;
+        --cs-teal-hover: #073c42;
+        --cs-teal-soft: rgba(11, 83, 91, 0.08);
+        --cs-emerald: #059669;
+        --cs-text: #0f172a;
+        --cs-muted: #64748b;
+        --cs-border: rgba(15, 23, 42, 0.08);
     }
 
-    .cs-page * { box-sizing: border-box; }
+    .cs-page {
+        background: var(--cs-bg);
+        color: var(--cs-text);
+        font-family: 'Inter', "Segoe UI", sans-serif;
+        overflow-x: hidden;
+    }
+
+    .cs-page * { 
+        box-sizing: border-box; 
+    }
 
     .cs-container {
-        width: min(1120px, calc(100% - 36px));
+        width: min(1120px, calc(100% - 40px));
         margin: auto;
     }
 
@@ -28,90 +38,102 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        color: var(--cs-gold);
-        font-size: .72rem;
-        font-weight: 700;
-        letter-spacing: .2em;
+        color: var(--cs-teal);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2.5px;
         text-transform: uppercase;
+        background: var(--cs-teal-soft);
+        padding: 5px 12px;
+        border-radius: 6px;
     }
 
     .cs-eyebrow::before {
         content: "";
-        width: 25px;
-        height: 1px;
-        background: var(--cs-gold);
+        width: 18px;
+        height: 2px;
+        background: var(--cs-teal);
     }
 
+    .cs-accent-text {
+        color: var(--cs-teal);
+    }
+
+    /* HERO SECTION */
     .cs-hero {
         position: relative;
-        padding: 85px 0 75px;
+        padding: 95px 0 85px;
         text-align: center;
+        background: var(--cs-surface);
         border-bottom: 1px solid var(--cs-border);
-        background:
-            radial-gradient(ellipse at 50% 0,
-                rgba(215,183,122,.12), transparent 60%),
-            linear-gradient(145deg, #0d1523, var(--cs-bg));
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
     }
 
     .cs-hero h1 {
-        margin: 22px auto 18px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2.8rem, 6vw, 5rem);
-        font-weight: 400;
-        line-height: 1.05;
-        letter-spacing: -.045em;
+        margin: 20px auto 15px;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -1.5px;
+        color: var(--cs-text);
     }
 
-    .cs-hero h1 span { color: var(--cs-gold); }
+    .cs-hero h1 span { 
+        color: var(--cs-teal); 
+        display: block;
+    }
 
     .cs-hero p {
-        max-width: 650px;
+        max-width: 600px;
         margin: auto;
         color: var(--cs-muted);
-        font-size: 1rem;
-        line-height: 1.9;
+        font-size: 1.02rem;
+        line-height: 1.8;
     }
 
     .cs-breadcrumb {
-        margin-bottom: 28px;
-        color: #9ba7b7;
-        font-size: .75rem;
-        letter-spacing: .08em;
+        margin-bottom: 25px;
+        color: var(--cs-muted);
+        font-size: 0.8rem;
     }
 
     .cs-breadcrumb a {
-        color: var(--cs-gold);
+        color: var(--cs-teal);
         text-decoration: none;
+        font-weight: 600;
     }
 
-    .cs-section { padding: 75px 0; }
+    .cs-section { 
+        padding: 85px 0; 
+    }
 
     .cs-contact-grid {
         display: grid;
-        grid-template-columns: .85fr 1.15fr;
-        gap: 28px;
+        grid-template-columns: 0.85fr 1.15fr;
+        gap: 35px;
         align-items: start;
     }
 
     .cs-intro h2,
     .cs-form-heading h2 {
-        margin: 18px 0 14px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2rem, 3.5vw, 3rem);
-        font-weight: 400;
-        line-height: 1.15;
+        margin: 16px 0 12px;
+        font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--cs-text);
     }
 
     .cs-intro > p,
     .cs-form-heading p {
         color: var(--cs-muted);
-        line-height: 1.9;
-        font-size: .91rem;
+        line-height: 1.8;
+        font-size: 0.95rem;
     }
 
     .cs-info-list {
         display: grid;
-        gap: 14px;
+        gap: 16px;
         margin-top: 30px;
     }
 
@@ -119,150 +141,168 @@
         display: flex;
         align-items: flex-start;
         gap: 16px;
-        padding: 20px;
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 5px;
-        background: linear-gradient(145deg,
-            rgba(255,255,255,.035), rgba(255,255,255,.01));
+        padding: 22px;
+        border: 1px solid var(--cs-border);
+        border-radius: 10px;
+        background: var(--cs-surface);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
+        transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .cs-info-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--cs-teal);
     }
 
     .cs-icon {
-        width: 45px;
-        height: 45px;
-        flex: 0 0 45px;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
         display: grid;
         place-items: center;
-        color: var(--cs-gold);
+        color: var(--cs-teal);
         border: 1px solid var(--cs-border);
-        border-radius: 4px;
-        background: rgba(215,183,122,.06);
+        border-radius: 8px;
+        background: var(--cs-teal-soft);
     }
 
     .cs-info-card h3 {
-        margin: 2px 0 7px;
-        font-size: .9rem;
+        margin: 2px 0 6px;
+        font-size: 1rem;
         font-weight: 700;
+        color: var(--cs-text);
     }
 
     .cs-info-card p {
         margin: 0;
         color: var(--cs-muted);
-        font-size: .82rem;
-        line-height: 1.75;
+        font-size: 0.86rem;
+        line-height: 1.7;
         overflow-wrap: anywhere;
     }
 
     .cs-info-card a {
-        color: var(--cs-gold-light);
+        color: var(--cs-teal);
         text-decoration: none;
+        font-weight: 600;
     }
 
-    .cs-info-card a:hover { text-decoration: underline; }
+    .cs-info-card a:hover { 
+        text-decoration: underline; 
+    }
 
+    /* FORM PANEL */
     .cs-form-panel {
-        padding: clamp(22px, 4vw, 38px);
+        padding: clamp(25px, 4vw, 40px);
         border: 1px solid var(--cs-border);
-        border-radius: 6px;
-        background:
-            radial-gradient(ellipse at 100% 0,
-                rgba(215,183,122,.06), transparent 45%),
-            var(--cs-panel);
-        box-shadow: 0 24px 65px rgba(0,0,0,.18);
+        border-radius: 12px;
+        background: var(--cs-surface);
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.05);
     }
 
-    .cs-form-heading { margin-bottom: 28px; }
+    .cs-form-heading { 
+        margin-bottom: 28px; 
+    }
 
-    .cs-form-heading h2 { font-size: 2rem; }
+    .cs-form-heading h2 { 
+        font-size: 1.8rem; 
+    }
 
     .cs-form-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 19px;
+        gap: 18px;
     }
 
-    .cs-field { min-width: 0; }
+    .cs-field { 
+        min-width: 0; 
+    }
 
-    .cs-field-full { grid-column: 1 / -1; }
+    .cs-field-full { 
+        grid-column: 1 / -1; 
+    }
 
     .cs-field label {
         display: block;
-        margin-bottom: 9px;
-        color: #e6e8ed;
-        font-size: .78rem;
-        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--cs-text);
+        font-size: 0.82rem;
+        font-weight: 700;
     }
 
     .cs-field input,
     .cs-field select,
     .cs-field textarea {
         width: 100%;
-        min-height: 49px;
-        padding: 13px 14px;
-        border: 1px solid rgba(255,255,255,.13);
-        border-radius: 3px;
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid var(--cs-border);
+        border-radius: 8px;
         outline: none;
         color: var(--cs-text);
-        background: #0a111e;
+        background: var(--cs-bg);
         font: inherit;
-        font-size: .84rem;
-        transition: border-color .2s, box-shadow .2s;
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .cs-field textarea {
-        min-height: 145px;
+        min-height: 140px;
         resize: vertical;
-        line-height: 1.7;
+        line-height: 1.6;
     }
 
     .cs-field select option {
         color: var(--cs-text);
-        background: #0a111e;
+        background: var(--cs-surface);
     }
 
     .cs-field input::placeholder,
     .cs-field textarea::placeholder {
-        color: #758195;
+        color: #94a3b8;
     }
 
     .cs-field input:focus,
     .cs-field select:focus,
     .cs-field textarea:focus {
-        border-color: var(--cs-gold);
-        box-shadow: 0 0 0 3px rgba(215,183,122,.09);
+        border-color: var(--cs-teal);
+        box-shadow: 0 0 0 3px rgba(11, 83, 91, 0.12);
+        background: var(--cs-surface);
     }
 
     .cs-submit {
         width: 100%;
-        min-height: 52px;
+        min-height: 50px;
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        gap: 12px;
-        margin-top: 22px;
-        padding: 14px 20px;
+        gap: 10px;
+        margin-top: 24px;
+        padding: 12px 20px;
         border: 1px solid transparent;
-        border-radius: 3px;
-        color: #15120b;
-        background: linear-gradient(120deg,
-            var(--cs-gold-light), var(--cs-gold));
-        font-size: .78rem;
-        font-weight: 800;
-        letter-spacing: .1em;
+        border-radius: 8px;
+        color: #ffffff;
+        background: var(--cs-teal);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         cursor: pointer;
-        transition: transform .2s, background .2s;
+        box-shadow: 0 8px 20px rgba(11, 83, 91, 0.22);
+        transition: all 0.25s ease;
     }
 
     .cs-submit:hover {
         transform: translateY(-2px);
-        background: #f3dfb3;
+        background: var(--cs-teal-hover);
+        box-shadow: 0 12px 25px rgba(11, 83, 91, 0.3);
     }
 
     .cs-form-note {
         margin: 15px 0 0;
-        color: #8793a5;
-        font-size: .72rem;
-        line-height: 1.7;
+        color: var(--cs-muted);
+        font-size: 0.78rem;
+        line-height: 1.6;
         text-align: center;
     }
 
@@ -271,33 +311,38 @@
         align-items: flex-start;
         gap: 12px;
         margin-top: 25px;
-        padding: 16px;
-        border: 1px solid rgba(215,183,122,.13);
-        background: rgba(215,183,122,.035);
+        padding: 18px;
+        border: 1px solid rgba(11, 83, 91, 0.2);
+        background: var(--cs-teal-soft);
         color: var(--cs-muted);
-        font-size: .78rem;
-        line-height: 1.8;
+        font-size: 0.84rem;
+        line-height: 1.7;
+        border-radius: 10px;
     }
 
-    .cs-security-note strong { color: var(--cs-gold-light); }
+    .cs-security-note strong { 
+        color: var(--cs-text); 
+    }
 
+    /* FAQ SECTION */
     .cs-faq {
-        padding: 70px 0 85px;
-        border-top: 1px solid rgba(255,255,255,.07);
-        background: #0b111d;
+        padding: 85px 0;
+        border-top: 1px solid var(--cs-border);
+        background: var(--cs-surface);
     }
 
     .cs-faq-heading {
-        max-width: 660px;
-        margin: 0 auto 38px;
+        max-width: 650px;
+        margin: 0 auto 40px;
         text-align: center;
     }
 
     .cs-faq-heading h2 {
-        margin: 17px 0;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: 400;
+        margin: 14px 0;
+        font-size: clamp(2rem, 3.5vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--cs-text);
     }
 
     .cs-faq-heading p {
@@ -308,66 +353,70 @@
     .cs-faq-list {
         max-width: 800px;
         margin: auto;
-        border-top: 1px solid rgba(255,255,255,.10);
+        border-top: 1px solid var(--cs-border);
     }
 
     .cs-faq-item {
-        border-bottom: 1px solid rgba(255,255,255,.10);
+        border-bottom: 1px solid var(--cs-border);
     }
 
     .cs-faq-item summary {
         position: relative;
         padding: 22px 35px 22px 0;
-        color: #eef0f4;
-        font-size: .92rem;
-        font-weight: 600;
+        color: var(--cs-text);
+        font-size: 0.98rem;
+        font-weight: 700;
         cursor: pointer;
         list-style: none;
     }
 
-    .cs-faq-item summary::-webkit-details-marker { display: none; }
+    .cs-faq-item summary::-webkit-details-marker { 
+        display: none; 
+    }
 
     .cs-faq-item summary::after {
         content: "+";
         position: absolute;
-        top: 17px;
+        top: 18px;
         right: 3px;
-        color: var(--cs-gold);
-        font-size: 1.5rem;
+        color: var(--cs-teal);
+        font-size: 1.4rem;
         font-weight: 400;
     }
 
-    .cs-faq-item[open] summary::after { content: "−"; }
+    .cs-faq-item[open] summary::after { 
+        content: "−"; 
+    }
 
     .cs-faq-item p {
-        max-width: 700px;
+        max-width: 730px;
         margin: 0;
         padding: 0 20px 22px 0;
         color: var(--cs-muted);
-        font-size: .86rem;
-        line-height: 1.9;
+        font-size: 0.9rem;
+        line-height: 1.8;
     }
 
+    /* BOTTOM CTA */
     .cs-bottom-cta {
-        padding: 65px 0;
+        padding: 75px 20px;
         text-align: center;
         border-top: 1px solid var(--cs-border);
-        background:
-            radial-gradient(ellipse at 50% 100%,
-                rgba(215,183,122,.08), transparent 65%),
-            var(--cs-bg);
+        background: var(--cs-bg);
     }
 
     .cs-bottom-cta h2 {
-        margin: 15px 0;
-        font-family: Georgia, "Times New Roman", serif;
+        max-width: 700px;
+        margin: 14px auto;
         font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: 400;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--cs-text);
     }
 
     .cs-bottom-cta p {
+        max-width: 580px;
         margin: 0 auto 25px;
-        max-width: 600px;
         color: var(--cs-muted);
         line-height: 1.8;
     }
@@ -377,41 +426,42 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
-        min-height: 49px;
-        padding: 13px 23px;
-        border: 1px solid var(--cs-gold);
-        border-radius: 3px;
-        color: var(--cs-gold-light);
+        min-height: 48px;
+        padding: 0 24px;
+        border: 2px solid var(--cs-teal);
+        border-radius: 8px;
+        color: var(--cs-teal);
         text-decoration: none;
-        font-size: .77rem;
+        font-size: 12px;
         font-weight: 700;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        transition: background .2s, color .2s;
+        background: var(--cs-surface);
+        transition: all 0.25s ease;
     }
 
     .cs-button:hover {
-        color: #15120b;
-        background: var(--cs-gold);
+        color: #ffffff;
+        background: var(--cs-teal);
+        transform: translateY(-2px);
     }
 
     @media (max-width: 850px) {
-        .cs-contact-grid { grid-template-columns: 1fr; }
-        .cs-info-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .cs-contact-grid { 
+            grid-template-columns: 1fr; 
+        }
+        .cs-info-list { 
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+        }
     }
 
     @media (max-width: 560px) {
-        .cs-container { width: calc(100% - 28px); }
-        .cs-hero { padding: 60px 0; }
-        .cs-section { padding: 52px 0; }
+        .cs-hero { padding: 65px 0; }
+        .cs-section { padding: 60px 0; }
         .cs-info-list { grid-template-columns: 1fr; }
         .cs-form-grid { grid-template-columns: 1fr; }
         .cs-field-full { grid-column: auto; }
         .cs-button { width: 100%; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .cs-page * { transition-duration: .01ms !important; }
     }
 </style>
 
@@ -421,17 +471,17 @@
     <section class="cs-hero">
         <div class="cs-container">
             <div class="cs-breadcrumb">
-                <a href="/">Home</a> / Support
+                <a href="{% url 'home' %}">Home</a> / Support
             </div>
 
-            <span class="cs-eyebrow">Dedicated assistance</span>
+            <span class="cs-eyebrow">Dedicated Assistance</span>
 
             <h1>We're here to help.<br><span>Every step of the way.</span></h1>
 
             <p>
                 Questions about your account, portfolio records, or
                 using the platform? Reach out to our support team for
-                assistance with your experience.
+                professional assistance with your experience.
             </p>
         </div>
     </section>
@@ -441,7 +491,7 @@
         <div class="cs-container cs-contact-grid">
 
             <div class="cs-intro">
-                <span class="cs-eyebrow">Contact our team</span>
+                <span class="cs-eyebrow">Contact Our Team</span>
 
                 <h2>Clear answers.<br>Considered support.</h2>
 
@@ -458,7 +508,7 @@
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                                 <circle cx="12" cy="9" r="2.5"/>
                             </svg>
@@ -467,7 +517,7 @@
                             <h3>Office Location</h3>
                             <p>
                                 Victoria Noble Center<br>
-                                4th Floor
+                                4th Floor, Dar es Salaam
                             </p>
                         </div>
                     </article>
@@ -476,7 +526,7 @@
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                             </svg>
                         </div>
@@ -492,7 +542,7 @@
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="5" width="18" height="14" rx="2"/>
                                 <path d="m3 7 9 6 9-6"/>
                             </svg>
@@ -500,8 +550,8 @@
                         <div>
                             <h3>Email Support</h3>
                             <p>
-                                <a href="mailto:info@assetra.com">info@assetra.com</a><br>
-                                <a href="mailto:assetra@gmail.com">assetra@gmail.com</a>
+                                <a href="mailto:info@assetra.africa">info@assetra.africa</a><br>
+                                <a href="mailto:support@assetra.africa">support@assetra.africa</a>
                             </p>
                         </div>
                     </article>
@@ -510,7 +560,7 @@
                     <article class="cs-info-card">
                         <div class="cs-icon" aria-hidden="true">
                             <svg width="22" height="22" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="9"/>
                                 <path d="M12 7v5l3 2"/>
                             </svg>
@@ -526,7 +576,7 @@
                 </div>
 
                 <div class="cs-security-note">
-                    <span class="cs-check" aria-hidden="true">◆</span>
+                    <span class="cs-accent-text" aria-hidden="true">◆</span>
                     <div>
                         <strong>Protect your information.</strong>
                         Never send your password, authentication codes,
@@ -536,10 +586,10 @@
                 </div>
             </div>
 
-            <!-- FRONT-END FORM PANEL -->
+            <!-- FORM PANEL -->
             <div class="cs-form-panel">
                 <div class="cs-form-heading">
-                    <span class="cs-eyebrow">Send an enquiry</span>
+                    <span class="cs-eyebrow">Send An Enquiry</span>
                     <h2>How can we assist?</h2>
                     <p>
                         Complete the fields below to describe your
@@ -616,7 +666,7 @@
 
                     <button type="submit" class="cs-submit">
                         Submit support request
-                        <span aria-hidden="true">↗</span>
+                        <span aria-hidden="true" style="margin-left: 4px;">↗</span>
                     </button>
 
                     <p class="cs-form-note">
@@ -633,7 +683,7 @@
     <section class="cs-faq">
         <div class="cs-container">
             <div class="cs-faq-heading">
-                <span class="cs-eyebrow">Quick guidance</span>
+                <span class="cs-eyebrow">Quick Guidance</span>
                 <h2>Frequently asked questions</h2>
                 <p>
                     Find a starting point for common account and
@@ -690,14 +740,14 @@
     <!-- CLOSING CTA -->
     <section class="cs-bottom-cta">
         <div class="cs-container">
-            <span class="cs-eyebrow">Client access</span>
+            <span class="cs-eyebrow">Client Access</span>
             <h2>Need help with your account?</h2>
             <p>
                 Return to your secure sign-in page to continue using
                 the platform.
             </p>
-            <a href="{% url 'login' %}" class="cs-button">
-                Go to client sign in <span aria-hidden="true">→</span>
+            <a href="{% url 'accounts:login' %}" class="cs-button">
+                Go to client sign in <span aria-hidden="true" style="margin-left: 4px;">→</span>
             </a>
         </div>
     </section>
