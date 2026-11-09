@@ -78,20 +78,26 @@ def signup_view(request):
         # Automatically create free trial subscription upon signup
         UserSubscription.objects.get_or_create(user=user)
 
-        user.generate_otp()
-        send_otp_notifications(user)
-
-        request.session['pre_otp_user_id'] = user.id
-        request.session.modified = True
+        # NOTE: OTP is frozen for now as requested. If you want signup to also bypass OTP, 
+        # uncomment the auto-login below and remove the redirect to verify_otp.
         
-        messages.info(request, "Account created! A verification code has been sent to your email and phone.")
-        return redirect("accounts:verify_otp")
+        # user.generate_otp()
+        # send_otp_notifications(user)
+        # request.session['pre_otp_user_id'] = user.id
+        # request.session.modified = True
+        # messages.info(request, "Account created! A verification code has been sent to your email and phone.")
+        # return redirect("accounts:verify_otp")
+
+        # Direct login & redirection for signup (optional, mirroring login change):
+        login(request, user)
+        messages.success(request, f"Account created successfully! Welcome, {user.first_name or user.email}!")
+        return redirect("dashboards:role_router")
 
     return render(request, "registration/signup.html")
 
 
 # ==========================================================
-# USER LOGIN
+# USER LOGIN (OTP BYPASSED / FROZEN)
 # ==========================================================
 
 def login_view(request):
@@ -105,14 +111,12 @@ def login_view(request):
         user = authenticate(request, username=identifier, password=password)
 
         if user is not None:
-            user.generate_otp()
-            send_otp_notifications(user)
-
-            request.session['pre_otp_user_id'] = user.id
-            request.session.modified = True
+            # Log the user straight in
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.first_name or user.email}!")
             
-            messages.info(request, "A verification code has been sent to your email and phone.")
-            return redirect("accounts:verify_otp")
+            # Redirect straight to dashboard via role router
+            return redirect("dashboards:role_router")
         else:
             messages.error(request, "Invalid credentials. Please check your email/phone and password.")
 
@@ -120,10 +124,13 @@ def login_view(request):
 
 
 # ==========================================================
-# OTP VERIFICATION & DIRECT REDIRECTION
+# OTP VERIFICATION & DIRECT REDIRECTION (FROZEN / UNUSED FOR NOW)
 # ==========================================================
 
 def verify_otp_view(request):
+    """
+    Frozen for now. Kept here in case you want to re-enable OTP functionality later.
+    """
     user_id = request.session.get('pre_otp_user_id')
     if not user_id:
         messages.error(request, "Verification session expired. Please sign in again.")
@@ -148,12 +155,7 @@ def verify_otp_view(request):
             login(request, user)
 
             messages.success(request, f"Welcome back, {user.first_name or user.email}!")
-
-            role = (getattr(user, "role", "USER") or "USER").upper()
-            if role == "ADMIN" or user.is_staff or user.is_superuser:
-                return redirect("dashboards:admin_dashboard")
-            else:
-                return redirect("dashboards:user_dashboard")
+            return redirect("dashboards:role_router")
         else:
             messages.error(request, "Invalid or expired verification code. Please try again.")
 
