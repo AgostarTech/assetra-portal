@@ -2,561 +2,208 @@
 {% load static %}
 {% load humanize %}
 
-{% block dashboard_title %}Asset Management Center{% endblock %}
-{% block view_header %}Asset Management Center{% endblock %}
+{% block dashboard_title %}My Asset Portfolio Table{% endblock %}
+{% block view_header %}Asset Intelligence Vault (Tabular View){% endblock %}
 
 {% block dashboard_content %}
 <style>
 :root {
     --asset-primary: #086070;
-    --asset-primary-dark: #064b58;
-    --asset-accent: #0097B2;
-    --asset-bg: #F4F6F9;
     --asset-border: rgba(15, 23, 42, 0.12);
     --asset-muted: #687181;
     --asset-text: #0F172A;
     --asset-radius: 14px;
 }
 
-.asset-workspace {
-    color: var(--asset-text);
-    width: 100%;
-    min-width: 0;
-}
-
-.asset-hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    padding: 24px;
-    margin-bottom: 22px;
-    border-radius: var(--asset-radius);
-    color: #fff;
-    background: linear-gradient(135deg, #086070, #097c92);
-    box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
-}
-
-.asset-hero h2 {
-    margin: 0 0 6px;
-    font-size: 24px;
-    color: #fff;
-}
-
-.asset-hero p {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.asset-hero-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.asset-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 8px 14px;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    transition: .2s ease;
-}
-
-.asset-btn-outline {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-.asset-btn-outline:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.asset-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.asset-stat {
-    padding: 18px;
-    border: 1px solid var(--asset-border);
-    border-radius: 12px;
+.table-card {
     background: #fff;
+    border: 1px solid var(--asset-border);
+    border-radius: var(--asset-radius);
+    padding: 25px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, .04);
+    margin-bottom: 25px;
+    overflow-x: auto;
 }
 
-.asset-stat-label {
+.portfolio-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13.5px;
+}
+
+.portfolio-table th {
+    background: #F8FAFC;
     color: var(--asset-muted);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
+    padding: 14px 12px;
+    border-bottom: 2px solid var(--asset-border);
+    letter-spacing: 0.5px;
 }
 
-.asset-stat-value {
-    display: block;
-    font-size: 21px;
-    font-weight: 800;
-    color: var(--asset-text);
-    margin-top: 6px;
-}
-
-.asset-table-panel {
-    background: #fff;
-    border: 1px solid var(--asset-border);
-    border-radius: var(--asset-radius);
-    box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
-    overflow: hidden;
-}
-
-.asset-section-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 20px;
+.portfolio-table td {
+    padding: 16px 12px;
     border-bottom: 1px solid var(--asset-border);
-}
-
-.asset-section-heading h3 {
-    margin: 0 0 4px;
-    font-size: 16px;
     color: var(--asset-text);
-}
-
-.asset-section-heading p {
-    margin: 0;
-    color: var(--asset-muted);
-    font-size: 12px;
-}
-
-.asset-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--asset-border);
-    background: #F8FAFC;
-}
-
-.asset-search {
-    flex: 1 1 220px;
-}
-
-.asset-search input,
-.asset-filter {
-    width: 100%;
-    height: 38px;
-    padding: 8px 12px;
-    border: 1px solid var(--asset-border);
-    border-radius: 8px;
-    background: #fff;
-    color: var(--asset-text);
-    outline: none;
-    font-size: 12px;
-}
-
-.asset-filter {
-    width: auto;
-    min-width: 160px;
-}
-
-.asset-table-scroll {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.asset-table {
-    width: 100%;
-    border-collapse: collapse;
-    white-space: nowrap;
-}
-
-.asset-table th {
-    padding: 12px 16px;
-    text-align: left;
-    background: #F8FAFC;
-    color: var(--asset-muted);
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    border-bottom: 1px solid var(--asset-border);
-}
-
-.asset-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #edf1f6;
-    font-size: 12px;
     vertical-align: middle;
 }
 
-.asset-table tbody tr:hover {
-    background: #fafcff;
+.portfolio-table tbody tr:hover {
+    background-color: rgba(8, 96, 112, 0.02);
 }
 
-.asset-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.asset-type-icon {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: rgba(8, 96, 112, 0.1);
+.category-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
     color: var(--asset-primary);
-    flex-shrink: 0;
-}
-
-.asset-name {
-    display: block;
-    color: var(--asset-text);
-    font-weight: 700;
-}
-
-.asset-id {
-    display: block;
-    margin-top: 2px;
-    color: var(--asset-muted);
-    font-size: 10px;
-}
-
-.asset-category-badge {
-    display: inline-flex;
-    padding: 4px 8px;
+    background: rgba(8, 96, 112, 0.08);
     border-radius: 20px;
-    background: rgba(8, 96, 112, 0.1);
-    color: var(--asset-primary);
-    font-size: 10px;
-    font-weight: 700;
 }
 
-.asset-value {
-    font-weight: 750;
-    color: var(--asset-text);
-}
-
-.asset-row-actions {
-    display: flex;
-    gap: 6px;
-}
-
-.asset-action-btn {
+.btn-action {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 6px 10px;
-    border: 1px solid var(--asset-border);
     border-radius: 6px;
-    color: var(--asset-primary);
-    background: #fff;
-    text-decoration: none;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 700;
-    transition: all 0.15s ease;
+    text-decoration: none;
+    cursor: pointer;
 }
-.asset-action-btn:hover {
-    background: rgba(8, 96, 112, 0.08);
-    border-color: var(--asset-primary);
-}
-.asset-action-btn.delete {
-    color: #b91c1c;
-    border-color: rgba(185, 28, 28, 0.2);
-}
-.asset-action-btn.delete:hover {
+.btn-primary-custom { background: var(--asset-primary); color: #fff; }
+.btn-primary-custom:hover { background: #064b58; color: #fff; }
+.btn-outline-custom { background: #fff; border: 1px solid var(--asset-border); color: var(--asset-text); }
+.btn-outline-custom:hover { background: #f8fafc; }
+.btn-danger-custom { background: #fee2e2; color: #b91c1c; }
+.btn-danger-custom:hover { background: #fecaca; }
+
+.doc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #dc2626;
+    text-decoration: none;
     background: #fef2f2;
-    border-color: #b91c1c;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(220, 38, 38, 0.2);
 }
-
-.asset-empty {
-    padding: 40px 20px !important;
-    text-align: center;
-    color: var(--asset-muted);
-    white-space: normal;
-}
-
-.asset-table-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-    padding: 14px 20px;
-    color: var(--asset-muted);
-    font-size: 10px;
-}
-
-@media (max-width: 900px) {
-    .asset-stats {
-        grid-template-columns: 1fr;
-    }
+.doc-link:hover {
+    background: #fee2e2;
 }
 </style>
 
-<div class="asset-workspace" id="assetWorkspace">
-
-    <!-- HERO HEADER -->
-    <section class="asset-hero">
+<div class="asset-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h2>Asset Management Center</h2>
-            <p>Review all available assets, inspect linked verification documents, and manage individual records.</p>
+            <h2 style="font-size: 22px; color: var(--asset-text); margin: 0 0 4px;">{{ selected_category_label }}</h2>
+            <span style="color: var(--asset-muted); font-size: 13px;">Showing {{ asset_count }} active asset record(s) in tabular format</span>
         </div>
-
-        <div class="asset-hero-actions">
-            <button type="button" class="asset-btn asset-btn-outline" onclick="exportMasterCSV()">
-                <i class="fa-solid fa-file-csv" aria-hidden="true"></i> Save / Export CSV
-            </button>
-            <button type="button" class="asset-btn asset-btn-outline" onclick="window.print()">
-                <i class="fa-solid fa-print" aria-hidden="true"></i> Print Report
-            </button>
-            <a href="{% url 'assets:asset_list' %}" class="asset-btn asset-btn-outline">
-                <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'assets:asset_list' %}" class="btn-action btn-outline-custom">
+                <i class="fa-solid fa-layer-group"></i> All Assets
+            </a>
+            <a href="{% url 'assets:create_vehicle' %}" class="btn-action btn-primary-custom">
+                <i class="fa-solid fa-plus"></i> Add New Asset
             </a>
         </div>
-    </section>
+    </div>
 
-    <!-- STATS SUMMARY -->
-    <section class="asset-stats" aria-label="Asset summary">
-        <article class="asset-stat">
-            <span class="asset-stat-label">Total Assets</span>
-            <strong class="asset-stat-value" id="statTotalCount">{{ assets|length }}</strong>
-        </article>
-        <article class="asset-stat">
-            <span class="asset-stat-label">Displayed Records</span>
-            <strong class="asset-stat-value" id="statFilteredCount">{{ assets|length }}</strong>
-        </article>
-        <article class="asset-stat">
-            <span class="asset-stat-label">Total Estimated Value</span>
-            <strong class="asset-stat-value" id="statValuation">$0.00</strong>
-        </article>
-    </section>
-
-    <!-- ASSET TABLE PANEL -->
-    <section class="asset-table-panel" id="assetTable">
-        <header class="asset-section-heading">
-            <div>
-                <h3>Available Assets &amp; Documentation</h3>
-                <p>View, edit, delete, or download individual reports for any registered asset.</p>
-            </div>
-            <span class="asset-category-badge" id="activeCategoryBadge">All Categories</span>
-        </header>
-
-        <div class="asset-toolbar">
-            <label class="asset-search">
-                <input type="search" id="assetSearch" placeholder="Search by asset name or ID..." autocomplete="off">
-            </label>
-
-            <select id="assetCategoryFilter" class="asset-filter">
-                <option value="">All categories</option>
-                <option value="vehicle">Vehicles</option>
-                <option value="land">Land</option>
-                <option value="house">Houses / Buildings</option>
-                <option value="stock">Stocks / Shares</option>
-                <option value="bond">Government Bonds</option>
-                <option value="other">Other Assets</option>
-            </select>
-        </div>
-
-        <div class="asset-table-scroll">
-            <table class="asset-table" id="masterAssetTable">
+    {% if assets %}
+        <div class="table-card">
+            <table class="portfolio-table">
                 <thead>
                     <tr>
-                        <th scope="col">Asset Details</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Estimated Valuation</th>
-                        <th scope="col">Linked Document</th>
-                        <th scope="col">Management Actions</th>
+                        <th>Asset Name &amp; ID</th>
+                        <th>Category</th>
+                        <th>Ownership</th>
+                        <th>Estimated Value</th>
+                        <th>Purchase Price</th>
+                        <th>Status</th>
+                        <th>Documents (PDF)</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="assetTableBody">
+                <tbody>
                     {% for asset in assets %}
-                    <tr data-asset-row
-                        data-category="{{ asset.category|lower|escape }}"
-                        data-name="{{ asset.name|lower|escape }}"
-                        data-id="{{ asset.id }}"
-                        data-value="{{ asset.current_estimated_value|default_if_none:0 }}">
+                    <tr>
                         <td>
-                            <div class="asset-name-cell">
-                                <span class="asset-type-icon">
-                                    {% if asset.category == "vehicle" %}<i class="fa-solid fa-car"></i>
-                                    {% elif asset.category == "land" %}<i class="fa-solid fa-map"></i>
-                                    {% elif asset.category == "house" %}<i class="fa-solid fa-house"></i>
-                                    {% elif asset.category == "stock" %}<i class="fa-solid fa-chart-pie"></i>
-                                    {% elif asset.category == "bond" %}<i class="fa-solid fa-file-contract"></i>
-                                    {% elif asset.category == "other" %}<i class="fa-solid fa-boxes-stacked"></i>
-                                    {% else %}<i class="fa-solid fa-box"></i>{% endif %}
-                                </span>
-                                <div>
-                                    <span class="asset-name">{{ asset.name|default:"Unnamed Asset" }}</span>
-                                    <span class="asset-id">Record ID: #{{ asset.id }}</span>
-                                </div>
-                            </div>
+                            <a href="{% url 'assets:asset_detail' asset.id %}" style="font-weight: 700; color: var(--asset-text); text-decoration: none;">
+                                {{ asset.name }}
+                            </a>
+                            <span style="display: block; font-size: 11px; color: var(--asset-muted);">ID: #{{ asset.id }} &bull; {{ asset.created_at|date:"M d, Y" }}</span>
                         </td>
                         <td>
-                            <span class="asset-category-badge">
-                                {{ asset.get_category_display|default:asset.category }}
-                            </span>
-                        </td>
-                        <td class="asset-value">
-                            ${{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                            <span class="category-badge">{{ asset.get_category_display }}</span>
                         </td>
                         <td>
-                            {% if asset.document %}
-                                <a href="{{ asset.document.url }}" target="_blank" class="asset-action-btn" title="View Document">
-                                    <i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> View Doc
-                                </a>
-                            {% else %}
-                                <span style="color:var(--asset-muted); font-size:11px;">No document</span>
+                            <span style="font-weight: 600; font-size: 12.5px;">{{ asset.get_ownership_type_display }}</span>
+                            {% if asset.company_name %}
+                                <span style="display: block; font-size: 11px; color: var(--asset-muted);">{{ asset.company_name }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="asset-row-actions">
-                                <!-- View Detail -->
-                                <a href="{% url 'assets:asset_detail' asset.id %}" class="asset-action-btn" title="View Asset">
-                                    <i class="fa-solid fa-eye"></i> View
+                            <span style="font-weight: 700; color: var(--asset-primary);">
+                                {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                            </span>
+                        </td>
+                        <td>
+                            <span>{{ asset.currency|default:"TZS" }} {{ asset.purchase_price|default:0|floatformat:2|intcomma }}</span>
+                        </td>
+                        <td>
+                            <span style="color: #16764f; font-weight: 700; font-size: 12px;">{{ asset.get_status_display|default:"Active" }}</span>
+                        </td>
+                        <td>
+                            {% with documents=asset.supporting_documents.all %}
+                                {% if documents %}
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        {% for doc in documents %}
+                                            <a href="{{ doc.file.url }}" target="_blank" class="doc-link" title="{{ doc.title }}">
+                                                <i class="fa-solid fa-file-pdf"></i> {{ doc.title|truncatechars:18 }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span style="color: var(--asset-muted); font-size: 11.5px; font-style: italic;">No PDF attached</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                                <a href="{% url 'assets:asset_detail' asset.id %}" class="btn-action btn-outline-custom" title="View Details">
+                                    <i class="fa-solid fa-eye"></i>
                                 </a>
-                                <!-- Edit Record -->
-                                <a href="{% url 'assets:asset_update' asset.id %}" class="asset-action-btn" title="Edit Asset">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                <a href="{% url 'assets:asset_update' asset.id %}" class="btn-action btn-outline-custom" title="Edit Asset">
+                                    <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
-                                <!-- Download Individual Report -->
-                                <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="asset-action-btn" title="Download Report">
-                                    <i class="fa-solid fa-download"></i> Report
+                                <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="btn-action btn-primary-custom" title="Download Report">
+                                    <i class="fa-solid fa-download"></i>
                                 </a>
-                                <!-- Delete Asset -->
-                                <a href="{% url 'assets:asset_delete' asset.id %}" class="asset-action-btn delete" title="Delete Asset">
+                                <a href="{% url 'assets:asset_delete' asset.id %}" class="btn-action btn-danger-custom" title="Delete Asset">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="asset-empty">
-                            <strong>No assets registered yet</strong>
-                            <span>Register your first asset from the dashboard or navigation menu.</span>
-                        </td>
-                    </tr>
                     {% endfor %}
-                    <tr id="assetNoResults" hidden>
-                        <td colspan="5" class="asset-empty">
-                            <strong>No matching assets found</strong>
-                            <span>Try adjusting your search query or category filter.</span>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
         </div>
-
-        <footer class="asset-table-footer">
-            <span id="assetVisibleCount">Showing all records</span>
-            <span>Secured Private Wealth Portal</span>
-        </footer>
-    </section>
+    {% else %}
+        <div class="table-card" style="text-align: center; padding: 50px 20px;">
+            <i class="fa-solid fa-folder-open" style="font-size: 40px; color: var(--asset-muted); margin-bottom: 15px;"></i>
+            <h3 style="color: var(--asset-text); font-size: 18px; margin: 0 0 8px;">No Portfolio Assets Found</h3>
+            <p style="color: var(--asset-muted); font-size: 13.5px; margin: 0 0 20px;">There are no registered assets matching this category in your private wealth portfolio.</p>
+            <a href="{% url 'assets:asset_list' %}" class="btn-action btn-primary-custom" style="display: inline-flex;">View All Assets</a>
+        </div>
+    {% endif %}
 </div>
-
-<script>
-(function () {
-    "use strict";
-
-    const workspace = document.getElementById("assetWorkspace");
-    if (!workspace) return;
-
-    const rows = Array.from(workspace.querySelectorAll("[data-asset-row]"));
-    const searchInput = document.getElementById("assetSearch");
-    const categorySelect = document.getElementById("assetCategoryFilter");
-    const noResultsRow = document.getElementById("assetNoResults");
-    const visibleCountSpan = document.getElementById("assetVisibleCount");
-    const activeBadge = document.getElementById("activeCategoryBadge");
-    const statFilteredCount = document.getElementById("statFilteredCount");
-    const statValuation = document.getElementById("statValuation");
-
-    function formatCurrency(amount) {
-        return "$" + Number(amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function filterAssets() {
-        const query = (searchInput.value || "").trim().toLowerCase();
-        const selectedCat = (categorySelect.value || "").trim().toLowerCase();
-        let visibleRows = 0;
-        let totalValuation = 0;
-
-        rows.forEach(row => {
-            const name = row.dataset.name || "";
-            const id = row.dataset.id || "";
-            const cat = row.dataset.category || "";
-            const value = parseFloat(row.dataset.value) || 0;
-
-            const matchesSearch = name.includes(query) || id.includes(query);
-            const matchesCategory = !selectedCat || cat === selectedCat;
-
-            if (matchesSearch && matchesCategory) {
-                row.hidden = false;
-                visibleRows++;
-                totalValuation += value;
-            } else {
-                row.hidden = true;
-            }
-        });
-
-        noResultsRow.hidden = visibleRows > 0;
-        visibleCountSpan.textContent = `Showing ${visibleRows} record(s)`;
-        statFilteredCount.textContent = visibleRows;
-        statValuation.textContent = formatCurrency(totalValuation);
-
-        if (selectedCat) {
-            activeBadge.textContent = selectedCat.charAt(0).toUpperCase() + selectedCat.slice(1);
-        } else {
-            activeBadge.textContent = "All Categories";
-        }
-    }
-
-    searchInput.addEventListener("input", filterAssets);
-    categorySelect.addEventListener("change", filterAssets);
-
-    filterAssets();
-})();
-
-function exportMasterCSV() {
-    const rows = document.querySelectorAll("#masterAssetTable tr");
-    const csv = [];
-
-    rows.forEach(row => {
-        if (row.style.display === "none" || row.hidden) return;
-        const cols = row.querySelectorAll("th, td");
-        const rowData = [];
-        // Skip the last column (Management Actions)
-        for (let i = 0; i < cols.length - 1; i++) {
-            let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ").trim();
-            rowData.push('"' + text.replace(/"/g, '""') + '"');
-        }
-        if (rowData.length > 0) csv.push(rowData.join(","));
-    });
-
-    const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-    const downloadLink = document.createElement("a");
-    downloadLink.download = "master_asset_portfolio.csv";
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-}
-</script>
 {% endblock %}

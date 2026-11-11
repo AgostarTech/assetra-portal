@@ -16,6 +16,7 @@ class Document(models.Model):
         VALUATION = 'VALUATION', 'Valuation Report'
         OTHER = 'OTHER', 'Other'
 
+    title = models.CharField(max_length=255, blank=True, help_text="Optional custom title for the document.")
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_documents')
     asset = models.ForeignKey(Asset, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', help_text="Optional: Associate with a specific asset")
     
@@ -34,8 +35,8 @@ class Document(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.get_category_display()} - {self.uploader.username} ({self.get_status_display()})"
-
+        doc_name = self.title or self.get_category_display()
+        return f"{doc_name} - {self.uploader.username} ({self.get_status_display()})"
 
 
 class DocumentVersion(models.Model):
@@ -46,4 +47,5 @@ class DocumentVersion(models.Model):
     rejection_reason = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.document.title} - v{self.version_number}"
+        doc_name = self.document.title or self.document.get_category_display()
+        return f"{doc_name} v{self.version_number}"

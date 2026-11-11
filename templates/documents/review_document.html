@@ -1,32 +1,338 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Review Document - Asset Portal{% endblock %}
-{% block page_title %}Review Document{% endblock %}
+{% block page_title %}Compliance Document Review{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #1a1a1a;">
-    <h3 style="margin-top: 0; color: #1a1a1a;">Document Information</h3>
-    <div style="background: #f4f6f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-        <p><strong>Uploader:</strong> {{ document.uploader.username }}</p>
-        <p><strong>Category:</strong> {{ document.get_category_display }}</p>
-        <p><strong>Associated Asset:</strong> {{ document.asset.name|default:"None" }}</p>
-        <p><strong>Date Submitted:</strong> {{ document.uploaded_at }}</p>
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(8, 96, 112, 0.15);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 18px;
+    }
+
+    /* Outer Static Wrapper */
+    .form-content-area-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        box-sizing: border-box;
+    }
+
+    /* Sliding Background Carousel with Fade Effect */
+    .form-bg-slideshow {
+        position: absolute;
+        inset: 0;
+        border-radius: var(--asset-radius);
+        overflow: hidden;
+        z-index: 1;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-bg-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        animation: fadeSlideAnimation 18s infinite;
+    }
+
+    .form-bg-slide:nth-child(1) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg.jpg" %}');
+        animation-delay: 0s;
+    }
+    .form-bg-slide:nth-child(2) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg-2.jpg" %}');
+        animation-delay: 6s;
+    }
+    .form-bg-slide:nth-child(3) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg-3.jpg" %}');
+        animation-delay: 12s;
+    }
+
+    @keyframes fadeSlideAnimation {
+        0% { opacity: 0; transform: scale(1.02); }
+        8% { opacity: 1; transform: scale(1); }
+        33% { opacity: 1; transform: scale(1); }
+        41% { opacity: 0; transform: scale(0.98); }
+        100% { opacity: 0; }
+    }
+
+    /* Animated Glowing Gradient Border Wrapper */
+    .form-workspace-glow {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: calc(var(--asset-radius) + 3px);
+        padding: 3px;
+        box-sizing: border-box;
+        background: linear-gradient(60deg, #086070, #2dd4bf, #086070, #38bdf8, #086070);
+        background-size: 300% 300%;
+        animation: borderGlowAnimation 6s ease infinite;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+    }
+
+    @keyframes borderGlowAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Inner Scrollable Workspace Container with Hidden Scrollbar */
+    .form-workspace {
+        position: relative;
+        width: 100%;
+        max-height: 78vh;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        padding: 35px;
+        box-sizing: border-box;
+        border-radius: var(--asset-radius);
+    }
+
+    .form-workspace::-webkit-scrollbar {
+        display: none;
+    }
+
+    .review-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--asset-border);
+        margin-bottom: 25px;
+    }
+
+    .meta-item label {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--asset-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .meta-item span {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--asset-text);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 800;
+        font-size: 12.5px;
+        color: var(--asset-text);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid var(--asset-border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        color: var(--asset-text);
+        box-sizing: border-box;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--asset-primary);
+        box-shadow: 0 0 0 3px rgba(8, 96, 112, 0.15);
+    }
+
+    /* Action Buttons */
+    .review-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 25px;
+        border-top: 2px solid rgba(8, 96, 112, 0.1);
+        padding-top: 20px;
+    }
+
+    .btn-approve {
+        background-color: #10b981;
+        color: #ffffff;
+        border: none;
+        padding: 12px 22px;
+        font-weight: 800;
+        font-size: 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-approve:hover {
+        background-color: #059669;
+        transform: translateY(-1px);
+    }
+
+    .btn-reject {
+        background-color: #ef4444;
+        color: #ffffff;
+        border: none;
+        padding: 12px 22px;
+        font-weight: 800;
+        font-size: 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-reject:hover {
+        background-color: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border: none;
+        padding: 12px 18px;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #d1d3d5;
+    }
+
+    .doc-preview-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(8, 96, 112, 0.1);
+        color: var(--asset-primary);
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 13px;
+        transition: background 0.2s ease;
+    }
+
+    .doc-preview-link:hover {
+        background: rgba(8, 96, 112, 0.2);
+    }
+</style>
+
+<!-- Static Centered Content Area Wrapper -->
+<div class="form-content-area-wrapper">
+
+    <!-- Sliding Background Carousel -->
+    <div class="form-bg-slideshow">
+        <div class="form-bg-slide"></div>
+        <div class="form-bg-slide"></div>
+        <div class="form-bg-slide"></div>
     </div>
 
-    <div style="margin-bottom: 20px;">
-        <a href="{{ document.file.url }}" target="_blank" style="color: #0056b3; text-decoration: underline; font-weight: bold;">View Attached File</a>
-    </div>
-
-    <form method="post" style="border-top: 1px solid #eee; padding-top: 20px;">
-        {% csrf_token %}
-        <label style="font-weight: bold; display: block; margin-bottom: 8px;">Review Notes (Required for rejection):</label>
-        <textarea name="review_notes" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;"></textarea>
+    <!-- Glowing Gradient Border Wrapper -->
+    <div class="form-workspace-glow">
         
-        <div style="display: flex; gap: 15px;">
-            <button type="submit" name="action" value="approve" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Approve</button>
-            <button type="submit" name="action" value="reject" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Reject</button>
-            <a href="{% url 'manager_dashboard' %}" style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold;">Cancel</a>
+        <!-- Scrollable Workspace Container -->
+        <div class="form-workspace">
+
+            <div style="border-bottom: 2px solid rgba(8, 96, 112, 0.15); padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2 style="margin: 0; color: var(--asset-text); font-size: 20px;">
+                        <i class="fa-solid fa-file-shield" style="color: var(--asset-primary); margin-right: 6px;"></i> Review Document
+                    </h2>
+                    <p style="color: var(--asset-muted); font-size: 13px; margin: 4px 0 0 0;">Verify compliance details and issue an administrative decision.</p>
+                </div>
+                <div>
+                    {% if document.file %}
+                        <a href="{{ document.file.url }}" target="_blank" class="doc-preview-link">
+                            <i class="fa-solid fa-eye"></i> View Original File
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="review-meta-grid">
+                <div class="meta-item">
+                    <label>Document Title</label>
+                    <span>{{ document.title|default:"Compliance Document" }}</span>
+                </div>
+                <div class="meta-item">
+                    <label>Uploader / User</label>
+                    <span>{{ document.uploader.username|default:"Client User" }}</span>
+                </div>
+                <div class="meta-item">
+                    <label>Submission Date</label>
+                    <span>{{ document.uploaded_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="meta-item">
+                    <label>Current Status</label>
+                    <span style="color: #b45309; font-weight: 800;">{{ document.get_status_display|default:"Submitted" }}</span>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="review_notes">Review Notes &amp; Compliance Feedback</label>
+                    <textarea name="review_notes" id="review_notes" placeholder="Provide notes or reasons for approval/rejection...">{{ document.review_notes }}</textarea>
+                    <small style="color: var(--asset-muted); font-size: 11.5px; margin-top: 4px; display: block;">These notes will be visible to the client user.</small>
+                </div>
+
+                <div class="review-actions">
+                    <a href="{% url 'assets:document_verification_queue' %}" class="btn-cancel">
+                        <i class="fa-solid fa-arrow-left" style="margin-right: 5px;"></i> Back to Queue
+                    </a>
+                    <button type="submit" name="action" value="reject" class="btn-reject">
+                        <i class="fa-solid fa-xmark"></i> Reject Document
+                    </button>
+                    <button type="submit" name="action" value="approve" class="btn-approve">
+                        <i class="fa-solid fa-check"></i> Approve Document
+                    </button>
+                </div>
+            </form>
+
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

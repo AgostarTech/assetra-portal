@@ -1,4 +1,3 @@
-
 from django import forms
 
 from .models import (
@@ -9,30 +8,8 @@ from .models import (
     House,
     Stock,
     GovernmentBond,
+    OtherAsset,
 )
-
-
-# ============================================================
-# SHARED FORM STYLING
-# ============================================================
-
-ASSET_FIELD_STYLE = (
-    "width: 100%; "
-    "padding: 8px; "
-    "margin-top: 5px; "
-    "margin-bottom: 15px; "
-    "border: 1px solid #ccc; "
-    "border-radius: 4px; "
-    "box-sizing: border-box;"
-)
-
-
-def apply_form_styling(form):
-    """Apply consistent styling to all fields in a form."""
-    for field in form.fields.values():
-        field.widget.attrs.update({
-            "style": ASSET_FIELD_STYLE,
-        })
 
 
 # ============================================================
@@ -40,6 +17,22 @@ def apply_form_styling(form):
 # ============================================================
 
 class AssetForm(forms.ModelForm):
+    # East African Currencies + USD and EUR Dropdown Choices
+    CURRENCY_CHOICES = [
+        ("TZS", "TZS - Tanzanian Shilling"),
+        ("KES", "KES - Kenyan Shilling"),
+        ("UGX", "UGX - Ugandan Shilling"),
+        ("RWF", "RWF - Rwandan Franc"),
+        ("BIF", "BIF - Burundian Franc"),
+        ("USD", "USD - US Dollar ($)"),
+        ("EUR", "EUR - Euro (€)"),
+    ]
+
+    currency = forms.ChoiceField(
+        choices=CURRENCY_CHOICES,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
     class Meta:
         model = Asset
         fields = [
@@ -65,10 +58,6 @@ class AssetForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
-
 
 # ============================================================
 # VEHICLE FORM
@@ -84,10 +73,6 @@ class VehicleForm(forms.ModelForm):
             "year",
         ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
-
 
 # ============================================================
 # LAND FORM
@@ -102,10 +87,6 @@ class LandForm(forms.ModelForm):
             "size",
             "measurement_unit",
         ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
 
 
 # ============================================================
@@ -127,10 +108,6 @@ class HouseForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
-
 
 # ============================================================
 # STOCK FORM
@@ -144,10 +121,6 @@ class StockForm(forms.ModelForm):
             "ticker",
             "units",
         ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
 
 
 # ============================================================
@@ -170,9 +143,34 @@ class GovernmentBondForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        apply_form_styling(self)
+
+# ============================================================
+# OTHER ASSET FORM
+# ============================================================
+
+class OtherAssetForm(forms.ModelForm):
+    class Meta:
+        model = OtherAsset
+        fields = [
+            "asset_sub_type",
+            "serial_number_or_identifier",
+        ]
+        widgets = {
+            "asset_sub_type": forms.TextInput(
+                attrs={
+                    "placeholder": "e.g., Artwork, Machinery, Jewelry",
+                }
+            ),
+            "serial_number_or_identifier": forms.TextInput(
+                attrs={
+                    "placeholder": "Serial number or unique ID (optional)",
+                }
+            ),
+        }
+        labels = {
+            "asset_sub_type": "Asset Type / Category",
+            "serial_number_or_identifier": "Serial Number / Identifier",
+        }
 
 
 # ============================================================
@@ -191,9 +189,7 @@ class AssetDocumentForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(
                 attrs={
-                    "placeholder": (
-                        "e.g. Vehicle registration certificate"
-                    ),
+                    "placeholder": "e.g. Vehicle registration certificate",
                 }
             ),
             "file": forms.ClearableFileInput(
@@ -220,8 +216,6 @@ class AssetDocumentForm(forms.ModelForm):
         self.fields["title"].required = False
         self.fields["document_type"].required = False
 
-        apply_form_styling(self)
-
     def clean(self):
         cleaned_data = super().clean()
 
@@ -243,44 +237,3 @@ class AssetDocumentForm(forms.ModelForm):
                 )
 
         return cleaned_data
-
-
-
-from django import forms
-from .models import (
-    Asset,
-    AssetDocument,
-    Vehicle,
-    Land,
-    House,
-    Stock,
-    GovernmentBond,
-    OtherAsset,
-)
-
-
-class OtherAssetForm(forms.ModelForm):
-    class Meta:
-        model = OtherAsset
-        fields = [
-            "asset_sub_type",
-            "serial_number_or_identifier",
-        ]
-        widgets = {
-            "asset_sub_type": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "e.g., Artwork, Machinery, Jewelry, Crypto",
-                }
-            ),
-            "serial_number_or_identifier": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Serial number, wallet address, or unique ID (optional)",
-                }
-            ),
-        }
-        labels = {
-            "asset_sub_type": "Asset Type / Category",
-            "serial_number_or_identifier": "Serial Number / Identifier",
-        }

@@ -33,4 +33,7 @@ urlpatterns = [
     path("<int:asset_id>/edit/", views.asset_update, name="asset_update"),
     path("<int:asset_id>/delete/", views.asset_delete, name="asset_delete"),
     path("<int:asset_id>/report/", views.asset_report_pdf, name="asset_report_pdf"),
+    
+    # Document Delete URL (Deletes only the specific PDF document)
+    path("document/<int:document_id>/delete/", views.document_delete, name="document_delete"),
 ]

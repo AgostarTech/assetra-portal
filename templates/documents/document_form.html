@@ -1,21 +1,246 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{{ title }} - Asset Portal{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
+{% block title %}{{ title|default:"Upload Document" }} - Asset Portal{% endblock %}
+{% block page_title %}{{ title|default:"Submit File for Verification" }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #cfa76e;">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <h3 style="color: #1a1a1a; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Submit File for Verification</h3>
-        <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Upload proof of identity, ownership, or valuation. Files will be reviewed by a manager.</p>
+<style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-border: rgba(8, 96, 112, 0.15);
+        --asset-muted: #687181;
+        --asset-text: #0F172A;
+        --asset-radius: 18px;
+    }
+
+    /* Outer Static Wrapper */
+    .form-content-area-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        box-sizing: border-box;
+    }
+
+    /* Sliding Background Carousel with Fade Effect */
+    .form-bg-slideshow {
+        position: absolute;
+        inset: 0;
+        border-radius: var(--asset-radius);
+        overflow: hidden;
+        z-index: 1;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-bg-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        animation: fadeSlideAnimation 18s infinite;
+    }
+
+    .form-bg-slide:nth-child(1) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg.jpg" %}');
+        animation-delay: 0s;
+    }
+    .form-bg-slide:nth-child(2) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg-2.jpg" %}');
+        animation-delay: 6s;
+    }
+    .form-bg-slide:nth-child(3) {
+        background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(8, 96, 112, 0.55)), url('{% static "images/auth-bg-3.jpg" %}');
+        animation-delay: 12s;
+    }
+
+    @keyframes fadeSlideAnimation {
+        0% { opacity: 0; transform: scale(1.02); }
+        8% { opacity: 1; transform: scale(1); }
+        33% { opacity: 1; transform: scale(1); }
+        41% { opacity: 0; transform: scale(0.98); }
+        100% { opacity: 0; }
+    }
+
+    /* Animated Glowing Gradient Border Wrapper */
+    .form-workspace-glow {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 750px;
+        margin: 0 auto;
+        border-radius: calc(var(--asset-radius) + 3px);
+        padding: 3px;
+        box-sizing: border-box;
+        background: linear-gradient(60deg, #086070, #2dd4bf, #086070, #38bdf8, #086070);
+        background-size: 300% 300%;
+        animation: borderGlowAnimation 6s ease infinite;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+    }
+
+    @keyframes borderGlowAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Inner Scrollable Workspace Container with Hidden Scrollbar */
+    .form-workspace {
+        position: relative;
+        width: 100%;
+        max-height: 78vh;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        padding: 35px;
+        box-sizing: border-box;
+        border-radius: var(--asset-radius);
+    }
+
+    .form-workspace::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Form Fields Styling */
+    .form-workspace p label {
+        display: block;
+        font-weight: 800;
+        font-size: 12px;
+        color: var(--asset-text);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-workspace p input,
+    .form-workspace p select,
+    .form-workspace p textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid var(--asset-border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        color: var(--asset-text);
+        box-sizing: border-box;
+        margin-bottom: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .form-workspace p input:focus,
+    .form-workspace p select:focus,
+    .form-workspace p textarea:focus {
+        outline: none;
+        border-color: var(--asset-primary);
+        box-shadow: 0 0 0 3px rgba(8, 96, 112, 0.15);
+    }
+
+    .form-workspace p .helptext {
+        font-size: 11.5px;
+        color: var(--asset-muted);
+        margin-top: -10px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 30px;
+        border-top: 2px solid rgba(8, 96, 112, 0.1);
+        padding-top: 20px;
+    }
+
+    .btn-submit {
+        background-color: var(--asset-primary);
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        font-weight: 800;
+        font-size: 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 4px 12px rgba(8, 96, 112, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--asset-primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border: none;
+        padding: 12px 20px;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #d1d3d5;
+    }
+</style>
+
+<!-- Static Centered Content Area Wrapper -->
+<div class="form-content-area-wrapper">
+
+    <!-- Sliding Background Carousel -->
+    <div class="form-bg-slideshow">
+        <div class="form-bg-slide"></div>
+        <div class="form-bg-slide"></div>
+        <div class="form-bg-slide"></div>
+    </div>
+
+    <!-- Glowing Gradient Border Wrapper -->
+    <div class="form-workspace-glow">
         
-        {{ form.as_p }}
-        
-        <div style="margin-top: 30px; display: flex; gap: 15px;">
-            <button type="submit" style="background-color: #1a1a1a; color: #cfa76e; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">Upload File</button>
-            <a href="{% url 'document_list' %}" style="background-color: #e9ecef; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold;">Cancel</a>
+        <!-- Scrollable Workspace Container -->
+        <div class="form-workspace">
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div style="border-bottom: 2px solid rgba(8, 96, 112, 0.15); padding-bottom: 15px; margin-bottom: 20px;">
+                    <h3 style="color: var(--asset-text); margin: 0; font-size: 20px;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="color: var(--asset-primary); margin-right: 6px;"></i> Submit File for Verification
+                    </h3>
+                    <p style="font-size: 13px; color: var(--asset-muted); margin: 6px 0 0 0;">Upload proof of identity, ownership, or valuation. Files will be reviewed by an administrator.</p>
+                </div>
+
+                {{ form.as_p }}
+
+                <div class="form-actions">
+                    <a href="{% url 'assets:document_list' %}" class="btn-cancel">
+                        <i class="fa-solid fa-arrow-left" style="margin-right: 5px;"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                    </button>
+                </div>
+            </form>
+
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

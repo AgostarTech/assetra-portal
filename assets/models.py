@@ -311,7 +311,7 @@ class GovernmentBond(models.Model):
 
 
 # ============================================================
-# OTHER ASSET DETAILS (New addition for miscellaneous holdings)
+# OTHER ASSET DETAILS
 # ============================================================
 
 class OtherAsset(models.Model):
@@ -323,14 +323,14 @@ class OtherAsset(models.Model):
 
     asset_sub_type = models.CharField(
         max_length=150,
-        help_text=_("Specify type of asset, e.g. Artwork, Machinery, Jewelry, Crypto, etc."),
+        help_text=_("Specify type of asset, e.g. Artwork, Machinery, Jewelry, etc."),
     )
 
     serial_number_or_identifier = models.CharField(
         max_length=100,
         blank=True,
         null=True,
-        help_text=_("Any serial number, wallet address, or unique asset identifier."),
+        help_text=_("Any serial number or unique asset identifier."),
     )
 
     def __str__(self):
@@ -462,3 +462,36 @@ class AssetTag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# ============================================================
+# AUDIT LOG MODEL
+# ============================================================
+
+class AuditLog(models.Model):
+    class ActionChoices(models.TextChoices):
+        CREATE = "CREATE", _("Create")
+        UPDATE = "UPDATE", _("Update")
+        DELETE = "DELETE", _("Delete")
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="asset_audit_logs",  # Fixed clash with audit app
+    )
+    action = models.CharField(max_length=20, choices=ActionChoices.choices)
+    model_name = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField()
+    description = models.TextField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "Audit Log"
+        verbose_name_plural = "Audit Logs"
+
+    def __str__(self):
+        return f"[{self.timestamp.strftime('%Y-%m-%d %H:%M')}] {self.user} performed {self.action} on {self.model_name} (#{self.object_id})"

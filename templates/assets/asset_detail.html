@@ -88,11 +88,38 @@
     cursor: pointer;
 }
 .btn-primary-custom { background: var(--asset-primary); color: #fff; }
-.btn-primary-custom:hover { background: #064b58; }
+.btn-primary-custom:hover { background: #064b58; color: #fff; }
 .btn-outline-custom { background: #fff; border: 1px solid var(--asset-border); color: var(--asset-text); }
 .btn-outline-custom:hover { background: #f8fafc; }
 .btn-danger-custom { background: #fee2e2; color: #b91c1c; }
 .btn-danger-custom:hover { background: #fecaca; }
+
+.doc-icon-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--asset-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--asset-primary);
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.15s ease;
+}
+.doc-icon-btn:hover {
+    background: rgba(8, 96, 112, 0.08);
+    border-color: var(--asset-primary);
+}
+.doc-icon-btn.delete {
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.2);
+}
+.doc-icon-btn.delete:hover {
+    background: #fef2f2;
+    border-color: #b91c1c;
+}
 
 @media (max-width: 768px) {
     .detail-grid { grid-template-columns: 1fr; }
@@ -108,14 +135,15 @@
             <h2>{{ asset.name }}</h2>
             <span style="color: var(--asset-muted); font-size: 12px;">Record ID: #{{ asset.id }} | Registered on {{ asset.created_at|date:"M d, Y" }}</span>
         </div>
+        <!-- Asset-Level Actions -->
         <div class="detail-actions">
-            <a href="{% url 'assets:asset_update' asset.id %}" class="btn-action btn-outline-custom">
+            <a href="{% url 'assets:asset_update' asset.id %}" class="btn-action btn-outline-custom" title="Edit Asset">
                 <i class="fa-solid fa-pen-to-square"></i> Edit
             </a>
-            <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="btn-action btn-primary-custom">
-                <i class="fa-solid fa-download"></i> Download Report
+            <a href="{% url 'assets:asset_report_pdf' asset.id %}" class="btn-action btn-primary-custom" title="Download Report">
+                <i class="fa-solid fa-download"></i> Report
             </a>
-            <a href="{% url 'assets:asset_delete' asset.id %}" class="btn-action btn-danger-custom">
+            <a href="{% url 'assets:asset_delete' asset.id %}" class="btn-action btn-danger-custom" title="Delete Asset">
                 <i class="fa-solid fa-trash"></i> Delete
             </a>
         </div>
@@ -125,12 +153,30 @@
         <div class="detail-group">
             <span class="detail-label">Estimated Valuation</span>
             <span class="detail-value" style="color: var(--asset-primary); font-size: 20px;">
-                ${{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
             </span>
         </div>
         <div class="detail-group">
             <span class="detail-label">Asset Status</span>
             <span class="detail-value" style="color: #16764f;">{{ asset.get_status_display|default:"Active" }}</span>
+        </div>
+        
+        <div class="detail-group">
+            <span class="detail-label">Purchase Price</span>
+            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.purchase_price|default:0|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="detail-group">
+            <span class="detail-label">Purchase Date</span>
+            <span class="detail-value">{{ asset.purchase_date|date:"M d, Y"|default:"Not specified" }}</span>
+        </div>
+
+        <div class="detail-group">
+            <span class="detail-label">Ownership Type</span>
+            <span class="detail-value">{{ asset.get_ownership_type_display|default:"Individual" }}</span>
+        </div>
+        <div class="detail-group">
+            <span class="detail-label">Liability Amount</span>
+            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.liability_amount|default:0|floatformat:2|intcomma }}</span>
         </div>
         
         {% if specific_fields %}
@@ -143,22 +189,63 @@
         {% endif %}
     </div>
 
-    <!-- DOCUMENT SECTION -->
+    {% if asset.description %}
+    <div class="detail-group" style="margin-bottom: 25px;">
+        <span class="detail-label">Description &amp; Notes</span>
+        <span class="detail-value" style="font-weight: 500; font-size: 13.5px; line-height: 1.5;">{{ asset.description }}</span>
+    </div>
+    {% endif %}
+
+    <!-- SUPPORTING DOCUMENTS & PDF SECTION -->
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--asset-border);">
-        <h3 style="font-size: 15px; margin-bottom: 15px; color: var(--asset-text);">Linked Verification Document</h3>
-        {% if asset.document %}
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #F8FAFC; border: 1px solid var(--asset-border); border-radius: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fa-solid fa-file-pdf" style="font-size: 20px; color: #dc2626;"></i>
-                    <span style="font-size: 13px; font-weight: 600;">Verification Certificate / Document</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-size: 15px; margin: 0; color: var(--asset-text);">Linked Verification Documents &amp; Certificates</h3>
+            <a href="{% url 'assets:asset_update' asset.id %}" class="btn-action btn-outline-custom" style="padding: 6px 12px; font-size: 11.5px;" title="Upload Document">
+                <i class="fa-solid fa-plus"></i> Add Document
+            </a>
+        </div>
+        
+        {% with documents=asset.supporting_documents.all %}
+            {% if documents %}
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for doc in documents %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #F8FAFC; border: 1px solid var(--asset-border); border-radius: 10px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="fa-solid fa-file-pdf" style="font-size: 24px; color: #dc2626;"></i>
+                            <div>
+                                <span style="display: block; font-size: 13.5px; font-weight: 700; color: var(--asset-text);">{{ doc.title }}</span>
+                                <span style="display: block; font-size: 11px; color: var(--asset-muted); margin-top: 2px;">
+                                    Type: {{ doc.get_document_type_display }} &bull; Uploaded {{ doc.uploaded_at|date:"M d, Y H:i" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Document-Specific Icon Action Buttons -->
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <!-- View -->
+                            <a href="{{ doc.file.url }}" target="_blank" class="doc-icon-btn" title="View Document">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <!-- Download -->
+                            <a href="{{ doc.file.url }}" download class="doc-icon-btn" title="Download Document">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                            <!-- Edit / Update Document (fallback to asset update or document edit URL if available) -->
+                            <a href="{% url 'assets:asset_update' asset.id %}" class="doc-icon-btn" title="Edit Document">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <!-- Delete Document Only (Make sure your url name is assets:document_delete or fallback to asset_delete if you prefer) -->
+                            <a href="{% url 'assets:document_delete' doc.id %}" class="doc-icon-btn delete" title="Delete Document">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                <a href="{{ asset.document.url }}" target="_blank" class="btn-action btn-outline-custom" style="padding: 6px 12px; font-size: 11px;">
-                    <i class="fa-solid fa-eye"></i> View File
-                </a>
-            </div>
-        {% else %}
-            <p style="color: var(--asset-muted); font-size: 13px; margin: 0;">No document has been attached to this asset record yet.</p>
-        {% endif %}
+            {% else %}
+                <p style="color: var(--asset-muted); font-size: 13.5px; margin: 0;">No supporting documents or certificates have been attached to this asset record yet.</p>
+            {% endif %}
+        {% endwith %}
     </div>
 
     <div style="margin-top: 30px;">

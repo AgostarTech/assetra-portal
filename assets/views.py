@@ -210,19 +210,35 @@ def asset_detail(request, asset_id):
                         "value": val
                     })
 
-    documents = asset.documents.all() if hasattr(asset, 'documents') else AssetDocument.objects.filter(asset=asset)
+    # Handle inline document upload modal submission
+    if request.method == "POST" and "upload_document_modal" in request.POST:
+        document_form = AssetDocumentForm(request.POST, request.FILES)
+        if document_form.is_valid():
+            try:
+                _save_asset_document(document_form, asset, request.user)
+                messages.success(request, "Supporting document uploaded successfully.")
+            except Exception:
+                messages.error(request, "Failed to upload document. Please try again.")
+            return redirect("assets:asset_detail", asset_id=asset.id)
+        else:
+            messages.error(request, "Please correct the errors in the document upload form.")
+    else:
+        document_form = AssetDocumentForm()
+
+    documents = asset.supporting_documents.all()
 
     context = {
         "asset": asset,
         "specific_detail": specific_detail,
         "specific_fields": specific_fields,
         "documents": documents,
+        "document_form": document_form,
     }
     return render(request, "assets/asset_detail.html", context)
 
 
 # ============================================================
-# SUPPORTING DOCUMENTS & INTELLIGENCE VAULT
+# SUPPORTING DOCUMENTS & COMPLIANCE QUEUE
 # ============================================================
 
 @login_required
@@ -240,6 +256,25 @@ def asset_documents(request):
     }
 
     return render(request, "assets/asset_documents.html", context)
+
+
+@login_required
+def document_verification_queue(request):
+    """Display pending compliance documents for administrative or compliance review."""
+    if not _is_admin(request.user):
+        messages.error(request, "You do not have permission to access the compliance verification queue.")
+        return redirect("assets:asset_list")
+
+    documents = (
+        AssetDocument.objects.all()
+        .select_related("asset", "asset__owner", "uploaded_by")
+        .order_by("-uploaded_at")
+    )
+
+    context = {
+        "documents": documents,
+    }
+    return render(request, "assets/document_verification_queue.html", context)
 
 
 @login_required
@@ -401,7 +436,6 @@ def asset_update(request, asset_id):
             try:
                 with transaction.atomic():
                     updated_asset = asset_form.save(commit=False)
-                    # Keep original owner if admin edits someone else's asset
                     if not updated_asset.owner_id:
                         updated_asset.owner = asset.owner
                     updated_asset.category = asset.category
@@ -466,6 +500,7 @@ def asset_delete(request, asset_id):
 
     if request.method == "POST":
         asset_name = asset.name
+        asset._deleted_by = request.user
         asset.delete()
         messages.success(request, f"Asset '{asset_name}' was deleted successfully.")
         if _is_admin(request.user):
@@ -476,6 +511,34 @@ def asset_delete(request, asset_id):
         "asset": asset,
     }
     return render(request, "assets/asset_confirm_delete.html", context)
+
+
+# ============================================================
+# INDIVIDUAL DOCUMENT DELETE VIEW
+# ============================================================
+
+@login_required
+def document_delete(request, document_id):
+    """Delete a specific supporting document securely without deleting the parent asset."""
+    if _is_admin(request.user):
+        document = get_object_or_404(AssetDocument, pk=document_id)
+    else:
+        document = get_object_or_404(AssetDocument, pk=document_id, asset__owner=request.user)
+
+    asset_id = document.asset.id
+    doc_title = document.title
+    
+    if request.method == "POST":
+        document._deleted_by = request.user
+        document.delete()
+        messages.success(request, f"Document '{doc_title}' was deleted successfully.")
+        return redirect("assets:asset_detail", asset_id=asset_id)
+
+    context = {
+        "document": document,
+        "asset": document.asset,
+    }
+    return render(request, "assets/document_confirm_delete.html", context)
 
 
 # ============================================================
