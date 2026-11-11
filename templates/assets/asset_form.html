@@ -94,10 +94,10 @@
         position: relative;
         width: 100%;
         max-height: 78vh;
-        overflow-y: scroll; /* Allows scrolling */
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
-        -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-        background: rgba(255, 255, 255, 0.85); /* Highly translucent to showcase sliding background images */
+        overflow-y: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         padding: 35px;
@@ -105,7 +105,6 @@
         border-radius: var(--asset-radius);
     }
 
-    /* Hide scrollbar for Chrome, Safari, and Opera */
     .form-workspace::-webkit-scrollbar {
         display: none;
     }
@@ -155,10 +154,10 @@
         height: 100%;
     }
 
-    /* Section Cards with Smooth Rounded Corners and Glowing Animated Borders */
+    /* Section Cards */
     .form-section-card {
         position: relative;
-        background: rgba(255, 255, 255, 0.92); /* Translucent card background */
+        background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(8px);
         border-radius: 16px;
         padding: 24px;
@@ -171,7 +170,6 @@
         box-shadow: 0 8px 20px rgba(0,0,0,0.03);
     }
 
-    /* Animated Border Wrapper for Form Section Cards */
     .form-section-card::before {
         content: '';
         position: absolute;
@@ -232,7 +230,6 @@
         font-size: 12px;
     }
 
-    /* Form Field Grouping */
     .form-group {
         display: flex;
         flex-direction: column;
@@ -336,6 +333,7 @@
     .btn-cancel {
         background-color: rgba(241, 245, 249, 0.9);
         color: var(--asset-text);
+        border: none;
         text-decoration: none;
         padding: 10px 20px;
         border-radius: 8px;
@@ -344,13 +342,13 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
         transition: all 0.2s ease;
     }
     .btn-cancel:hover {
         background-color: #e2e8f0;
     }
 
-    /* Responsive Breakpoints */
     @media (max-width: 850px) {
         .form-content-area-wrapper {
             padding: 16px;
@@ -367,7 +365,7 @@
     }
 </style>
 
-<!-- Centered Static Dashboard Content Area (Sidebar Fully Visible) -->
+<!-- Centered Static Dashboard Content Area -->
 <div class="form-content-area-wrapper">
 
     <!-- Sliding Background Carousel with Fade Effect -->
@@ -380,13 +378,13 @@
     <!-- Animated Glowing Gradient Border Wrapper -->
     <div class="form-workspace-glow">
         
-        <!-- Scrollable Form Container with Translucent Frosted Glass & Hidden Scrollbar -->
+        <!-- Scrollable Form Container -->
         <div class="form-workspace">
 
-            <!-- Floating Cancel "X" Button -->
-            <a href="{% url 'assets:asset_list' %}" class="form-close-x" title="Cancel & Close">
+            <!-- Floating Cancel / Close "X" Button (Returns to Previous Page) -->
+            <button type="button" onclick="goBackOrFallback()" class="form-close-x" title="Cancel & Close">
                 <i class="fa-solid fa-xmark"></i>
-            </a>
+            </button>
 
             <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
@@ -491,9 +489,9 @@
 
                     <!-- ACTION BUTTONS -->
                     <div class="btn-group-custom">
-                        <a href="{% url 'assets:asset_list' %}" class="btn-cancel">
+                        <button type="button" onclick="goBackOrFallback()" class="btn-cancel">
                             <i class="fa-solid fa-xmark"></i> Cancel
-                        </a>
+                        </button>
                         <button type="submit" class="btn-submit">
                             <i class="fa-solid fa-check"></i> Save Asset Record
                         </button>
@@ -505,4 +503,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    function goBackOrFallback() {
+        // Checks if there is a previous history page in the browser session.
+        // If they came from Dashboard or Land, it takes them right back there.
+        if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+            window.history.back();
+        } else {
+            // Fallback to dashboard router if opened directly
+            window.location.href = "{% url 'portal_redirect' %}";
+        }
+    }
+</script>
 {% endblock %}
