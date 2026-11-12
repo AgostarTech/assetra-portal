@@ -7,10 +7,23 @@
     <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/house.jpg' %}?v=2">
     <link rel="apple-touch-icon" href="{% static 'images/house.jpg' %}?v=2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Private Wealth Asset Portfolio Management System">
-    <meta name="theme-color" content="#FFFFFF">
+    
+    <!-- =========================
+        SEO & SEARCH ENGINE OPTIMIZATION
+    ========================= -->
+    <title>{% block title %}Assetra — Secure Private Wealth & Asset Portfolio Management Tanzania{% endblock %}</title>
+    <meta name="description" content="Assetra is Tanzania's premier secure private wealth management and asset portfolio portal based in Dar es Salaam. Access advanced wealth advisory, compliance tracking, and secure asset solutions.">
+    <meta name="keywords" content="private wealth management Tanzania, asset portfolio management Dar es Salaam, wealth advisory platform, secure financial portal Africa">
+    <link rel="canonical" href="https://www.assetra.africa/">
 
-    <title>{% block title %}Asset Portfolio Management{% endblock %}</title>
+    <!-- Open Graph / Social Sharing SEO Meta Tags (WhatsApp, LinkedIn, Twitter) -->
+    <meta property="og:title" content="Assetra — Secure Private Wealth & Asset Portfolio Management">
+    <meta property="og:description" content="Secure private wealth management and asset portfolio portal in Dar es Salaam, Tanzania.">
+    <meta property="og:url" content="https://www.assetra.africa/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{% static 'images/house.jpg' %}">
+
+    <meta name="theme-color" content="#FFFFFF">
 
     <!-- Restore saved theme before page rendering -->
     <script>
