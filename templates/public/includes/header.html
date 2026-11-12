@@ -955,32 +955,26 @@
 <script>
     (function() {
         const preloader = document.getElementById("assetraPreloader");
-        let startTime = Date.now();
         const minDisplayTime = 3000; // Guaranteed 3 seconds minimum spin time
 
         function showPreloader() {
-            startTime = Date.now();
             if (preloader) {
                 preloader.classList.add("is-active");
             }
         }
 
         function hidePreloader() {
-            if (!preloader) return;
-            const elapsedTime = Date.now() - startTime;
-            const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
-
-            setTimeout(() => {
+            if (preloader) {
                 preloader.classList.remove("is-active");
-            }, remainingTime);
+            }
         }
 
-        // Hide preloader when page finishes loading (respecting 3s minimum)
+        // Hide preloader when page finishes loading
         window.addEventListener("DOMContentLoaded", hidePreloader);
         window.addEventListener("load", hidePreloader);
         window.addEventListener("pageshow", hidePreloader);
 
-        // Trigger preloader on ANY link click system-wide (pages, documents, file downloads)
+        // Intercept ALL link clicks (pages, documents, file downloads) to guarantee 3s spin
         document.addEventListener("click", (e) => {
             const link = e.target.closest("a");
             if (!link) return;
@@ -998,21 +992,25 @@
                 return;
             }
 
+            e.preventDefault();
             showPreloader();
 
-            // If it's a file download link (e.g. PDF, Excel, CSV, ZIP) that doesn't trigger a full page reload,
-            // ensure the preloader safely finishes its 3-second spin and hides automatically.
-            const fileExtensions = /\.(pdf|docx|doc|xlsx|xls|csv|zip|rar|txt|png|jpg|jpeg)(\?.*)?$/i;
-            if (link.hasAttribute("download") || fileExtensions.test(href)) {
-                setTimeout(hidePreloader, minDisplayTime);
-            }
+            setTimeout(() => {
+                window.location.href = href;
+            }, minDisplayTime);
         });
 
-        // Trigger preloader on ANY form submission system-wide
+        // Intercept ALL form submissions to guarantee 3s spin
         document.addEventListener("submit", (e) => {
-            if (!e.defaultPrevented) {
-                showPreloader();
-            }
+            if (e.defaultPrevented) return;
+
+            const form = e.target;
+            e.preventDefault();
+            showPreloader();
+
+            setTimeout(() => {
+                form.submit();
+            }, minDisplayTime);
         });
 
         // Mobile Menu Toggle Logic
