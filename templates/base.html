@@ -3,9 +3,9 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}?v=2">
-    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}?v=2">
-    <link rel="apple-touch-icon" href="{% static 'images/logo.jpg' %}?v=2">
+    <link rel="icon" type="image/jpeg" href="{% static 'images/house.jpg' %}?v=2">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/house.jpg' %}?v=2">
+    <link rel="apple-touch-icon" href="{% static 'images/house.jpg' %}?v=2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Private Wealth Asset Portfolio Management System">
     <meta name="theme-color" content="#FFFFFF">
@@ -30,15 +30,15 @@
     <style>
         :root {
             color-scheme: light;
-            --app-bg: #F4F6F9; /* White smoke background */
-            --app-surface: #FFFFFF; /* Clean white */
+            --app-bg: #F4F6F9;
+            --app-surface: #FFFFFF;
             --app-surface-alt: #EDF0F5;
-            --app-text: #0F172A; /* Black / Dark neutral text */
+            --app-text: #0F172A;
             --app-muted: #687181;
             --app-border: rgba(15, 23, 42, 0.12);
-            --app-teal: #0097B2; /* Primary Teal */
-            --app-teal-hover: #048AA2; /* Secondary Teal */
-            --app-teal-dark: #086070; /* Deep Slate Teal */
+            --app-teal: #0097B2;
+            --app-teal-hover: #048AA2;
+            --app-teal-dark: #086070;
             --app-sidebar-width: 270px;
             --app-manager-sidebar-width: 250px;
             --app-transition: 180ms ease;
@@ -46,10 +46,10 @@
 
         html[data-theme="dark"] {
             color-scheme: dark;
-            --app-bg: #0F172A; /* Enhanced Dark Mode background */
-            --app-surface: #1E293B; /* Enhanced Dark Mode surface */
+            --app-bg: #0F172A;
+            --app-surface: #1E293B;
             --app-surface-alt: #15171d;
-            --app-text: #F8FAFC; /* Enhanced Dark Mode text */
+            --app-text: #F8FAFC;
             --app-muted: #9298a5;
             --app-border: rgba(255,255,255,.08);
             --app-teal: #0097B2;
@@ -111,7 +111,7 @@
         }
 
         /* =========================
-            PAGE LOADING SCREEN
+            TRANSPARENT 3S SPINNING PRELOADER
         ========================= */
 
         #loader-wrapper {
@@ -119,57 +119,84 @@
             inset: 0;
             z-index: 99999;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #loader-wrapper.is-active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .preloader-content {
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            padding: 24px;
-            background: var(--app-surface);
-            color: var(--app-text);
-            transition: opacity 250ms ease, visibility 250ms ease;
+            gap: 16px;
+            padding: 0;
+            background: transparent;
         }
 
-        #loader-wrapper.loader-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+        .preloader-spinner-box {
+            position: relative;
+            width: 86px;
+            height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .app-loader-logo {
-            width: 78px;
-            height: 78px;
-            object-fit: contain;
-            border-radius: 14px;
+            position: relative;
+            width: 62px;
+            height: 62px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            background: var(--app-teal-dark);
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(0, 151, 178, 0.4);
         }
 
         .app-loader-spinner {
-            width: 34px;
-            height: 34px;
-            border: 3px solid rgba(0, 151, 178, 0.2);
-            border-top-color: var(--app-teal);
+            position: absolute;
+            inset: -4px;
             border-radius: 50%;
-            animation: app-spin 800ms linear infinite;
+            border: 3px solid transparent;
+            border-top-color: var(--app-teal);
+            border-bottom-color: var(--app-text);
+            animation: app-spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+            z-index: 1;
         }
 
         .app-loader-title {
             margin: 0;
-            color: var(--app-teal-dark);
-            font-size: 12px;
+            color: var(--app-text);
+            font-size: 10.5px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-align: center;
             text-transform: uppercase;
-        }
-
-        .app-loader-caption {
-            margin: -10px 0 0;
-            color: var(--app-muted);
-            font-size: 11px;
-            text-align: center;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            animation: app-pulse-text 1.4s ease-in-out infinite alternate;
         }
 
         @keyframes app-spin {
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes app-pulse-text {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
         /* =========================
@@ -216,12 +243,6 @@
             overflow-wrap: anywhere;
         }
 
-        @media (min-width: 769px) {
-            .main-panel {
-                margin-left: 0;
-            }
-        }
-
         .content-area {
             flex: 1 0 auto;
             width: 100%;
@@ -232,35 +253,12 @@
             overflow-wrap: anywhere;
         }
 
-        .content-area > * {
-            max-width: 100%;
-        }
-
         .content-area .pwh-dashboard {
             width: 100%;
             min-width: 0;
             max-width: none;
             margin: 0;
             padding: 24px;
-        }
-
-        .content-area img,
-        .content-area video,
-        .content-area iframe {
-            max-width: 100%;
-        }
-
-        .content-area table {
-            max-width: 100%;
-        }
-
-        .main-panel > header,
-        .main-panel > .app-header,
-        .main-panel > nav.app-header,
-        .main-panel > footer,
-        .main-panel > .app-footer {
-            flex-shrink: 0;
-            max-width: 100%;
         }
 
         /* =========================
@@ -384,22 +382,6 @@
         }
 
         /* =========================
-            PUBLIC / LOGIN PAGES
-        ========================= */
-
-        .public-shell {
-            width: 100%;
-            min-width: 0;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
-        .public-shell > * {
-            max-width: 100%;
-        }
-
-        /* =========================
             RESPONSIVE DESIGN
         ========================= */
 
@@ -407,50 +389,31 @@
             :root {
                 --app-sidebar-width: 225px;
             }
-
             .content-area .pwh-dashboard {
                 padding: 20px;
             }
         }
 
         @media (max-width: 760px) {
-            .wrapper {
-                width: 100%;
-                min-width: 0;
-            }
-
             .wrapper > aside {
                 flex: 0 0 auto;
                 width: auto;
                 min-width: 0;
                 max-width: none;
             }
-
             .main-panel {
                 flex: 1 1 0;
                 width: 100%;
                 min-width: 0;
             }
-
             .content-area .pwh-dashboard {
                 padding: 16px;
             }
-
             .app-theme-toggle {
                 right: 12px;
                 bottom: 12px;
                 min-height: 38px;
                 padding: 8px 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .content-area .pwh-dashboard {
-                padding: 12px;
-            }
-
-            .app-idle-dialog {
-                padding: 22px;
             }
         }
 
@@ -472,25 +435,26 @@
 <body>
 
     <!-- =========================
-         LOADING SCREEN
+        TRANSPARENT 3S SPINNING PRELOADER
     ========================= -->
 
     <div id="loader-wrapper" role="status" aria-live="polite">
-        <img
-            src="{% static 'images/asset_logo_3.jpg' %}"
-            alt="Application logo"
-            class="app-loader-logo"
-            onerror="this.style.display='none';"
-        >
-
-        <div class="app-loader-spinner" aria-hidden="true"></div>
-        <p class="app-loader-title">Private Wealth</p>
-        <p class="app-loader-caption">Preparing your workspace...</p>
+        <div class="preloader-content">
+            <div class="preloader-spinner-box">
+                <div class="app-loader-spinner" aria-hidden="true"></div>
+                <img
+                    src="{% static 'images/house.jpg' %}"
+                    alt="Application logo"
+                    class="app-loader-logo"
+                    onerror="this.style.display='none';"
+                >
+            </div>
+            <p class="app-loader-title">ASSETRA SYNCING...</p>
+        </div>
     </div>
 
     <!-- =========================
-         APPLICATION LAYOUT
-         Content block declared ONCE
+        APPLICATION LAYOUT
     ========================= -->
 
     {% if user.is_authenticated %}
@@ -573,7 +537,7 @@
             </div>
         </div>
 
-        <!-- Logout form: Django logout uses POST and CSRF -->
+        <!-- Logout form -->
         <form
             id="appLogoutForm"
             method="post"
@@ -590,109 +554,117 @@
     {% endif %}
 
     <!-- =========================
-         APPLICATION JAVASCRIPT
+        APPLICATION JAVASCRIPT & 3S SPIN PRELOADER CONTROL
     ========================= -->
 
     <script>
         (function () {
             "use strict";
 
-            /* PAGE LOADER */
-
             const loader = document.getElementById("loader-wrapper");
-            let loaderHidden = false;
+            const minDisplayTime = 3000; // Guaranteed 3 seconds minimum spin time
+            let pageLoadStartTime = Date.now();
+
+            function showLoader() {
+                if (loader) {
+                    loader.classList.add("is-active");
+                }
+            }
 
             function hideLoader() {
-                if (loaderHidden || !loader) {
+                if (!loader) return;
+                const elapsedTime = Date.now() - pageLoadStartTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+
+                setTimeout(() => {
+                    loader.classList.remove("is-active");
+                }, remainingTime);
+            }
+
+            // Hide preloader when page finishes loading (respecting 3s minimum)
+            window.addEventListener("DOMContentLoaded", hideLoader);
+            window.addEventListener("load", hideLoader);
+            window.addEventListener("pageshow", hideLoader);
+            window.setTimeout(hideLoader, 5000);
+
+            // Intercept ALL link clicks (pages, documents, file downloads) to guarantee 3s spin
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a");
+                if (!link) return;
+
+                const href = link.getAttribute("href");
+                const target = link.getAttribute("target");
+
+                if (
+                    !href ||
+                    href.startsWith("#") ||
+                    href.startsWith("javascript:") ||
+                    target === "_blank" ||
+                    e.defaultPrevented
+                ) {
                     return;
                 }
 
-                loaderHidden = true;
-                loader.classList.add("loader-hidden");
+                e.preventDefault();
+                pageLoadStartTime = Date.now();
+                showLoader();
 
-                window.setTimeout(function () {
-                    if (loader.parentNode) {
-                        loader.parentNode.removeChild(loader);
-                    }
-                }, 300);
-            }
+                setTimeout(() => {
+                    window.location.href = href;
+                }, minDisplayTime);
+            });
 
-            if (document.readyState === "complete") {
-                hideLoader();
-            } else {
-                window.addEventListener("load", hideLoader, { once: true });
-            }
+            // Intercept ALL form submissions to guarantee 3s spin
+            document.addEventListener("submit", (e) => {
+                if (e.defaultPrevented) return;
 
-            /* Fallback if the load event is delayed */
-            window.setTimeout(hideLoader, 5000);
+                const form = e.target;
+                e.preventDefault();
+                pageLoadStartTime = Date.now();
+                showLoader();
+
+                setTimeout(() => {
+                    form.submit();
+                }, minDisplayTime);
+            });
 
             /* THEME SWITCH */
-
             const themeToggle = document.getElementById("appThemeToggle");
             const themeIcon = document.getElementById("appThemeIcon");
             const themeLabel = document.getElementById("appThemeLabel");
 
             function updateThemeControls(theme) {
                 const isDark = theme === "dark";
-
-                if (themeIcon) {
-                    themeIcon.textContent = isDark ? "☼" : "☾";
-                }
-
-                if (themeLabel) {
-                    themeLabel.textContent = isDark ? "Light mode" : "Dark mode";
-                }
-
+                if (themeIcon) themeIcon.textContent = isDark ? "☼" : "☾";
+                if (themeLabel) themeLabel.textContent = isDark ? "Light mode" : "Dark mode";
                 if (themeToggle) {
-                    themeToggle.setAttribute(
-                        "aria-pressed",
-                        isDark ? "true" : "false"
-                    );
-
-                    themeToggle.setAttribute(
-                        "aria-label",
-                        isDark
-                            ? "Switch to light theme"
-                            : "Switch to dark theme"
-                    );
+                    themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+                    themeToggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
                 }
             }
 
             function applyTheme(theme) {
                 const safeTheme = theme === "dark" ? "dark" : "light";
-
                 document.documentElement.dataset.theme = safeTheme;
-
                 try {
                     localStorage.setItem("pwh-theme", safeTheme);
-                } catch (error) {
-                    /* Theme remains active for this page. */
-                }
-
+                } catch (error) {}
                 updateThemeControls(safeTheme);
             }
 
-            applyTheme(
-                document.documentElement.dataset.theme === "dark"
-                    ? "dark"
-                    : "light"
-            );
+            applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 
             if (themeToggle) {
                 themeToggle.addEventListener("click", function () {
-                    const currentTheme =
-                        document.documentElement.dataset.theme || "light";
-
+                    const currentTheme = document.documentElement.dataset.theme || "light";
                     applyTheme(currentTheme === "light" ? "dark" : "light");
                 });
             }
 
             /* INACTIVITY MANAGEMENT */
-
             const logoutForm = document.getElementById("appLogoutForm");
             const idleOverlay = document.getElementById("appIdleOverlay");
-            const continueButton =
-                document.getElementById("appContinueSession");
+            const continueButton = document.getElementById("appContinueSession");
             const logoutButton = document.getElementById("appLogoutNow");
 
             const IDLE_LIMIT_MS = 15 * 60 * 1000;
@@ -704,44 +676,29 @@
 
             function hideIdleWarning() {
                 warningVisible = false;
-
                 if (idleOverlay) {
                     idleOverlay.classList.remove("is-visible");
                 }
             }
 
             function recordActivity() {
-                if (loggingOut) {
-                    return;
-                }
-
+                if (loggingOut) return;
                 lastActivity = Date.now();
-
                 if (warningVisible) {
                     hideIdleWarning();
                 }
             }
 
             function showIdleWarning() {
-                if (!idleOverlay || warningVisible || loggingOut) {
-                    return;
-                }
-
+                if (!idleOverlay || warningVisible || loggingOut) return;
                 warningVisible = true;
                 idleOverlay.classList.add("is-visible");
-
-                if (continueButton) {
-                    continueButton.focus();
-                }
+                if (continueButton) continueButton.focus();
             }
 
             function submitLogout() {
-                if (loggingOut) {
-                    return;
-                }
-
+                if (loggingOut) return;
                 loggingOut = true;
-
                 if (logoutForm) {
                     logoutForm.submit();
                 } else {
@@ -749,15 +706,8 @@
                 }
             }
 
-            if (logoutButton) {
-                logoutButton.addEventListener("click", submitLogout);
-            }
-
-            if (continueButton) {
-                continueButton.addEventListener("click", function () {
-                    recordActivity();
-                });
-            }
+            if (logoutButton) logoutButton.addEventListener("click", submitLogout);
+            if (continueButton) continueButton.addEventListener("click", recordActivity);
 
             if (idleOverlay) {
                 idleOverlay.addEventListener("click", function (event) {
@@ -767,27 +717,13 @@
                 });
             }
 
-            [
-                "mousemove",
-                "mousedown",
-                "keydown",
-                "scroll",
-                "touchstart",
-                "click"
-            ].forEach(function (eventName) {
-                document.addEventListener(
-                    eventName,
-                    recordActivity,
-                    { passive: true }
-                );
+            ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "click"].forEach(function (eventName) {
+                document.addEventListener(eventName, recordActivity, { passive: true });
             });
 
             if (logoutForm) {
                 window.setInterval(function () {
-                    if (loggingOut) {
-                        return;
-                    }
-
+                    if (loggingOut) return;
                     const idleDuration = Date.now() - lastActivity;
 
                     if (idleDuration >= IDLE_LIMIT_MS) {
@@ -795,10 +731,7 @@
                         return;
                     }
 
-                    if (
-                        idleDuration >=
-                        IDLE_LIMIT_MS - WARNING_BEFORE_MS
-                    ) {
+                    if (idleDuration >= IDLE_LIMIT_MS - WARNING_BEFORE_MS) {
                         showIdleWarning();
                     }
                 }, 1000);
