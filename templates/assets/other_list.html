@@ -82,7 +82,7 @@
                             </div>
                         </td>
                         <td style="font-weight: 750;">
-                            ${{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                            {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:0|intcomma }}
                         </td>
                         <td>
                             {% if asset.document %}

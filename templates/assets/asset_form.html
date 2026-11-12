@@ -506,12 +506,9 @@
 
 <script>
     function goBackOrFallback() {
-        // Checks if there is a previous history page in the browser session.
-        // If they came from Dashboard or Land, it takes them right back there.
         if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
             window.history.back();
         } else {
-            // Fallback to dashboard router if opened directly
             window.location.href = "{% url 'portal_redirect' %}";
         }
     }

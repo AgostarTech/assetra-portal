@@ -57,6 +57,14 @@
 </header>
 
 <style>
+    :root {
+        --asset-primary: #086070;
+        --asset-primary-hover: #064b58;
+        --asset-gold: #cfa76e;
+        --asset-border: rgba(8, 96, 112, 0.15);
+        --asset-text: #0F172A;
+    }
+
     .assetra-dash-header {
         width: 100%;
         min-height: 86px;
@@ -66,8 +74,8 @@
         justify-content: space-between;
         gap: 24px;
         background: #ffffff;
-        border-bottom: 1px solid rgba(52, 211, 153, 0.2);
-        box-shadow: 0 3px 12px rgba(6, 44, 48, 0.04);
+        border-bottom: 1px solid var(--asset-border);
+        box-shadow: 0 4px 20px rgba(8, 96, 112, 0.05);
         box-sizing: border-box;
         font-family: "Inter", "Segoe UI", Arial, sans-serif;
     }
@@ -79,7 +87,7 @@
     .assetra-eyebrow {
         display: block;
         margin-bottom: 4px;
-        color: #0b535b;
+        color: var(--asset-primary);
         font-size: 9px;
         font-weight: 800;
         letter-spacing: 1.8px;
@@ -87,7 +95,7 @@
 
     .assetra-page-title {
         margin: 0;
-        color: #0F172A;
+        color: var(--asset-text);
         font-size: 22px;
         font-weight: 700;
         letter-spacing: -0.5px;
@@ -100,33 +108,36 @@
         flex-shrink: 0;
     }
 
+    /* Updated Avatar Card matching your preferred UI style */
     .assetra-avatar {
         position: relative;
         width: 42px;
         height: 42px;
+        flex: 0 0 42px;
         display: grid;
         place-items: center;
-        border-radius: 50%;
-        background: #0b535b;
         color: #ffffff;
+        background: var(--asset-primary);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
         font-family: Georgia, serif;
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 800;
-        border: 2px solid #34d399;
-        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(8, 96, 112, 0.2);
     }
 
     .avatar-pulse {
         position: absolute;
         inset: -3px;
-        border-radius: 50%;
-        border: 1px solid rgba(52, 211, 153, 0.4);
+        border-radius: 14px;
+        border: 1.5px solid var(--asset-gold);
         animation: pulseRing 2.5s infinite;
+        pointer-events: none;
     }
 
     @keyframes pulseRing {
         0% { transform: scale(1); opacity: 0.8; }
-        100% { transform: scale(1.15); opacity: 0; }
+        100% { transform: scale(1.12); opacity: 0; }
     }
 
     .assetra-account-details {
@@ -145,7 +156,7 @@
 
     .assetra-account-name {
         max-width: 170px;
-        color: #0F172A;
+        color: var(--asset-text);
         font-size: 13px;
         font-weight: 700;
         white-space: nowrap;
@@ -157,9 +168,9 @@
         display: inline-block;
         padding: 2px 7px;
         border-radius: 4px;
-        background: rgba(11, 83, 91, 0.08);
-        border: 1px solid rgba(11, 83, 91, 0.2);
-        color: #0b535b;
+        background: rgba(8, 96, 112, 0.08);
+        border: 1px solid rgba(8, 96, 112, 0.2);
+        color: var(--asset-primary);
         font-size: 9.5px;
         font-weight: 700;
         width: fit-content;
@@ -204,7 +215,7 @@
         }
         .assetra-account-area {
             width: 100%;
-            justify-content: flex-between;
+            justify-content: space-between;
         }
         .assetra-header-divider {
             display: none;

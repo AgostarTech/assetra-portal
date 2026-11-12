@@ -1,8 +1,23 @@
 {% load static %}
 
 <!-- =====================================================
+     ASSETRA — SYSTEM-WIDE TRANSPARENT SYNC PRELOADER
+     ================================================     -->
+<div id="assetraPreloader" class="assetra-preloader" aria-hidden="true">
+    <div class="preloader-content">
+        <div class="preloader-spinner-box">
+            <div class="preloader-spinner-ring"></div>
+            <div class="preloader-logo-wrap">
+                <img src="{% static 'images/house.jpg' %}" alt="Assetra syncing" class="preloader-logo">
+            </div>
+        </div>
+        <span class="preloader-text">ASSETRA SYNCING...</span>
+    </div>
+</div>
+
+<!-- =====================================================
      ASSETRA — DEEP TEAL & EMERALD PUBLIC HEADER
-     ===================================================== -->
+     ================================================     -->
 <header class="assetra-header" id="assetraHeader">
     <div class="assetra-container">
 
@@ -13,7 +28,7 @@
 
             <div class="assetra-logo-wrapper">
                 <img
-                    src="{% static 'images/asset_logo_3.jpg' %}"
+                    src="{% static 'images/house.jpg' %}"
                     alt="Assetra logo"
                     class="assetra-logo"
                     onerror="this.style.display='none';"
@@ -106,7 +121,7 @@
 
 <!-- =====================================================
      ASSETRA — AUTHENTICATED DASHBOARD HEADER
-     ===================================================== -->
+     ================================================     -->
 {% if user.is_authenticated %}
 <header class="assetra-dashboard-header">
 
@@ -179,7 +194,7 @@
 
 <!-- =====================================================
      ASSETRA — SYSTEM TEAL STYLING & KINETIC ANIMATIONS
-     ===================================================== -->
+     ================================================     -->
 <style>
     :root {
         --sys-teal: #0b535b;
@@ -197,6 +212,103 @@
     .assetra-dashboard-header,
     .assetra-dashboard-header * {
         box-sizing: border-box;
+    }
+
+    /* PRELOADER SCREEN STYLING (100% TRANSPARENT BACKGROUND) */
+    .assetra-preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .assetra-preloader.is-active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .preloader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 0;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: none;
+    }
+
+    .preloader-spinner-box {
+        position: relative;
+        width: 86px;
+        height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preloader-logo-wrap {
+        position: relative;
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+        z-index: 2;
+    }
+
+    .preloader-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.85);
+        background: var(--sys-teal-dark);
+    }
+
+    .preloader-spinner-ring {
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: var(--sys-emerald-bright);
+        border-bottom-color: var(--sys-white);
+        animation: preloaderSpin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        z-index: 1;
+    }
+
+    @keyframes preloaderSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .preloader-text {
+        color: var(--sys-white);
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        animation: preloaderPulseText 1.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes preloaderPulseText {
+        0% { opacity: 0.5; }
+        100% { opacity: 1; }
     }
 
     .assetra-header {
@@ -242,7 +354,7 @@
         gap: 28px;
     }
 
-    /* BRAND WITH DYNAMIC LOGO GLOW */
+    /* BRAND WITH PERFECT CIRCLE FITTED LOGO */
     .assetra-brand {
         display: inline-flex;
         align-items: center;
@@ -256,6 +368,8 @@
         width: 46px;
         height: 46px;
         border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
     }
 
     .assetra-logo {
@@ -265,6 +379,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         border: 1.5px solid rgba(255, 255, 255, 0.75);
         border-radius: 50%;
         background: var(--sys-teal-dark);
@@ -825,7 +940,8 @@
         .assetra-logout-btn,
         .assetra-menu-toggle,
         .header-laser-beam,
-        .avatar-pulse {
+        .avatar-pulse,
+        .preloader-spinner-ring {
             animation: none !important;
             transition: none !important;
         }
@@ -834,60 +950,102 @@
 
 
 <!-- =====================================================
-     ASSETRA — FLUID MOBILE TOGGLE FUNCTIONALITY
-     ===================================================== -->
+     ASSETRA — SYSTEM-WIDE NAVIGATION & PRELOADER SCRIPT
+     ================================================     -->
 <script>
-    (() => {
+    (function() {
+        const preloader = document.getElementById("assetraPreloader");
+        let startTime = Date.now();
+        const minDisplayTime = 3000; // Guaranteed 3 seconds minimum spin time
+
+        function showPreloader() {
+            startTime = Date.now();
+            if (preloader) {
+                preloader.classList.add("is-active");
+            }
+        }
+
+        function hidePreloader() {
+            if (!preloader) return;
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+
+            setTimeout(() => {
+                preloader.classList.remove("is-active");
+            }, remainingTime);
+        }
+
+        // Hide preloader when page finishes loading (respecting 3s minimum)
+        window.addEventListener("DOMContentLoaded", hidePreloader);
+        window.addEventListener("load", hidePreloader);
+        window.addEventListener("pageshow", hidePreloader);
+
+        // Trigger preloader on ANY link click system-wide (pages, documents, file downloads)
+        document.addEventListener("click", (e) => {
+            const link = e.target.closest("a");
+            if (!link) return;
+
+            const href = link.getAttribute("href");
+            const target = link.getAttribute("target");
+
+            if (
+                !href ||
+                href.startsWith("#") ||
+                href.startsWith("javascript:") ||
+                target === "_blank" ||
+                e.defaultPrevented
+            ) {
+                return;
+            }
+
+            showPreloader();
+
+            // If it's a file download link (e.g. PDF, Excel, CSV, ZIP) that doesn't trigger a full page reload,
+            // ensure the preloader safely finishes its 3-second spin and hides automatically.
+            const fileExtensions = /\.(pdf|docx|doc|xlsx|xls|csv|zip|rar|txt|png|jpg|jpeg)(\?.*)?$/i;
+            if (link.hasAttribute("download") || fileExtensions.test(href)) {
+                setTimeout(hidePreloader, minDisplayTime);
+            }
+        });
+
+        // Trigger preloader on ANY form submission system-wide
+        document.addEventListener("submit", (e) => {
+            if (!e.defaultPrevented) {
+                showPreloader();
+            }
+        });
+
+        // Mobile Menu Toggle Logic
         const toggle = document.getElementById("assetra-menu-toggle");
         const navigation = document.getElementById("assetra-navigation");
         const actions = document.querySelector(".assetra-public-actions");
-        const icon = toggle
-            ? toggle.querySelector(".assetra-menu-icon")
-            : null;
+        const icon = toggle ? toggle.querySelector(".assetra-menu-icon") : null;
 
-        if (!toggle || !navigation || !actions || !icon) {
-            return;
+        if (toggle && navigation && actions && icon) {
+            toggle.addEventListener("click", () => {
+                const isOpen = toggle.getAttribute("aria-expanded") === "true";
+                const nextState = !isOpen;
+
+                toggle.setAttribute("aria-expanded", String(nextState));
+                toggle.setAttribute("aria-label", nextState ? "Close navigation menu" : "Open navigation menu");
+
+                navigation.classList.toggle("is-open", nextState);
+                actions.classList.toggle("is-open", nextState);
+
+                icon.classList.toggle("fa-bars", !nextState);
+                icon.classList.toggle("fa-xmark", nextState);
+            });
+
+            window.addEventListener("resize", () => {
+                if (window.innerWidth > 850) {
+                    navigation.classList.remove("is-open");
+                    actions.classList.remove("is-open");
+                    toggle.setAttribute("aria-expanded", "false");
+                    toggle.setAttribute("aria-label", "Open navigation menu");
+                    icon.classList.remove("fa-xmark");
+                    icon.classList.add("fa-bars");
+                }
+            });
         }
-
-        toggle.addEventListener("click", () => {
-            const isOpen =
-                toggle.getAttribute("aria-expanded") === "true";
-
-            const nextState = !isOpen;
-
-            toggle.setAttribute(
-                "aria-expanded",
-                String(nextState)
-            );
-
-            toggle.setAttribute(
-                "aria-label",
-                nextState
-                    ? "Close navigation menu"
-                    : "Open navigation menu"
-            );
-
-            navigation.classList.toggle("is-open", nextState);
-            actions.classList.toggle("is-open", nextState);
-
-            icon.classList.toggle("fa-bars", !nextState);
-            icon.classList.toggle("fa-xmark", nextState);
-        });
-
-        window.addEventListener("resize", () => {
-            if (window.innerWidth > 850) {
-                navigation.classList.remove("is-open");
-                actions.classList.remove("is-open");
-
-                toggle.setAttribute("aria-expanded", "false");
-                toggle.setAttribute(
-                    "aria-label",
-                    "Open navigation menu"
-                );
-
-                icon.classList.remove("fa-xmark");
-                icon.classList.add("fa-bars");
-            }
-        });
     })();
 </script>

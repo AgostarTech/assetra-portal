@@ -153,7 +153,7 @@
         <div class="detail-group">
             <span class="detail-label">Estimated Valuation</span>
             <span class="detail-value" style="color: var(--asset-primary); font-size: 20px;">
-                {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:0|intcomma }}
             </span>
         </div>
         <div class="detail-group">
@@ -163,7 +163,7 @@
         
         <div class="detail-group">
             <span class="detail-label">Purchase Price</span>
-            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.purchase_price|default:0|floatformat:2|intcomma }}</span>
+            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.purchase_price|default:0|floatformat:0|intcomma }}</span>
         </div>
         <div class="detail-group">
             <span class="detail-label">Purchase Date</span>
@@ -176,7 +176,7 @@
         </div>
         <div class="detail-group">
             <span class="detail-label">Liability Amount</span>
-            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.liability_amount|default:0|floatformat:2|intcomma }}</span>
+            <span class="detail-value">{{ asset.currency|default:"TZS" }} {{ asset.liability_amount|default:0|floatformat:0|intcomma }}</span>
         </div>
         
         {% if specific_fields %}
@@ -230,11 +230,11 @@
                             <a href="{{ doc.file.url }}" download class="doc-icon-btn" title="Download Document">
                                 <i class="fa-solid fa-download"></i>
                             </a>
-                            <!-- Edit / Update Document (fallback to asset update or document edit URL if available) -->
+                            <!-- Edit / Update Document -->
                             <a href="{% url 'assets:asset_update' asset.id %}" class="doc-icon-btn" title="Edit Document">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
-                            <!-- Delete Document Only (Make sure your url name is assets:document_delete or fallback to asset_delete if you prefer) -->
+                            <!-- Delete Document Only -->
                             <a href="{% url 'assets:document_delete' doc.id %}" class="doc-icon-btn delete" title="Delete Document">
                                 <i class="fa-solid fa-trash"></i>
                             </a>

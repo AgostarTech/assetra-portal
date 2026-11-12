@@ -273,14 +273,14 @@
                         </td>
                         <td>
                             {% if asset.stock_details %}
-                                <strong style="display:block; color:var(--asset-text);">{{ asset.stock_details.units|floatformat:2|intcomma }} shares</strong>
-                                <small style="color:var(--asset-muted);">@ {{ asset.currency|default:"USD" }} {{ asset.stock_details.price_per_share|floatformat:2|intcomma }}/sh</small>
+                                <strong style="display:block; color:var(--asset-text);">{{ asset.stock_details.units|floatformat:0|intcomma }} shares</strong>
+                                <small style="color:var(--asset-muted);">@ {{ asset.currency|default:"TZS" }} {{ asset.stock_details.price_per_share|floatformat:0|intcomma }}/sh</small>
                             {% else %}
                                 <span style="color:var(--asset-muted);">—</span>
                             {% endif %}
                         </td>
                         <td style="font-weight: 750; color: var(--asset-text);">
-                            {{ asset.currency|default:"USD" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                            {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:0|intcomma }}
                         </td>
                         <td>
                             {% with doc=asset.supporting_documents.first %}

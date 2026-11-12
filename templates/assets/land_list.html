@@ -281,7 +281,7 @@
                             {% endif %}
                         </td>
                         <td style="font-weight: 750; color: var(--asset-text);">
-                            {{ asset.currency|default:"USD" }} {{ asset.current_estimated_value|default:0|floatformat:2|intcomma }}
+                            {{ asset.currency|default:"TZS" }} {{ asset.current_estimated_value|default:0|floatformat:0|intcomma }}
                         </td>
                         <td>
                             {% with doc=asset.supporting_documents.first %}
