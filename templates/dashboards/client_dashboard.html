@@ -1,298 +1,114 @@
 {% extends 'dashboards/base_dashboard.html' %}
 {% load static humanize %}
 
-{% block dashboard_title %}Client Overview Portal{% endblock %}
-{% block view_header %}Client Wealth &amp; Asset Summary{% endblock %}
+{% block dashboard_title %}Client Overview Portal | Assetra Africa{% endblock %}
+{% block page_title %}Client Wealth &amp; Asset Summary{% endblock %}
 
 {% block dashboard_content %}
-<style>
-    .summary-hero {
-        background: linear-gradient(135deg, #086070 0%, #064b58 100%);
-        color: #fff;
-        border-radius: 16px;
-        padding: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 25px rgba(8, 96, 112, 0.15);
-        gap: 20px;
-    }
-    .hero-greeting h1 { margin: 0 0 8px; font-size: 24px; font-weight: 800; }
-    .hero-greeting p { margin: 0; opacity: 0.85; font-size: 14px; }
-    .hero-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
+<div class="client-overview-workspace space-y-6 pb-12">
 
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .metric-card {
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 14px;
-        padding: 22px;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
-    }
-    .metric-title { font-size: 13px; font-weight: 600; color: #687181; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric-value { font-size: 22px; font-weight: 800; color: #0F172A; }
-    .metric-sub { font-size: 12px; color: #16845b; margin-top: 6px; font-weight: 600; }
-
-    /* Analytics Charts Grid */
-    .charts-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .chart-card {
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
-    }
-    .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 18px;
-        gap: 10px;
-    }
-    .chart-header h3 {
-        margin: 0 0 4px;
-        font-size: 16px;
-        font-weight: 800;
-        color: #086070;
-    }
-    .chart-header p {
-        margin: 0;
-        font-size: 12.5px;
-        color: #687181;
-    }
-    .chart-badge {
-        background: rgba(8, 96, 112, 0.08);
-        color: #086070;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 11.5px;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-    .chart-container {
-        position: relative;
-        height: 280px;
-        width: 100%;
-    }
-
-    .action-row {
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 14px;
-        padding: 25px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-    }
-    .action-buttons {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-    .btn-action {
-        background: #fff;
-        color: #086070;
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 13.5px;
-        text-decoration: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .btn-action:hover { background: #f8fafc; color: #064b58; }
-
-    .btn-action-primary {
-        background: #fff;
-        color: #086070;
-    }
-
-    .btn-action-alt {
-        background: #F4F6F9;
-        color: #086070;
-        border: 1px solid #086070;
-    }
-    .btn-action-alt:hover {
-        background: #086070;
-        color: #fff;
-    }
-
-    /* Dropdown Styles */
-    .asset-dropdown {
-        position: relative;
-        display: inline-block;
-    }
-    .asset-dropdown-menu {
-        display: none;
-        position: absolute;
-        left: 0;
-        top: calc(100% + 8px);
-        min-width: 230px;
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, 0.12);
-        border-radius: 12px;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
-        padding: 8px;
-        z-index: 1000;
-    }
-    .asset-dropdown-menu.show {
-        display: block;
-    }
-    .asset-dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        color: #0F172A;
-        text-decoration: none;
-        font-size: 13.5px;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: background 0.15s, color 0.15s;
-    }
-    .asset-dropdown-item i {
-        width: 18px;
-        text-align: center;
-        color: #086070;
-    }
-    .asset-dropdown-item:hover {
-        background: #F4F6F9;
-        color: #086070;
-    }
-
-    @media (max-width: 992px) {
-        .charts-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-        .summary-hero { flex-direction: column; align-items: flex-start; gap: 20px; }
-        .action-row { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
-        .action-buttons { justify-content: center; }
-        .asset-dropdown-menu { left: auto; right: 0; }
-    }
-</style>
-
-<!-- Professional Client Summary Hero Banner with Prominent Add Asset Button -->
-<div class="summary-hero">
-    <div class="hero-greeting">
-        <h1>Welcome back, {{ request.user.first_name|default:request.user.email }}</h1>
-        <p><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i> Secure Private Wealth &amp; Asset Management Dashboard</p>
-    </div>
-    <div class="hero-actions">
-        <!-- Prominent Add Asset Dropdown -->
-        <div class="asset-dropdown" id="addAssetDropdown">
-            <button type="button" class="btn-action btn-action-primary" id="addAssetBtn" aria-expanded="false" aria-haspopup="true">
-                <i class="fa-solid fa-plus" style="margin-right: 8px; color: #086070;"></i> Add New Asset
-                <i class="fa-solid fa-chevron-down" style="margin-left: 8px; font-size: 11px; color: #086070;"></i>
-            </button>
-            <div class="asset-dropdown-menu" id="addAssetMenu" role="menu">
-                <a href="{% url 'assets:create_vehicle' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-car"></i> Vehicle
-                </a>
-                <a href="{% url 'assets:create_land' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-map-location-dot"></i> Land
-                </a>
-                <a href="{% url 'assets:create_house' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-house"></i> House
-                </a>
-                <a href="{% url 'assets:create_stock' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-chart-line"></i> Stock
-                </a>
-                <a href="{% url 'assets:create_bond' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Government Bond
-                </a>
-                <a href="{% url 'assets:create_other' %}" class="asset-dropdown-item" role="menuitem">
-                    <i class="fa-solid fa-box-open"></i> Other Asset
-                </a>
+    <!-- Professional Client Summary Hero Banner -->
+    <div class="summary-hero">
+        <div class="hero-greeting">
+            <div class="summary-eyebrow">PORTFOLIO OVERVIEW</div>
+            <h1>Welcome back, {{ request.user.first_name|default:request.user.email }}</h1>
+            <p><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i> Secure Private Wealth &amp; Asset Management Dashboard</p>
+        </div>
+        <div class="hero-actions">
+            <!-- Prominent Add Asset Dropdown -->
+            <div class="asset-dropdown" id="addAssetDropdown">
+                <button type="button" class="btn-action btn-action-primary" id="addAssetBtn" aria-expanded="false" aria-haspopup="true">
+                    <i class="fa-solid fa-plus" style="margin-right: 8px; color: #086070;"></i> Add New Asset
+                    <i class="fa-solid fa-chevron-down" style="margin-left: 8px; font-size: 11px; color: #086070;"></i>
+                </button>
+                <div class="asset-dropdown-menu" id="addAssetMenu" role="menu">
+                    <a href="{% url 'assets:create_vehicle' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-car"></i> Vehicle
+                    </a>
+                    <a href="{% url 'assets:create_land' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-map-location-dot"></i> Land
+                    </a>
+                    <a href="{% url 'assets:create_house' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-house"></i> House
+                    </a>
+                    <a href="{% url 'assets:create_stock' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-chart-line"></i> Stock
+                    </a>
+                    <a href="{% url 'assets:create_bond' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Government Bond
+                    </a>
+                    <a href="{% url 'assets:create_other' %}" class="asset-dropdown-item" role="menuitem">
+                        <i class="fa-solid fa-box-open"></i> Other Asset
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Key Metrics Grid -->
-<div class="metrics-grid">
-    <div class="metric-card">
-        <div class="metric-title">Portfolio Assets</div>
-        <div class="metric-value">{{ total_valuation|default:0|floatformat:0|intcomma }} TZS</div>
-        <div class="metric-sub"><i class="fa-solid fa-arrow-up"></i> {{ asset_count|default:0 }} Active Item(s) Synchronized</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-title">Account Status</div>
-        <div class="metric-value" style="font-size: 18px; color: {% if subscription.is_locked %}#dc2626{% else %}#16845b{% endif %};">
-            {% if subscription.is_locked %}Locked / Expired{% else %}Fully Operational{% endif %}
+    <!-- Key Metrics Grid -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-title">Portfolio Assets</div>
+            <div class="metric-value">{{ total_valuation|default:0|floatformat:0|intcomma }} TZS</div>
+            <div class="metric-sub"><i class="fa-solid fa-arrow-up"></i> {{ asset_count|default:0 }} Active Item(s) Synchronized</div>
         </div>
-        <div class="metric-sub" style="color: #687181;">Encrypted Access Tier</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-title">Support Requests</div>
-        <div class="metric-value">0 Open</div>
-        <div class="metric-sub" style="color: #086070;">24/7 Priority Desk</div>
-    </div>
-</div>
-
-<!-- Wealth Analytics & Prediction Charts -->
-<div class="charts-grid">
-    <!-- Line Chart: Historical Progress & Market Prediction -->
-    <div class="chart-card">
-        <div class="chart-header">
-            <div>
-                <h3><i class="fa-solid fa-chart-line" style="margin-right: 8px;"></i> Portfolio Growth &amp; Wealth Forecast</h3>
-                <p>Historical asset progression from inception vs. projected market value</p>
+        <div class="metric-card">
+            <div class="metric-title">Account Status</div>
+            <div class="metric-value" style="font-size: 18px; color: {% if subscription.is_locked %}#dc2626{% else %}#059669{% endif %};">
+                {% if subscription.is_locked %}Locked / Expired{% else %}Fully Operational{% endif %}
             </div>
-            <span class="chart-badge">+7.4% Est. Annual Growth</span>
+            <div class="metric-sub" style="color: #687181;">Encrypted Access Tier</div>
         </div>
-        <div class="chart-container">
-            <canvas id="wealthProgressChart"></canvas>
+        <div class="metric-card">
+            <div class="metric-title">Support Requests</div>
+            <div class="metric-value">0 Open</div>
+            <div class="metric-sub" style="color: #086070;">24/7 Priority Desk</div>
         </div>
     </div>
 
-    <!-- Line-Based Chart: Asset Category Breakdown -->
-    <div class="chart-card">
-        <div class="chart-header">
-            <div>
-                <h3><i class="fa-solid fa-chart-area" style="margin-right: 8px;"></i> Asset Breakdown</h3>
-                <p>Value distribution across categories</p>
+    <!-- Wealth Analytics & Prediction Charts (Fully Responsive & Non-Overflowing) -->
+    <div class="charts-grid">
+        <!-- Line Chart: Historical Progress & Market Prediction -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <h3><i class="fa-solid fa-chart-line" style="margin-right: 8px;"></i> Portfolio Growth &amp; Wealth Forecast</h3>
+                    <p>Historical asset progression from inception vs. projected market value</p>
+                </div>
+                <span class="chart-badge">+7.4% Est. Growth</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="wealthProgressChart"></canvas>
             </div>
         </div>
-        <div class="chart-container">
-            <canvas id="assetCategoryChart"></canvas>
+
+        <!-- Line-Based Chart: Asset Category Breakdown -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <h3><i class="fa-solid fa-chart-area" style="margin-right: 8px;"></i> Asset Breakdown</h3>
+                    <p>Value distribution across categories</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="assetCategoryChart"></canvas>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Quick Action Banner -->
-<div class="action-row">
-    <div>
-        <h3 style="margin: 0 0 5px; font-size: 16px; font-weight: 800;">Manage Your Subscription &amp; Billing</h3>
-        <p style="margin: 0; font-size: 13px; color: #687181;">Upgrade your account tier or test checkouts seamlessly.</p>
+    <!-- Quick Action Banner -->
+    <div class="action-row">
+        <div>
+            <h3 style="margin: 0 0 4px; font-size: 15px; font-weight: 800; color: #086070;">Manage Your Subscription &amp; Billing</h3>
+            <p style="margin: 0; font-size: 12.5px; color: #687181;">Upgrade your account tier or test checkouts seamlessly.</p>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'accounts:subscription_plans' %}" class="btn-action btn-action-alt">
+                <i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Subscription Plans
+            </a>
+        </div>
     </div>
-    <div class="action-buttons">
-        <a href="{% url 'accounts:subscription_plans' %}" class="btn-action btn-action-alt" style="background: #086070; color: #fff; border: none;">
-            <i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Subscription Plans
-        </a>
-    </div>
+
 </div>
 
 <!-- Chart.js CDN -->
@@ -337,27 +153,27 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: "Actual Portfolio Value (TZS)",
+                        label: "Actual Portfolio (TZS)",
                         data: historicalData,
                         borderColor: "#086070",
                         backgroundColor: "rgba(8, 96, 112, 0.12)",
                         borderWidth: 3,
                         fill: true,
                         tension: 0.35,
-                        pointRadius: 4,
+                        pointRadius: 3,
                         pointBackgroundColor: "#086070"
                     },
                     {
-                        label: "Market-Based Prediction (TZS)",
+                        label: "Market Prediction (TZS)",
                         data: predictedData,
-                        borderColor: "#16845b",
-                        backgroundColor: "rgba(22, 132, 91, 0.08)",
+                        borderColor: "#059669",
+                        backgroundColor: "rgba(5, 150, 105, 0.08)",
                         borderWidth: 3,
                         borderDash: [6, 6],
                         fill: true,
                         tension: 0.35,
-                        pointRadius: 4,
-                        pointBackgroundColor: "#16845b"
+                        pointRadius: 3,
+                        pointBackgroundColor: "#059669"
                     }
                 ]
             },
@@ -367,7 +183,7 @@
                 plugins: {
                     legend: {
                         position: "top",
-                        labels: { usePointStyle: true, font: { size: 12, weight: "600" } }
+                        labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: "600" } }
                     },
                     tooltip: {
                         callbacks: {
@@ -382,6 +198,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
+                            font: { size: 10 },
                             callback: function (value) {
                                 if (value >= 1000000) {
                                     return (value / 1000000).toFixed(1) + "M";
@@ -392,6 +209,7 @@
                         grid: { color: "rgba(15, 23, 42, 0.05)" }
                     },
                     x: {
+                        ticks: { font: { size: 10 } },
                         grid: { display: false }
                     }
                 }
@@ -415,12 +233,12 @@
                 datasets: [{
                     label: "Category Valuation (TZS)",
                     data: categoryData,
-                    borderColor: "#0097B2",
-                    backgroundColor: "rgba(0, 151, 178, 0.15)",
+                    borderColor: "#097c92",
+                    backgroundColor: "rgba(9, 124, 146, 0.15)",
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 5,
+                    pointRadius: 4,
                     pointBackgroundColor: "#086070"
                 }]
             },
@@ -441,6 +259,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
+                            font: { size: 10 },
                             callback: function (value) {
                                 if (value >= 1000000) {
                                     return (value / 1000000).toFixed(1) + "M";
@@ -451,6 +270,7 @@
                         grid: { color: "rgba(15, 23, 42, 0.05)" }
                     },
                     x: {
+                        ticks: { font: { size: 10 } },
                         grid: { display: false }
                     }
                 }
@@ -459,4 +279,313 @@
     })();
 </script>
 
+<style>
+/* =========================================================
+   ASSETRA AFRICA — CLIENT OVERVIEW PORTAL (NO HORIZONTAL SCROLL)
+========================================================= */
+
+.client-overview-workspace {
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-emerald: #059669;
+    --pw-border: rgba(8, 96, 112, 0.15);
+    --pw-card: #ffffff;
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-radius: 14px;
+
+    color: var(--pw-text);
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: clamp(12px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    overflow-x: hidden; /* Strictly prevent horizontal page sliding */
+}
+
+.client-overview-workspace *, .client-overview-workspace *::before, .client-overview-workspace *::after {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.summary-hero {
+    background: linear-gradient(135deg, #086070 0%, #064b58 100%);
+    color: #fff;
+    border-radius: var(--pw-radius);
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 24px rgba(8, 96, 112, 0.16);
+    gap: 16px;
+    position: relative;
+    overflow: visible;
+    flex-wrap: wrap;
+}
+
+.summary-eyebrow {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.hero-greeting h1 {
+    margin: 0 0 4px;
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    word-break: break-word;
+}
+
+.hero-greeting p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 12.5px;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.metric-card {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover {
+    box-shadow: 0 8px 28px rgba(8, 96, 112, 0.08);
+    transform: translateY(-2px);
+}
+
+.metric-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--pw-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.metric-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--pw-text);
+    letter-spacing: -0.5px;
+    word-break: break-word;
+}
+
+.metric-sub {
+    font-size: 11px;
+    color: var(--pw-emerald);
+    margin-top: 6px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Analytics Charts Grid (Fixed Responsive Layout) */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1.6fr 1fr;
+    }
+}
+
+.chart-card {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    min-width: 0; /* Prevents flex/grid overflow from chart canvas */
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.chart-header h3 {
+    margin: 0 0 4px;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--pw-teal);
+}
+
+.chart-header p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--pw-muted);
+}
+
+.chart-badge {
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    padding: 4px 10px;
+    border: 1px solid rgba(8, 96, 112, 0.2);
+    border-radius: 20px;
+    font-size: 9.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.chart-container {
+    position: relative;
+    height: 260px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.action-row {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    flex-wrap: wrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-action {
+    background: var(--pw-card);
+    color: var(--pw-teal);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    border: 1px solid var(--pw-border);
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    background: #f1f5f9;
+    border-color: var(--pw-teal);
+}
+
+.btn-action-primary {
+    background: #fff;
+    color: var(--pw-teal);
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.btn-action-alt {
+    background: var(--pw-teal);
+    color: #fff;
+    border: none;
+}
+.btn-action-alt:hover {
+    background: var(--pw-teal-dark);
+    color: #fff;
+}
+
+/* Dropdown Styles */
+.asset-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.asset-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 220px;
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 12px;
+    box-shadow: 0 16px 35px rgba(8, 96, 112, 0.18);
+    padding: 8px;
+    z-index: 1000;
+    animation: dropdownFadeIn 0.18s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.asset-dropdown-menu.show {
+    display: block;
+}
+
+.asset-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    color: var(--pw-text);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.asset-dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--pw-teal);
+    font-size: 12px;
+}
+
+.asset-dropdown-item:hover {
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+}
+
+@media (max-width: 768px) {
+    .summary-hero { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .action-row { flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
+    .action-buttons { justify-content: center; }
+    .asset-dropdown-menu { right: auto; left: 0; }
+}
+</style>
 {% endblock %}

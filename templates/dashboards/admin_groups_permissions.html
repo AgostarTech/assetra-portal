@@ -1,10 +1,159 @@
-{% extends 'base.html' %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Groups &amp; Permissions | Assetra Africa{% endblock %}
+{% block dashboard_title %}Groups &amp; Permissions | Assetra Africa{% endblock %}
+{% block page_title %}Groups &amp; Permissions{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pw-groups max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Access Control</div>
+            <h1 class="pw-page-heading">User Groups &amp; Permissions</h1>
+            <p class="pw-description">Organize users into role categories and manage granular system permission groups.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- NOTIFICATIONS -->
+    {% if messages %}
+        <div class="pw-messages">
+            {% for message in messages %}
+                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- CREATE GROUP PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Create New Permission Group</h2>
+                <p class="pw-panel-subtitle">Add a custom group to partition user access levels across Assetra Africa.</p>
+            </div>
+        </div>
+        <div class="pw-panel-body">
+            <form method="post" class="pw-form-group">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_group">
+                <input type="text" name="group_name" placeholder="Group Name (e.g., Compliance Officers, Wealth Advisors)" required class="pw-input">
+                <button type="submit" class="pw-btn pw-btn-primary">Create Group</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- EXISTING GROUPS PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">System Groups &amp; Members</h2>
+                <p class="pw-panel-subtitle">Manage group memberships, view permissions, and control access levels.</p>
+            </div>
+            <span class="pw-badge"><i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> {{ groups.count|default:0|intcomma }} groups</span>
+        </div>
+
+        {% if groups %}
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Assigned Members</th>
+                        <th>Add Member</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--pw-teal); font-size: 13px;">{{ group.name }}</strong><br>
+                            <span style="color: var(--pw-muted); font-size: 11px;">{{ group.permissions.count|default:0|intcomma }} permissions assigned</span>
+                        </td>
+                        <td>
+                            <div class="pw-member-list">
+                                {% for member in group.user_set.all %}
+                                    <span class="pw-member-chip">
+                                        {% if member.get_full_name %}
+                                            {{ member.get_full_name }}
+                                        {% elif member.first_name %}
+                                            {{ member.first_name }} {{ member.last_name|default:"" }}
+                                        {% elif member.username %}
+                                            {{ member.username }}
+                                        {% else %}
+                                            {{ member.email|default:"User" }}
+                                        {% endif %}
+                                        <!-- Remove member form -->
+                                        <form method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="remove_member">
+                                            <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                            <input type="hidden" name="user_id" value="{{ member.pk }}">
+                                            <button type="submit" style="background:none; border:none; color:var(--pw-danger); cursor:pointer; font-weight:bold; padding:0 2px; font-size: 13px;" title="Remove member">&times;</button>
+                                        </form>
+                                    </span>
+                                {% empty %}
+                                    <span style="color: var(--pw-muted); font-style: italic; font-size: 11px;">No members assigned to this group</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <!-- Add Member Form -->
+                            <form method="post" style="display: flex; gap: 6px; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_member">
+                                <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                <select name="user_id" class="pw-select" required style="width: 180px; font-size: 11.5px;">
+                                    <option value="">Select user...</option>
+                                    {% for usr in all_users %}
+                                        <option value="{{ usr.pk }}">
+                                            {% if usr.get_full_name %}
+                                                {{ usr.get_full_name }} ({{ usr.username }})
+                                            {% elif usr.first_name %}
+                                                {{ usr.first_name }} {{ usr.last_name|default:"" }}
+                                            {% elif usr.username %}
+                                                {{ usr.username }}
+                                            {% else %}
+                                                {{ usr.email }}
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="pw-btn" style="padding: 4px 10px; font-size: 11px;">Add</button>
+                            </form>
+                        </td>
+                        <td style="text-align: right;">
+                            <!-- Delete Group Form -->
+                            <form method="post" onsubmit="return confirm('Are you sure you want to delete the group {{ group.name }}?');" style="display: inline-block;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_group">
+                                <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                <button type="submit" class="pw-btn pw-btn-danger" style="padding: 5px 10px; font-size: 11px;">Delete Group</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pw-empty">
+                <i class="fa-solid fa-shield-halved" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pw-teal);"></i>
+                No user groups have been created yet.
+            </div>
+        {% endif %}
+    </section>
+
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — GROUPS & PERMISSIONS MANAGEMENT
@@ -295,154 +444,4 @@
     }
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pw-groups">
-
-    <!-- HEADER -->
-    <header class="pw-topbar">
-        <div>
-            <div class="pw-eyebrow">Administration / Access Control</div>
-            <h1 class="pw-page-heading">User Groups &amp; Permissions</h1>
-            <p class="pw-description">Organize users into role categories and manage granular system permission groups.</p>
-        </div>
-
-        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
-            &larr; Back to Admin Hub
-        </a>
-    </header>
-
-    <!-- NOTIFICATIONS -->
-    {% if messages %}
-        <div class="pw-messages">
-            {% for message in messages %}
-                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <!-- CREATE GROUP PANEL -->
-    <section class="pw-panel">
-        <div class="pw-panel-head">
-            <div>
-                <h2 class="pw-panel-title">Create New Permission Group</h2>
-                <p class="pw-panel-subtitle">Add a custom group to partition user access levels across Assetra Africa.</p>
-            </div>
-        </div>
-        <div class="pw-panel-body">
-            <form method="post" class="pw-form-group">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="create_group">
-                <input type="text" name="group_name" placeholder="Group Name (e.g., Compliance Officers, Wealth Advisors)" required class="pw-input">
-                <button type="submit" class="pw-btn pw-btn-primary">Create Group</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- EXISTING GROUPS PANEL -->
-    <section class="pw-panel">
-        <div class="pw-panel-head">
-            <div>
-                <h2 class="pw-panel-title">System Groups &amp; Members</h2>
-                <p class="pw-panel-subtitle">Manage group memberships, view permissions, and control access levels.</p>
-            </div>
-            <span class="pw-badge"><i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> {{ groups.count|default:0|intcomma }} groups</span>
-        </div>
-
-        {% if groups %}
-        <div class="pw-table-wrap">
-            <table class="pw-table">
-                <thead>
-                    <tr>
-                        <th>Group Name</th>
-                        <th>Assigned Members</th>
-                        <th>Add Member</th>
-                        <th style="text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for group in groups %}
-                    <tr>
-                        <td>
-                            <strong style="color: var(--pw-teal); font-size: 13px;">{{ group.name }}</strong><br>
-                            <span style="color: var(--pw-muted); font-size: 11px;">{{ group.permissions.count|default:0|intcomma }} permissions assigned</span>
-                        </td>
-                        <td>
-                            <div class="pw-member-list">
-                                {% for member in group.user_set.all %}
-                                    <span class="pw-member-chip">
-                                        {% if member.get_full_name %}
-                                            {{ member.get_full_name }}
-                                        {% elif member.first_name %}
-                                            {{ member.first_name }} {{ member.last_name|default:"" }}
-                                        {% elif member.username %}
-                                            {{ member.username }}
-                                        {% else %}
-                                            {{ member.email|default:"User" }}
-                                        {% endif %}
-                                        <!-- Remove member form -->
-                                        <form method="post" style="display:inline;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="remove_member">
-                                            <input type="hidden" name="group_id" value="{{ group.pk }}">
-                                            <input type="hidden" name="user_id" value="{{ member.pk }}">
-                                            <button type="submit" style="background:none; border:none; color:var(--pw-danger); cursor:pointer; font-weight:bold; padding:0 2px; font-size: 13px;" title="Remove member">&times;</button>
-                                        </form>
-                                    </span>
-                                {% empty %}
-                                    <span style="color: var(--pw-muted); font-style: italic; font-size: 11px;">No members assigned to this group</span>
-                                {% endfor %}
-                            </div>
-                        </td>
-                        <td>
-                            <!-- Add Member Form -->
-                            <form method="post" style="display: flex; gap: 6px; align-items: center;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="add_member">
-                                <input type="hidden" name="group_id" value="{{ group.pk }}">
-                                <select name="user_id" class="pw-select" required style="width: 180px; font-size: 11.5px;">
-                                    <option value="">Select user...</option>
-                                    {% for usr in all_users %}
-                                        <option value="{{ usr.pk }}">
-                                            {% if usr.get_full_name %}
-                                                {{ usr.get_full_name }} ({{ usr.username }})
-                                            {% elif usr.first_name %}
-                                                {{ usr.first_name }} {{ usr.last_name|default:"" }}
-                                            {% elif usr.username %}
-                                                {{ usr.username }}
-                                            {% else %}
-                                                {{ usr.email }}
-                                            {% endif %}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="pw-btn" style="padding: 4px 10px; font-size: 11px;">Add</button>
-                            </form>
-                        </td>
-                        <td style="text-align: right;">
-                            <!-- Delete Group Form -->
-                            <form method="post" onsubmit="return confirm('Are you sure you want to delete the group {{ group.name }}?');" style="display: inline-block;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_group">
-                                <input type="hidden" name="group_id" value="{{ group.pk }}">
-                                <button type="submit" class="pw-btn pw-btn-danger" style="padding: 5px 10px; font-size: 11px;">Delete Group</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <div class="pw-empty">
-                <i class="fa-solid fa-shield-halved" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pw-teal);"></i>
-                No user groups have been created yet.
-            </div>
-        {% endif %}
-    </section>
-
-</div>
 {% endblock %}

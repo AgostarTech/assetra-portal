@@ -1,9 +1,213 @@
-{% extends 'base.html' %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}User Management | Assetra Africa{% endblock %}
+{% block dashboard_title %}User Management | Assetra Africa{% endblock %}
+{% block page_title %}User Management{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pw-users max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- TOPBAR / HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Assetra Africa / Administration</div>
+            <h1 class="pw-page-heading">User Management & Permissions</h1>
+            <p class="pw-description">Provision accounts matching signup details, modify role permissions, inspect details, and manage security access.</p>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Trigger modal for creating a user matching signup details -->
+            <button type="button" class="pw-btn pw-btn-primary" onclick="document.getElementById('createUserModal').style.display='flex'">
+                + Create User
+            </button>
+            <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+                &larr; Admin Hub
+            </a>
+        </div>
+    </header>
+
+    <!-- NOTIFICATION MESSAGES -->
+    {% if messages %}
+        <div class="pw-messages">
+            {% for message in messages %}
+                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- STATS CARDS -->
+    <section class="pw-stats">
+        <article class="pw-stat">
+            <p class="pw-stat-label">Total Accounts</p>
+            <p class="pw-stat-value">{{ total_users|default:users.count|default:0 }}</p>
+            <p class="pw-stat-note">Registered in system</p>
+        </article>
+        <article class="pw-stat">
+            <p class="pw-stat-label">Active Users</p>
+            <p class="pw-stat-value" style="color: #059669;">{{ active_users_count|default:0 }}</p>
+            <p class="pw-stat-note">Currently operational</p>
+        </article>
+        <article class="pw-stat">
+            <p class="pw-stat-label">Administrators</p>
+            <p class="pw-stat-value" style="color: var(--pw-teal);">{{ admin_users_count|default:0 }}</p>
+            <p class="pw-stat-note">Elevated access privilege</p>
+        </article>
+    </section>
+
+    <!-- USER TABLE PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <h2 class="pw-panel-title">System Directory</h2>
+
+            <form method="get" action="{% url 'dashboards:admin_manage_users' %}" class="pw-search-form">
+                <input class="pw-search-input" type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search username, name, or email...">
+                <button class="pw-btn" type="submit">Search</button>
+                {% if request.GET.q %}
+                    <a href="{% url 'dashboards:admin_manage_users' %}" class="pw-btn">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Account / Email</th>
+                        <th>Full Name</th>
+                        <th>Role & Permissions</th>
+                        <th>Status</th>
+                        <th>Joined Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--pw-teal);">{{ u.username }}</strong><br>
+                                <span style="color: var(--pw-muted); font-size: 11px;">{{ u.email|default:"No email" }}</span>
+                            </td>
+                            <td>
+                                {% if u.get_full_name %}
+                                    {{ u.get_full_name }}
+                                {% elif u.first_name %}
+                                    {{ u.first_name }} {{ u.last_name }}
+                                {% elif u.name %}
+                                    {{ u.name }}
+                                {% else %}
+                                    <span style="color: var(--pw-muted); font-style: italic;">Not provided</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.is_superuser or u.is_staff or u.role == 'ADMIN' %}
+                                    <span class="pw-badge pw-badge-admin">Administrator</span>
+                                {% else %}
+                                    <span class="pw-badge pw-badge-user">Normal User</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                    <span class="pw-badge pw-badge-active">Active</span>
+                                {% else %}
+                                    <span class="pw-badge pw-badge-inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="color: var(--pw-muted);">{{ u.date_joined|date:"d M Y" }}</td>
+                            <td style="text-align: right;">
+                                <div class="pw-actions-cell" style="justify-content: flex-end;">
+                                    {% if not u.is_superuser and u.id != request.user.id %}
+                                        <!-- Inline Role/Permission & Status Update Form -->
+                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" class="pw-account-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ u.pk }}">
+                                            <select name="role" class="pw-select">
+                                                <option value="USER" {% if u.role != 'ADMIN' and not u.is_staff %}selected{% endif %}>User</option>
+                                                <option value="ADMIN" {% if u.role == 'ADMIN' or u.is_staff %}selected{% endif %}>Admin</option>
+                                            </select>
+                                            <label class="pw-checkbox-label">
+                                                <input type="checkbox" name="is_active" value="on" {% if u.is_active %}checked{% endif %}> Active
+                                            </label>
+                                            <button type="submit" class="pw-btn" style="padding: 4px 8px; font-size: 10px;">Save</button>
+                                        </form>
+
+                                        <!-- Delete User Action Form -->
+                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" onsubmit="return confirm('Are you sure you want to delete user {{ u.username }}?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_user_id" value="{{ u.pk }}">
+                                            <button type="submit" class="pw-btn pw-btn-danger" style="padding: 4px 8px; font-size: 10px;" title="Delete User">Delete</button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: var(--pw-muted); font-size: 11px; font-style: italic;">Protected</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--pw-muted);">
+                                No user accounts found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- CREATE USER MODAL MATCHING SIGNUP DETAILS -->
+    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: var(--pw-card); border: 1px solid var(--pw-border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(8, 96, 112, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--pw-border); padding-bottom: 12px;">
+                <h3 style="margin: 0; color: var(--pw-teal); font-size: 16px; font-weight: 800;">Create User (Matching Signup Details)</h3>
+                <button type="button" onclick="document.getElementById('createUserModal').style.display='none'" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--pw-muted);">&times;</button>
+            </div>
+            <form method="post" action="{% url 'dashboards:admin_manage_users' %}">
+                {% csrf_token %}
+                <input type="hidden" name="create_user" value="1">
+                <div style="display: grid; gap: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">FIRST NAME</label>
+                            <input type="text" name="first_name" class="pw-search-input" style="width: 100%;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">LAST NAME</label>
+                            <input type="text" name="last_name" class="pw-search-input" style="width: 100%;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">USERNAME *</label>
+                        <input type="text" name="username" required class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">EMAIL ADDRESS</label>
+                        <input type="email" name="email" class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">PASSWORD *</label>
+                        <input type="password" name="password" required class="pw-search-input" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">ASSIGN ROLE & PERMISSIONS</label>
+                        <select name="role" class="pw-select" style="width: 100%; height: 38px;">
+                            <option value="USER">Normal User</option>
+                            <option value="ADMIN">Administrator</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; border-top: 1px solid var(--pw-border); padding-top: 12px;">
+                        <button type="button" class="pw-btn" onclick="document.getElementById('createUserModal').style.display='none'">Cancel</button>
+                        <button type="submit" class="pw-btn pw-btn-primary">Create Account</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — USER MANAGEMENT (SIDEBAR COLOR MATCHED)
@@ -346,208 +550,4 @@
     }
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pw-users">
-
-    <!-- TOPBAR / HEADER -->
-    <header class="pw-topbar">
-        <div>
-            <div class="pw-eyebrow">Assetra Africa / Administration</div>
-            <h1 class="pw-page-heading">User Management & Permissions</h1>
-            <p class="pw-description">Provision accounts matching signup details, modify role permissions, inspect details, and manage security access.</p>
-        </div>
-
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <!-- Trigger modal for creating a user matching signup details -->
-            <button type="button" class="pw-btn pw-btn-primary" onclick="document.getElementById('createUserModal').style.display='flex'">
-                + Create User
-            </button>
-            <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
-                &larr; Admin Hub
-            </a>
-        </div>
-    </header>
-
-    <!-- NOTIFICATION MESSAGES -->
-    {% if messages %}
-        <div class="pw-messages">
-            {% for message in messages %}
-                <div class="pw-alert {% if 'success' in message.tags %}pw-alert-success{% else %}pw-alert-error{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <!-- STATS CARDS -->
-    <section class="pw-stats">
-        <article class="pw-stat">
-            <p class="pw-stat-label">Total Accounts</p>
-            <p class="pw-stat-value">{{ total_users|default:users.count|default:0 }}</p>
-            <p class="pw-stat-note">Registered in system</p>
-        </article>
-        <article class="pw-stat">
-            <p class="pw-stat-label">Active Users</p>
-            <p class="pw-stat-value" style="color: #059669;">{{ active_users_count|default:0 }}</p>
-            <p class="pw-stat-note">Currently operational</p>
-        </article>
-        <article class="pw-stat">
-            <p class="pw-stat-label">Administrators</p>
-            <p class="pw-stat-value" style="color: var(--pw-teal);">{{ admin_users_count|default:0 }}</p>
-            <p class="pw-stat-note">Elevated access privilege</p>
-        </article>
-    </section>
-
-    <!-- USER TABLE PANEL -->
-    <section class="pw-panel">
-        <div class="pw-panel-head">
-            <h2 class="pw-panel-title">System Directory</h2>
-
-            <form method="get" action="{% url 'dashboards:admin_manage_users' %}" class="pw-search-form">
-                <input class="pw-search-input" type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search username, name, or email...">
-                <button class="pw-btn" type="submit">Search</button>
-                {% if request.GET.q %}
-                    <a href="{% url 'dashboards:admin_manage_users' %}" class="pw-btn">Clear</a>
-                {% endif %}
-            </form>
-        </div>
-
-        <div class="pw-table-wrap">
-            <table class="pw-table">
-                <thead>
-                    <tr>
-                        <th>Account / Email</th>
-                        <th>Full Name</th>
-                        <th>Role & Permissions</th>
-                        <th>Status</th>
-                        <th>Joined Date</th>
-                        <th style="text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                        <tr>
-                            <td>
-                                <strong style="color: var(--pw-teal);">{{ u.username }}</strong><br>
-                                <span style="color: var(--pw-muted); font-size: 11px;">{{ u.email|default:"No email" }}</span>
-                            </td>
-                            <td>
-                                {% if u.get_full_name %}
-                                    {{ u.get_full_name }}
-                                {% elif u.first_name %}
-                                    {{ u.first_name }} {{ u.last_name }}
-                                {% elif u.name %}
-                                    {{ u.name }}
-                                {% else %}
-                                    <span style="color: var(--pw-muted); font-style: italic;">Not provided</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if u.is_superuser or u.is_staff or u.role == 'ADMIN' %}
-                                    <span class="pw-badge pw-badge-admin">Administrator</span>
-                                {% else %}
-                                    <span class="pw-badge pw-badge-user">Normal User</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if u.is_active %}
-                                    <span class="pw-badge pw-badge-active">Active</span>
-                                {% else %}
-                                    <span class="pw-badge pw-badge-inactive">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td style="color: var(--pw-muted);">{{ u.date_joined|date:"d M Y" }}</td>
-                            <td style="text-align: right;">
-                                <div class="pw-actions-cell" style="justify-content: flex-end;">
-                                    {% if not u.is_superuser and u.id != request.user.id %}
-                                        <!-- Inline Role/Permission & Status Update Form -->
-                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" class="pw-account-form">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="user_id" value="{{ u.pk }}">
-                                            <select name="role" class="pw-select">
-                                                <option value="USER" {% if u.role != 'ADMIN' and not u.is_staff %}selected{% endif %}>User</option>
-                                                <option value="ADMIN" {% if u.role == 'ADMIN' or u.is_staff %}selected{% endif %}>Admin</option>
-                                            </select>
-                                            <label class="pw-checkbox-label">
-                                                <input type="checkbox" name="is_active" value="on" {% if u.is_active %}checked{% endif %}> Active
-                                            </label>
-                                            <button type="submit" class="pw-btn" style="padding: 4px 8px; font-size: 10px;">Save</button>
-                                        </form>
-
-                                        <!-- Delete User Action Form -->
-                                        <form method="post" action="{% url 'dashboards:admin_manage_users' %}" onsubmit="return confirm('Are you sure you want to delete user {{ u.username }}?');">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="delete_user_id" value="{{ u.pk }}">
-                                            <button type="submit" class="pw-btn pw-btn-danger" style="padding: 4px 8px; font-size: 10px;" title="Delete User">Delete</button>
-                                        </form>
-                                    {% else %}
-                                        <span style="color: var(--pw-muted); font-size: 11px; font-style: italic;">Protected</span>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--pw-muted);">
-                                No user accounts found.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- CREATE USER MODAL MATCHING SIGNUP DETAILS -->
-    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
-        <div style="background: var(--pw-card); border: 1px solid var(--pw-border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(8, 96, 112, 0.15);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--pw-border); padding-bottom: 12px;">
-                <h3 style="margin: 0; color: var(--pw-teal); font-size: 16px; font-weight: 800;">Create User (Matching Signup Details)</h3>
-                <button type="button" onclick="document.getElementById('createUserModal').style.display='none'" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--pw-muted);">&times;</button>
-            </div>
-            <form method="post" action="{% url 'dashboards:admin_manage_users' %}">
-                {% csrf_token %}
-                <input type="hidden" name="create_user" value="1">
-                <div style="display: grid; gap: 12px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div>
-                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">FIRST NAME</label>
-                            <input type="text" name="first_name" class="pw-search-input" style="width: 100%;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">LAST NAME</label>
-                            <input type="text" name="last_name" class="pw-search-input" style="width: 100%;">
-                        </div>
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">USERNAME *</label>
-                        <input type="text" name="username" required class="pw-search-input" style="width: 100%;">
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">EMAIL ADDRESS</label>
-                        <input type="email" name="email" class="pw-search-input" style="width: 100%;">
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">PASSWORD *</label>
-                        <input type="password" name="password" required class="pw-search-input" style="width: 100%;">
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">ASSIGN ROLE & PERMISSIONS</label>
-                        <select name="role" class="pw-select" style="width: 100%; height: 38px;">
-                            <option value="USER">Normal User</option>
-                            <option value="ADMIN">Administrator</option>
-                        </select>
-                    </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; border-top: 1px solid var(--pw-border); padding-top: 12px;">
-                        <button type="button" class="pw-btn" onclick="document.getElementById('createUserModal').style.display='none'">Cancel</button>
-                        <button type="submit" class="pw-btn pw-btn-primary">Create Account</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-</div>
 {% endblock %}

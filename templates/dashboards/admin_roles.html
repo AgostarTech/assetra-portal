@@ -1,50 +1,267 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Dynamic Role Assignment - Asset Portal{% endblock %}
+{% block dashboard_title %}Dynamic Role Assignment | Assetra Africa{% endblock %}
 {% block page_title %}Enterprise Role Management & Access Control{% endblock %}
 
-{% block content %}
-<div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">User Role Promotion & Assignment</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Promote users to Managers, Compliance Officers, or Help Desk agents directly from the admin dashboard[cite: 1].</p>
+{% block dashboard_content %}
+<div class="pw-roles max-w-7xl mx-auto space-y-8 pb-12">
 
-    <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
-        <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1a1a1a;">Assign Role to User</h4>
-        <form method="POST">
-            {% csrf_token %}
-            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: center;">
-                <select name="user" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
-                    <option value="">-- Select User Account --</option>
-                    {% for u in users|default:clients %}
-                    <option value="{{ u.pk|default:u.username }}">
-                        {% if u.get_full_name %}
-                            {{ u.get_full_name }} ({{ u.username }})
-                        {% elif u.first_name %}
-                            {{ u.first_name }} {{ u.last_name|default:"" }} ({{ u.username }})
-                        {% elif u.name %}
-                            {{ u.name }}
-                        {% elif u.username %}
-                            {{ u.username }}
-                        {% else %}
-                            {{ u.email|default:"User Account" }}
-                        {% endif %}
-                        {% if u.pk %} (ID: {{ u.pk }}){% endif %}
-                    </option>
-                    {% endfor %}
-                </select>
-                <select name="role" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
-                    <option value="">-- Select Enterprise Role --</option>
-                    <option value="ROLE_USER">High-Net-Worth Client (ROLE_USER)</option>
-                    <option value="ROLE_MANAGER">Wealth Advisor (ROLE_MANAGER)</option>
-                    <option value="ROLE_MANAGER_COMPLIANCE">Compliance Officer (ROLE_MANAGER_COMPLIANCE)</option>
-                    <option value="ROLE_ADMIN">System Administrator (ROLE_ADMIN)</option>
-                    <option value="ROLE_HELP_DESK">Support Agent (ROLE_HELP_DESK)</option>
-                    <option value="ROLE_READ_ONLY">External Auditor (ROLE_READ_ONLY)</option>
-                </select>
-                <button type="submit" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Update Role</button>
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Access Control</div>
+            <h1 class="pw-page-heading">User Role Promotion & Assignment</h1>
+            <p class="pw-description">Promote users to Managers, Compliance Officers, or Help Desk agents directly from the admin dashboard.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- ROLE ASSIGNMENT PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Assign Role to User</h2>
+                <p class="pw-panel-subtitle">Select a user account and assign granular system privileges</p>
             </div>
-        </form>
-    </div>
+            <span class="pw-badge"><i class="fa-solid fa-user-shield" style="margin-right: 4px;"></i> RBAC PRIVILEGES</span>
+        </div>
+
+        <div class="pw-panel-body">
+            <form method="POST" class="pw-form-stack">
+                {% csrf_token %}
+                <div class="pw-grid-inputs">
+                    <select name="user" class="pw-select" required>
+                        <option value="">-- Select User Account --</option>
+                        {% for u in users|default:clients %}
+                        <option value="{{ u.pk|default:u.username }}">
+                            {% if u.get_full_name %}
+                                {{ u.get_full_name }} ({{ u.username }})
+                            {% elif u.first_name %}
+                                {{ u.first_name }} {{ u.last_name|default:"" }} ({{ u.username }})
+                            {% elif u.name %}
+                                {{ u.name }}
+                            {% elif u.username %}
+                                {{ u.username }}
+                            {% else %}
+                                {{ u.email|default:"User Account" }}
+                            {% endif %}
+                            {% if u.pk %} (ID: {{ u.pk }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="role" class="pw-select" required>
+                        <option value="">-- Select Enterprise Role --</option>
+                        <option value="ROLE_USER">High-Net-Worth Client (ROLE_USER)</option>
+                        <option value="ROLE_MANAGER">Wealth Advisor (ROLE_MANAGER)</option>
+                        <option value="ROLE_MANAGER_COMPLIANCE">Compliance Officer (ROLE_MANAGER_COMPLIANCE)</option>
+                        <option value="ROLE_ADMIN">System Administrator (ROLE_ADMIN)</option>
+                        <option value="ROLE_HELP_DESK">Support Agent (ROLE_HELP_DESK)</option>
+                        <option value="ROLE_READ_ONLY">External Auditor (ROLE_READ_ONLY)</option>
+                    </select>
+
+                    <button type="submit" class="pw-btn pw-btn-primary">Update Role</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
 </div>
+
+<style>
+/* =========================================================
+   ASSETRA AFRICA — DYNAMIC ROLE ASSIGNMENT
+========================================================= */
+
+.pw-roles {
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-emerald: #34d399;
+    --pw-gold: #c5a059;
+    --pw-border: rgba(8, 96, 112, 0.15);
+    --pw-card: #ffffff;
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-bg-alt: #f8fafc;
+
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    color: var(--pw-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pw-roles *, .pw-roles *::before, .pw-roles *::after {
+    box-sizing: border-box;
+}
+
+.pw-roles a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Animations & Transitions */
+.pw-roles .pw-panel,
+.pw-roles .pw-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pw-roles .pw-panel:hover {
+    box-shadow: 0 8px 25px rgba(8, 96, 112, 0.08);
+}
+
+/* Topbar & Header */
+.pw-roles .pw-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pw-roles .pw-eyebrow {
+    color: var(--pw-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.pw-roles .pw-page-heading {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.pw-roles .pw-description {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+/* Buttons */
+.pw-roles .pw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 8px 20px;
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--pw-card);
+    color: var(--pw-teal);
+}
+
+.pw-roles .pw-btn:hover {
+    border-color: var(--pw-teal);
+    background: #f1f5f9;
+}
+
+.pw-roles .pw-btn-primary {
+    background: var(--pw-teal);
+    border-color: var(--pw-teal);
+    color: #ffffff;
+}
+
+.pw-roles .pw-btn-primary:hover {
+    background: var(--pw-teal-dark);
+    color: #ffffff;
+}
+
+/* Panels */
+.pw-roles .pw-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.pw-roles .pw-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.pw-roles .pw-panel-title {
+    margin: 0;
+    color: var(--pw-teal);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pw-roles .pw-panel-subtitle {
+    margin: 4px 0 0;
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+.pw-roles .pw-panel-body {
+    padding: 24px;
+}
+
+/* Form Layout */
+.pw-roles .pw-grid-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 15px;
+    align-items: center;
+}
+
+.pw-roles .pw-select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    color: var(--pw-text);
+    background: var(--pw-bg-alt);
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.pw-roles .pw-select:focus {
+    border-color: var(--pw-teal);
+    outline: none;
+}
+
+.pw-roles .pw-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    border: 1px solid rgba(8, 96, 112, 0.2);
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .pw-roles .pw-grid-inputs {
+        grid-template-columns: 1fr;
+    }
+    .pw-roles .pw-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
 {% endblock %}

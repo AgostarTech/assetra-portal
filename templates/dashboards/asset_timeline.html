@@ -2,76 +2,38 @@
 {% load static %}
 {% load humanize %}
 
-{% block dashboard_title %}Activity Timeline - Asset Portal{% endblock %}
+{% block dashboard_title %}Activity Timeline | Assetra Africa{% endblock %}
 {% block view_header %}Portfolio Activity Timeline{% endblock %}
 
 {% block dashboard_content %}
-<style>
-    :root {
-        --asset-primary: #086070;
-        --asset-primary-hover: #064b58;
-        --asset-border: rgba(15, 23, 42, 0.12);
-        --asset-muted: #687181;
-        --asset-text: #0F172A;
-        --asset-radius: 14px;
-    }
+<div class="timeline-workspace max-w-7xl mx-auto space-y-8 pb-12">
 
-    .asset-workspace { color: var(--asset-text); width: 100%; max-width: 900px; margin: 0 auto; }
-
-    .asset-hero {
-        display: flex; justify-content: space-between; align-items: center;
-        gap: 20px; flex-wrap: wrap; padding: 24px; margin-bottom: 22px;
-        border-radius: var(--asset-radius); color: #fff;
-        background: linear-gradient(135deg, #086070, #097c92);
-        box-shadow: 0 4px 15px rgba(8, 96, 112, 0.15);
-    }
-    .asset-hero h2 { margin: 0 0 6px; font-size: 24px; color: #fff; }
-    .asset-hero p { margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 13px; line-height: 1.5; }
-
-    .timeline-wrapper {
-        background: #fff; border: 1px solid var(--asset-border);
-        border-radius: var(--asset-radius); padding: 25px;
-        box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
-    }
-
-    .timeline-list {
-        position: relative; padding-left: 25px; list-style: none; margin: 0;
-    }
-    .timeline-list::before {
-        content: ''; position: absolute; left: 7px; top: 5px; bottom: 5px; width: 2px; background: rgba(8, 96, 112, 0.2);
-    }
-
-    .timeline-event {
-        position: relative; margin-bottom: 25px;
-    }
-    .timeline-event:last-child { margin-bottom: 0; }
-
-    .timeline-dot {
-        position: absolute; left: -25px; top: 3px; width: 14px; height: 14px;
-        border-radius: 50%; background: var(--asset-primary); border: 2px solid #fff; box-shadow: 0 0 0 2px rgba(8, 96, 112, 0.2);
-    }
-
-    .timeline-content {
-        background: #f8fafc; border: 1px solid var(--asset-border);
-        border-radius: 10px; padding: 14px 18px;
-    }
-    .timeline-content h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--asset-text); }
-    .timeline-content p { margin: 0; font-size: 12px; color: var(--asset-muted); }
-    .timeline-time { font-size: 10.5px; color: var(--asset-primary); font-weight: 700; display: block; margin-bottom: 6px; }
-</style>
-
-<div class="asset-workspace">
-    <section class="asset-hero">
+    <!-- HERO BANNER -->
+    <section class="timeline-hero">
         <div>
+            <div class="timeline-eyebrow">CLIENT PORTAL / LIFECYCLE AUDIT</div>
             <h2>Portfolio Activity &amp; Audit Timeline</h2>
             <p>Chronological audit record tracking all asset registrations, updates, and valuation milestones.</p>
         </div>
+        <div>
+            <span class="audit-badge">
+                <i class="fa-solid fa-clock-rotate-left"></i> {{ user_assets|length|default:0 }} Recorded Event(s)
+            </span>
+        </div>
     </section>
 
-    <div class="timeline-wrapper">
-        <h3 style="margin-top: 0; font-size: 16px; font-weight: 800; color: var(--asset-text); margin-bottom: 20px;">
-            <i class="fa-solid fa-timeline" style="color: var(--asset-primary); margin-right: 8px;"></i> Asset Lifecycle History
-        </h3>
+    <!-- TIMELINE PANEL -->
+    <div class="timeline-panel">
+        <div class="panel-header-row">
+            <div>
+                <h3>
+                    <i class="fa-solid fa-timeline" style="color: var(--pw-teal); margin-right: 8px;"></i>
+                    Asset Lifecycle History
+                </h3>
+                <p>Verified chronological log of portfolio additions and valuation entries.</p>
+            </div>
+            <span class="pw-badge">IMMUTABLE LOG</span>
+        </div>
 
         {% if user_assets %}
             <ul class="timeline-list">
@@ -79,19 +41,273 @@
                     <li class="timeline-event">
                         <span class="timeline-dot"></span>
                         <div class="timeline-content">
-                            <span class="timeline-time"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i> {{ asset.created_at|date:"F j, Y, P" }}</span>
-                            <h4>Registered Asset: {{ asset.name }}</h4>
-                            <p>Added to <strong>{{ asset.get_category_display }}</strong> portfolio with an initial valuation of <strong>${{ asset.current_estimated_value|floatformat:2|intcomma }}</strong>.</p>
+                            <div class="timeline-meta-row">
+                                <span class="timeline-time">
+                                    <i class="fa-regular fa-clock"></i> {{ asset.created_at|date:"F j, Y, P" }}
+                                </span>
+                                <span class="timeline-cat-pill">
+                                    {{ asset.get_category_display|default:"Asset" }}
+                                </span>
+                            </div>
+                            <h4>
+                                Registered Asset: 
+                                <a href="{% url 'assets:asset_detail' asset.id %}" class="asset-timeline-link">
+                                    {{ asset.name|default:"Registered Holding" }}
+                                </a>
+                            </h4>
+                            <p>
+                                Added to your <strong>{{ asset.get_category_display|default:"Portfolio" }}</strong> vault with a recorded valuation of 
+                                <strong>{{ asset.current_estimated_value|default:0|floatformat:2|intcomma }} TZS</strong>.
+                            </p>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <div style="text-align: center; padding: 40px; color: var(--asset-muted);">
-                <i class="fa-solid fa-clock-rotate-left" style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;"></i>
-                <p>No timeline activities recorded yet.</p>
+            <div class="empty-state">
+                <i class="fa-solid fa-clock-rotate-left" style="font-size: 32px; color: var(--pw-teal); opacity: 0.6; margin-bottom: 10px; display: block;"></i>
+                <p style="margin: 0;">No timeline activities recorded yet.</p>
             </div>
         {% endif %}
     </div>
+
 </div>
+
+<style>
+/* =========================================================
+   ASSETRA AFRICA — PORTFOLIO ACTIVITY TIMELINE
+========================================================= */
+
+.timeline-workspace {
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-border: rgba(8, 96, 112, 0.15);
+    --pw-card: #ffffff;
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-bg-alt: #f8fafc;
+    --pw-radius: 14px;
+
+    color: var(--pw-text);
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.timeline-workspace *, .timeline-workspace *::before, .timeline-workspace *::after {
+    box-sizing: border-box;
+}
+
+/* Hero Banner */
+.timeline-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border-radius: var(--pw-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.15);
+}
+
+.timeline-eyebrow {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.timeline-hero h2 {
+    margin: 0 0 4px;
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    color: #fff;
+}
+
+.timeline-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+}
+
+.audit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Panel */
+.timeline-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+}
+
+.panel-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.panel-header-row h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: var(--pw-teal);
+    font-weight: 800;
+}
+
+.panel-header-row p {
+    margin: 0;
+    color: var(--pw-muted);
+    font-size: 12.5px;
+}
+
+.pw-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    border: 1px solid rgba(8, 96, 112, 0.25);
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Timeline Structure */
+.timeline-list {
+    position: relative;
+    padding-left: 28px;
+    list-style: none;
+    margin: 0;
+}
+
+.timeline-list::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: rgba(8, 96, 112, 0.2);
+}
+
+.timeline-event {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-event:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -28px;
+    top: 16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--pw-teal);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px rgba(8, 96, 112, 0.25);
+}
+
+.timeline-content {
+    background: var(--pw-bg-alt);
+    border: 1px solid var(--pw-border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-content:hover {
+    border-color: var(--pw-teal);
+    box-shadow: 0 4px 15px rgba(8, 96, 112, 0.06);
+}
+
+.timeline-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.timeline-time {
+    font-size: 11px;
+    color: var(--pw-teal);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.timeline-cat-pill {
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.timeline-content h4 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--pw-text);
+}
+
+.asset-timeline-link {
+    color: var(--pw-teal);
+    text-decoration: none;
+}
+
+.asset-timeline-link:hover {
+    text-decoration: underline;
+}
+
+.timeline-content p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--pw-muted);
+    line-height: 1.5;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 45px 20px;
+    color: var(--pw-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .timeline-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
 {% endblock %}

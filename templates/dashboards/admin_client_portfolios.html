@@ -1,10 +1,96 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Client Portfolios | Assetra Africa{% endblock %}
+{% block dashboard_title %}Client Portfolios | Assetra Africa{% endblock %}
+{% block page_title %}Client Portfolios{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pw-portfolios max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Wealth Management</div>
+            <h1 class="pw-page-heading">Client Portfolios</h1>
+            <p class="pw-description">Aggregated portfolio valuations and asset counts across all institutional clients.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- PORTFOLIOS PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Client Wealth Summary</h2>
+                <p class="pw-panel-subtitle">Overview of client holdings and estimated valuations</p>
+            </div>
+            <span class="pw-badge">{{ portfolio_data|length|default:0 }} clients</span>
+        </div>
+
+        {% if portfolio_data %}
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Client Identifier</th>
+                        <th>Email Address</th>
+                        <th>Active Assets</th>
+                        <th>Total Portfolio Value</th>
+                        <th style="text-align: right;">Quick Filter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in portfolio_data %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if item.client.get_full_name %}
+                                    {{ item.client.get_full_name }}
+                                {% elif item.client.first_name %}
+                                    {{ item.client.first_name }} {{ item.client.last_name|default:"" }}
+                                {% elif item.client.name %}
+                                    {{ item.client.name }}
+                                {% elif item.client.username %}
+                                    {{ item.client.username }}
+                                {% elif item.client.email %}
+                                    {{ item.client.email }}
+                                {% else %}
+                                    Institutional Client
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td style="color: var(--pw-muted);">{{ item.client.email|default:"N/A" }}</td>
+                        <td>
+                            <span class="pw-badge" style="background: rgba(5, 150, 105, 0.15); color: #065f46;">
+                                {{ item.asset_count }} assets
+                            </span>
+                        </td>
+                        <td>
+                            <strong style="color: var(--pw-teal); font-size: 13px;">
+                                ${{ item.total_value|default:0|floatformat:2|intcomma }}
+                            </strong>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{% url 'dashboards:admin_all_assets' %}?q={{ item.client.email }}" class="pw-btn pw-btn-icon" title="View Client Assets">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pw-empty">No client portfolios available.</div>
+        {% endif %}
+    </section>
+
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — CLIENT PORTFOLIOS MANAGEMENT
@@ -205,91 +291,4 @@
     }
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pw-portfolios">
-
-    <!-- HEADER -->
-    <header class="pw-topbar">
-        <div>
-            <div class="pw-eyebrow">Administration / Wealth Management</div>
-            <h1 class="pw-page-heading">Client Portfolios</h1>
-            <p class="pw-description">Aggregated portfolio valuations and asset counts across all institutional clients.</p>
-        </div>
-
-        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
-            &larr; Back to Admin Hub
-        </a>
-    </header>
-
-    <!-- PORTFOLIOS PANEL -->
-    <section class="pw-panel">
-        <div class="pw-panel-head">
-            <div>
-                <h2 class="pw-panel-title">Client Wealth Summary</h2>
-                <p class="pw-panel-subtitle">Overview of client holdings and estimated valuations</p>
-            </div>
-            <span class="pw-badge">{{ portfolio_data|length|default:0 }} clients</span>
-        </div>
-
-        {% if portfolio_data %}
-        <div class="pw-table-wrap">
-            <table class="pw-table">
-                <thead>
-                    <tr>
-                        <th>Client Identifier</th>
-                        <th>Email Address</th>
-                        <th>Active Assets</th>
-                        <th>Total Portfolio Value</th>
-                        <th style="text-align: right;">Quick Filter</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in portfolio_data %}
-                    <tr>
-                        <td>
-                            <strong>
-                                {% if item.client.get_full_name %}
-                                    {{ item.client.get_full_name }}
-                                {% elif item.client.first_name %}
-                                    {{ item.client.first_name }} {{ item.client.last_name|default:"" }}
-                                {% elif item.client.name %}
-                                    {{ item.client.name }}
-                                {% elif item.client.username %}
-                                    {{ item.client.username }}
-                                {% elif item.client.email %}
-                                    {{ item.client.email }}
-                                {% else %}
-                                    Institutional Client
-                                {% endif %}
-                            </strong>
-                        </td>
-                        <td style="color: var(--pw-muted);">{{ item.client.email|default:"N/A" }}</td>
-                        <td>
-                            <span class="pw-badge" style="background: rgba(5, 150, 105, 0.15); color: #065f46;">
-                                {{ item.asset_count }} assets
-                            </span>
-                        </td>
-                        <td>
-                            <strong style="color: var(--pw-teal); font-size: 13px;">
-                                ${{ item.total_value|default:0|floatformat:2|intcomma }}
-                            </strong>
-                        </td>
-                        <td style="text-align: right;">
-                            <a href="{% url 'dashboards:admin_all_assets' %}?q={{ item.client.email }}" class="pw-btn pw-btn-icon" title="View Client Assets">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <div class="pw-empty">No client portfolios available.</div>
-        {% endif %}
-    </section>
-
-</div>
 {% endblock %}

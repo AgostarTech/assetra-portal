@@ -1,0 +1,239 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}SEO & Verification Files{% endblock %}
+{% block page_title %}SEO & Site Verification Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="seo-manager-container max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- Upload Card -->
+    <div class="upload-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#086070]/5 to-transparent rounded-bl-full pointer-events-none"></div>
+
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#086070] to-[#064b58] flex items-center justify-center text-white shadow-md shadow-[#086070]/20 flex-shrink-0">
+                <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Upload Verification Document</h3>
+                <p class="text-xs text-slate-500 font-medium">Upload Google Search Console, Bing, Yandex, or custom root SEO verification files.</p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Description / Title</label>
+                    {{ form.title }}
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Select File (.html, .txt)</label>
+                    <div class="file-input-wrapper">
+                        {{ form.file }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <span class="text-xs text-slate-500 font-medium flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/60">
+                    <i class="fa-solid fa-shield-halved text-[#086070]"></i> Served securely at root domain path (<code class="text-[#086070] font-mono">/filename.html</code>)
+                </span>
+                <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#086070] to-[#064b58] hover:from-[#064b58] hover:to-[#043842] text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#086070]/25 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer">
+                    <i class="fa-solid fa-upload text-sm"></i> Upload & Publish
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Uploaded Files Table Card -->
+    <div class="files-table-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden">
+        
+        <!-- Header & Live Filter Toolbar -->
+        <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Active Root Verification Files</h3>
+                <span id="fileCountBadge" class="px-3 py-1 rounded-full bg-[#086070]/10 text-[#086070] text-xs font-bold shadow-inner">
+                    {{ files.count }} Total
+                </span>
+            </div>
+
+            <!-- Instant Search Input for 100+ files -->
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="fileSearchInput" placeholder="Filter files by title or name..." 
+                    class="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#086070] focus:ring-2 focus:ring-[#086070]/15 transition-all">
+            </div>
+        </div>
+
+        <!-- Scrollable Tabular View -->
+        <div class="overflow-x-auto max-h-[550px] overflow-y-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse" id="verificationFilesTable" style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 25%;">
+                    <col style="width: 28%;">
+                    <col style="width: 22%;">
+                    <col style="width: 25%;">
+                </colgroup>
+                <thead class="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm border-b border-slate-200 text-slate-600 text-[11px] font-extrabold uppercase tracking-wider">
+                    <tr>
+                        <th class="py-4 px-6">Title / Label</th>
+                        <th class="py-4 px-6">Root URL Path</th>
+                        <th class="py-4 px-6">Uploaded Timestamp</th>
+                        <th class="py-4 px-6 text-right">Full Control Management</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                    {% for item in files %}
+                    <tr class="file-row hover:bg-slate-50/80 transition-colors duration-150 group">
+                        <td class="py-4 px-6 font-semibold text-slate-900 truncate">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#086070]/10 group-hover:text-[#086070] transition-colors flex-shrink-0">
+                                    <i class="fa-regular fa-file-code text-xs"></i>
+                                </div>
+                                <span class="file-title truncate" title="{{ item.title }}">{{ item.title }}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 font-mono text-xs truncate">
+                            <a href="/{{ item.filename }}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#086070]/5 text-[#086070] hover:bg-[#086070] hover:text-white font-medium transition-all duration-200 shadow-sm max-w-full truncate">
+                                <span class="file-path truncate">/{{ item.filename }}</span> 
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] flex-shrink-0"></i>
+                            </a>
+                        </td>
+                        <td class="py-4 px-6 text-xs text-slate-500 font-medium truncate">
+                            {{ item.uploaded_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <div class="inline-flex items-center justify-end gap-1.5">
+                                <!-- View / Preview -->
+                                <a href="/{{ item.filename }}" target="_blank" title="View / Preview" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-[#086070] hover:text-white transition-all shadow-sm">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </a>
+                                <!-- Download -->
+                                <a href="{{ item.file.url }}" download title="Download File" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
+                                    <i class="fa-solid fa-download text-xs"></i>
+                                </a>
+                                <!-- Edit -->
+                                <a href="{% url 'support:edit_seo_file' item.pk %}" title="Edit File or Title" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-all shadow-sm">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </a>
+                                <!-- Delete -->
+                                <form action="{% url 'support:delete_seo_file' item.pk %}" method="post" class="inline" onsubmit="return confirm('Permanently delete this verification file?');">
+                                    {% csrf_token %}
+                                    <button type="submit" title="Delete File" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm cursor-pointer">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="emptyStateRow">
+                        <td colspan="4" class="py-16 text-center text-slate-400">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-3 text-slate-300">
+                                <i class="fa-regular fa-folder-open text-2xl"></i>
+                            </div>
+                            <p class="text-sm font-bold text-slate-600">No verification files uploaded yet</p>
+                            <p class="text-xs text-slate-400 mt-1">Upload your first search engine verification file above.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .seo-manager-container {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .upload-card, .files-table-card {
+        border-color: rgba(8, 96, 112, 0.12);
+    }
+    .upload-card form input[type="text"] {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 13px;
+        outline: none;
+        transition: all 0.25s ease;
+        background: #f8fafc;
+        color: #1e293b;
+    }
+    .upload-card form input[type="text"]:focus {
+        border-color: #086070;
+        box-shadow: 0 0 0 4px rgba(8, 96, 112, 0.12);
+        background: #ffffff;
+    }
+    .file-input-wrapper input[type="file"] {
+        width: 100%;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #475569;
+        transition: all 0.25s ease;
+    }
+    .file-input-wrapper input[type="file"]:hover {
+        border-color: #086070;
+        background: #ffffff;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('fileSearchInput');
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.file-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const titleText = row.querySelector('.file-title').textContent.toLowerCase();
+                const pathText = row.querySelector('.file-path').textContent.toLowerCase();
+
+                if (titleText.includes(query) || pathText.includes(query)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const badge = document.getElementById('fileCountBadge');
+            if (badge) {
+                badge.textContent = visibleCount + ' Matching';
+            }
+        });
+    });
+</script>
+{% endblock %}

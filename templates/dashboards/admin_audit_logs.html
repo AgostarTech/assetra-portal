@@ -1,10 +1,88 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}System Audit Logs | Admin Control Hub{% endblock %}
+{% block dashboard_title %}System Audit Logs | Admin Control Hub{% endblock %}
+{% block page_title %}System Audit Logs{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pwh-dashboard max-w-7xl mx-auto space-y-8 pb-12">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / SECURITY</div>
+            <h1>System Audit Logs</h1>
+            <p class="pwh-subtitle">Track recorded security actions and user operations across the portal.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Recorded Activities</h2>
+                <p>Chronological system event ledger</p>
+            </div>
+            <span class="pwh-badge">AUDIT TRAIL</span>
+        </div>
+
+        {% if audit_logs %}
+            {% for log in audit_logs %}
+            <article class="pwh-audit-item">
+                <div class="pwh-audit-title">
+                    <strong>
+                        {% if log.action %}
+                            {{ log.action }}
+                        {% elif log.event %}
+                            {{ log.event }}
+                        {% else %}
+                            System Activity Record
+                        {% endif %}
+                    </strong>
+                    <span class="pwh-muted">
+                        {% if log.timestamp %}
+                            {{ log.timestamp|date:"d M Y, H:i" }}
+                        {% elif log.created_at %}
+                            {{ log.created_at|date:"d M Y, H:i" }}
+                        {% else %}
+                            Recent
+                        {% endif %}
+                    </span>
+                </div>
+                <p>
+                    {% if log.details %}
+                        {{ log.details }}
+                    {% elif log.description %}
+                        {{ log.description }}
+                    {% else %}
+                        No additional activity details recorded.
+                    {% endif %}
+                </p>
+                <span class="pwh-muted" style="display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-user-shield" style="font-size: 10px; color: var(--pwh-teal);"></i>
+                    {% if log.user %}
+                        User: 
+                        {% if log.user.get_full_name %}
+                            {{ log.user.get_full_name }}
+                        {% elif log.user.username %}
+                            {{ log.user.username }}
+                        {% else %}
+                            {{ log.user.email }}
+                        {% endif %}
+                        ({{ log.user.email|default:"No email" }})
+                    {% else %}
+                        System Automated Event
+                    {% endif %}
+                </span>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="pwh-empty">
+                <i class="fa-solid fa-clock-rotate-left" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
+                No audit logs recorded yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — SYSTEM AUDIT LOGS
@@ -172,83 +250,4 @@
     font-size: 13px;
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pwh-dashboard">
-    <header class="pwh-header">
-        <div>
-            <div class="pwh-eyebrow">ADMINISTRATION / SECURITY</div>
-            <h1>System Audit Logs</h1>
-            <p class="pwh-subtitle">Track recorded security actions and user operations across the portal.</p>
-        </div>
-    </header>
-
-    <div class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>Recorded Activities</h2>
-                <p>Chronological system event ledger</p>
-            </div>
-            <span class="pwh-badge">AUDIT TRAIL</span>
-        </div>
-
-        {% if audit_logs %}
-            {% for log in audit_logs %}
-            <article class="pwh-audit-item">
-                <div class="pwh-audit-title">
-                    <strong>
-                        {% if log.action %}
-                            {{ log.action }}
-                        {% elif log.event %}
-                            {{ log.event }}
-                        {% else %}
-                            System Activity Record
-                        {% endif %}
-                    </strong>
-                    <span class="pwh-muted">
-                        {% if log.timestamp %}
-                            {{ log.timestamp|date:"d M Y, H:i" }}
-                        {% elif log.created_at %}
-                            {{ log.created_at|date:"d M Y, H:i" }}
-                        {% else %}
-                            Recent
-                        {% endif %}
-                    </span>
-                </div>
-                <p>
-                    {% if log.details %}
-                        {{ log.details }}
-                    {% elif log.description %}
-                        {{ log.description }}
-                    {% else %}
-                        No additional activity details recorded.
-                    {% endif %}
-                </p>
-                <span class="pwh-muted" style="display: inline-flex; align-items: center; gap: 5px;">
-                    <i class="fa-solid fa-user-shield" style="font-size: 10px; color: var(--pwh-teal);"></i>
-                    {% if log.user %}
-                        User: 
-                        {% if log.user.get_full_name %}
-                            {{ log.user.get_full_name }}
-                        {% elif log.user.username %}
-                            {{ log.user.username }}
-                        {% else %}
-                            {{ log.user.email }}
-                        {% endif %}
-                        ({{ log.user.email|default:"No email" }})
-                    {% else %}
-                        System Automated Event
-                    {% endif %}
-                </span>
-            </article>
-            {% endfor %}
-        {% else %}
-            <div class="pwh-empty">
-                <i class="fa-solid fa-clock-rotate-left" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
-                No audit logs recorded yet.
-            </div>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}

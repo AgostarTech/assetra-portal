@@ -1,5 +1,7 @@
-from django.db import models
+import os
 from django.conf import settings
+from django.db import models
+
 
 class Ticket(models.Model):
     class PriorityChoices(models.TextChoices):
@@ -27,9 +29,6 @@ class Ticket(models.Model):
         return f"[{self.get_priority_display()}] {self.subject} - {self.user.username}"
 
 
-from django.conf import settings
-from django.db import models
-
 class ClientMessage(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_messages')
@@ -40,3 +39,16 @@ class ClientMessage(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender} to {self.recipient}: {self.subject}"
+
+
+class SiteVerificationFile(models.Model):
+    title = models.CharField(max_length=255, help_text="e.g. Google Search Console Verification")
+    file = models.FileField(upload_to='verification_files/', help_text="Upload the verification file (.html, .txt)")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)

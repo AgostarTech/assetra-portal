@@ -1,83 +1,419 @@
-{% extends 'dashboards/client_dashboard.html' %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block dashboard_title %}My Documents{% endblock %}
-{% block view_header %}Account Documents & Records{% endblock %}
+{% block dashboard_title %}My Documents | Assetra Africa{% endblock %}
+{% block view_header %}Account Documents &amp; Records{% endblock %}
 
 {% block dashboard_content %}
-<div class="panel" style="background:#FFFFFF; border:1px solid rgba(15,23,42,0.12); border-radius:14px; padding:24px; box-shadow:0 3px 12px rgba(15,23,42,.03);">
-    <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Uploaded Documents</h3>
-    <p style="margin:0 0 20px; color:#687181; font-size:13px;">Securely store and review your asset titles, certificates, and verification records.</p>
+<div class="docs-workspace max-w-7xl mx-auto space-y-8 pb-12">
 
-    <!-- Document Upload / Submission Form -->
-    <div style="background:#F8FAFC; border:1px solid rgba(15,23,42,0.08); border-radius:10px; padding:16px; margin-bottom:20px;">
-        <h4 style="margin:0 0 10px; font-size:13px; color:#0F172A; font-weight:700;">Upload New Document</h4>
-        <form method="POST" enctype="multipart/form-data" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-            {% csrf_token %}
-            <input type="hidden" name="upload_document" value="1">
-            <input type="text" name="title" placeholder="Document Title (e.g., Land Title Deed)" required style="flex:1; min-width:200px; padding:8px 12px; border:1px solid rgba(15,23,42,0.15); border-radius:6px; font-size:12px; background:#fff;">
-            <select name="category" style="padding:8px 12px; border:1px solid rgba(15,23,42,0.15); border-radius:6px; font-size:12px; background:#fff;">
-                <option value="TITLE_DEED">Title Deed</option>
-                <option value="KYC">KYC Verification</option>
-                <option value="CERTIFICATE">Ownership Certificate</option>
-                <option value="OTHER">Other Record</option>
-            </select>
-            <input type="file" name="file" required style="font-size:12px; color:#687181;">
-            <button type="submit" style="background:#086070; color:#fff; border:none; padding:8px 16px; font-weight:700; border-radius:6px; cursor:pointer; font-size:12px;">Upload File</button>
-        </form>
+    <!-- HERO BANNER -->
+    <section class="docs-hero">
+        <div>
+            <div class="docs-eyebrow">CLIENT VAULT / VERIFICATION</div>
+            <h2>Account Documents &amp; Records</h2>
+            <p>Securely store, manage, and review your asset titles, ownership certificates, and KYC verification records.</p>
+        </div>
+        <div>
+            <span class="vault-badge">
+                <i class="fa-solid fa-file-shield"></i> {{ documents|length|default:0 }} Stored Record(s)
+            </span>
+        </div>
+    </section>
+
+    <!-- MAIN DOCUMENTS PANEL -->
+    <div class="docs-panel">
+        <div class="panel-header-row">
+            <div>
+                <h3>Uploaded Documents</h3>
+                <p>Upload new legal documents or download verified records from your private vault.</p>
+            </div>
+            <span class="pw-badge">ENCRYPTED STORAGE</span>
+        </div>
+
+        <!-- DOCUMENT UPLOAD FORM -->
+        <div class="upload-box">
+            <h4><i class="fa-solid fa-cloud-arrow-up" style="color: var(--pw-teal); margin-right: 6px;"></i> Upload New Document</h4>
+            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <input type="hidden" name="upload_document" value="1">
+                
+                <input type="text" name="title" placeholder="Document Title (e.g., Land Title Deed)" required class="pw-input">
+                
+                <select name="category" class="pw-select">
+                    <option value="TITLE_DEED">Title Deed</option>
+                    <option value="KYC">KYC Verification</option>
+                    <option value="CERTIFICATE">Ownership Certificate</option>
+                    <option value="OTHER">Other Record</option>
+                </select>
+                
+                <input type="file" name="file" required class="pw-file-input">
+                
+                <button type="submit" class="btn-portal-primary">
+                    <i class="fa-solid fa-upload"></i> Upload File
+                </button>
+            </form>
+        </div>
+
+        <!-- DOCUMENTS TABLE -->
+        <div class="table-wrapper">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Document Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Uploaded Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td class="doc-title-cell">
+                            <i class="fa-regular fa-file-lines" style="color: var(--pw-teal); margin-right: 6px;"></i>
+                            {% if doc.title %}
+                                {{ doc.title }}
+                            {% elif doc.file.name %}
+                                {{ doc.file.name|cut:"documents/"|cut:"uploads/" }}
+                            {% else %}
+                                Unnamed Document
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--pw-muted);">
+                            {{ doc.get_category_display|default:"General Record" }}
+                        </td>
+                        <td>
+                            <span class="status-pill {% if doc.status == 'APPROVED' %}status-approved{% elif doc.status == 'REJECTED' %}status-rejected{% else %}status-pending{% endif %}">
+                                {{ doc.get_status_display|default:"Submitted" }}
+                            </span>
+                        </td>
+                        <td style="color: var(--pw-muted);">
+                            {{ doc.uploaded_at|date:"d M Y, H:i"|default:"—" }}
+                        </td>
+                        <td style="text-align: right;">
+                            {% if doc.file and doc.file.url %}
+                                <a href="{{ doc.file.url }}" target="_blank" class="action-link view-link">
+                                    <i class="fa-regular fa-eye"></i> View
+                                </a>
+                                <a href="{{ doc.file.url }}" download class="action-link download-link">
+                                    <i class="fa-solid fa-download"></i> Download
+                                </a>
+                            {% else %}
+                                <span style="color: var(--pw-muted); font-style: italic;">File missing</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fa-solid fa-folder-open" style="font-size: 28px; color: var(--pw-teal); opacity: 0.6; margin-bottom: 10px; display: block;"></i>
+                            No documents uploaded yet. Use the form above to upload your first record.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="table-wrapper" style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:12px;">
-            <thead>
-                <tr style="background:#F8FAFC; border-bottom:1px solid rgba(15,23,42,0.08);">
-                    <th style="padding:12px; text-align:left; color:#687181;">Document Title</th>
-                    <th style="padding:12px; text-align:left; color:#687181;">Category</th>
-                    <th style="padding:12px; text-align:left; color:#687181;">Status</th>
-                    <th style="padding:12px; text-align:left; color:#687181;">Uploaded Date</th>
-                    <th style="padding:12px; text-align:right; color:#687181;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for doc in documents %}
-                <tr style="border-bottom:1px solid #edf0f5;">
-                    <td style="padding:12px; font-weight:600; color:#0F172A;">
-                        {% if doc.title %}
-                            {{ doc.title }}
-                        {% elif doc.file.name %}
-                            {{ doc.file.name|cut:"documents/"|cut:"uploads/" }}
-                        {% else %}
-                            Unnamed Document
-                        {% endif %}
-                    </td>
-                    <td style="padding:12px; color:#687181;">
-                        {{ doc.get_category_display|default:doc.category|default:"General Record" }}
-                    </td>
-                    <td style="padding:12px;">
-                        <span style="padding:4px 8px; border-radius:20px; font-size:10px; font-weight:700; background:#e1effe; color:#1e429f;">
-                            {{ doc.get_status_display|default:doc.status|default:"Submitted" }}
-                        </span>
-                    </td>
-                    <td style="padding:12px; color:#687181;">{{ doc.uploaded_at|date:"d M Y, H:i"|default:"—" }}</td>
-                    <td style="padding:12px; text-align:right;">
-                        {% if doc.file and doc.file.url %}
-                        <a href="{{ doc.file.url }}" target="_blank" style="color:#086070; font-weight:700; text-decoration:none; margin-right:12px;">View File</a>
-                        <a href="{{ doc.file.url }}" download style="color:#16764f; font-weight:700; text-decoration:none;">Download</a>
-                        {% else %}
-                        <span style="color:#687181;">File missing</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align:center; padding:40px; color:#687181;">
-                        <i class="fa-solid fa-folder-open" style="font-size:24px; margin-bottom:8px; display:block;"></i>
-                        No documents uploaded yet. Use the form above to upload your first record.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
 </div>
+
+<style>
+/* =========================================================
+   ASSETRA AFRICA — ACCOUNT DOCUMENTS & RECORDS
+========================================================= */
+
+.docs-workspace {
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-border: rgba(8, 96, 112, 0.15);
+    --pw-card: #ffffff;
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-bg-alt: #f8fafc;
+    --pw-radius: 14px;
+
+    color: var(--pw-text);
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.docs-workspace *, .docs-workspace *::before, .docs-workspace *::after {
+    box-sizing: border-box;
+}
+
+/* Hero Banner */
+.docs-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border-radius: var(--pw-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.15);
+}
+
+.docs-eyebrow {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.docs-hero h2 {
+    margin: 0 0 4px;
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    color: #fff;
+}
+
+.docs-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+}
+
+.vault-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Panel */
+.docs-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+}
+
+.panel-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.panel-header-row h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: var(--pw-teal);
+    font-weight: 800;
+}
+
+.panel-header-row p {
+    margin: 0;
+    color: var(--pw-muted);
+    font-size: 12.5px;
+}
+
+.pw-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    border: 1px solid rgba(8, 96, 112, 0.25);
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Upload Box */
+.upload-box {
+    background: var(--pw-bg-alt);
+    border: 1px solid var(--pw-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+}
+
+.upload-box h4 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--pw-text);
+    font-weight: 800;
+}
+
+.upload-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pw-input, .pw-select {
+    padding: 9px 12px;
+    border: 1px solid var(--pw-border);
+    border-radius: 8px;
+    font-size: 12.5px;
+    background: #fff;
+    color: var(--pw-text);
+    height: 38px;
+}
+
+.pw-input {
+    flex: 1;
+    min-width: 220px;
+}
+
+.pw-input:focus, .pw-select:focus {
+    outline: none;
+    border-color: var(--pw-teal);
+}
+
+.pw-file-input {
+    font-size: 12px;
+    color: var(--pw-muted);
+}
+
+.btn-portal-primary {
+    background: var(--pw-teal);
+    color: #fff;
+    border: none;
+    padding: 0 18px;
+    height: 38px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.btn-portal-primary:hover {
+    background: var(--pw-teal-dark);
+}
+
+/* Table */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pw-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.pw-table thead th {
+    padding: 12px 14px;
+    text-align: left;
+    color: var(--pw-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--pw-border);
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.pw-table tbody td {
+    padding: 14px;
+    border-bottom: 1px solid var(--pw-border);
+    vertical-align: middle;
+}
+
+.pw-table tbody tr:hover {
+    background: rgba(8, 96, 112, 0.03);
+}
+
+.doc-title-cell {
+    font-weight: 700;
+    color: var(--pw-text);
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+.status-pending {
+    background: #e1effe;
+    color: #1e429f;
+}
+
+.status-approved {
+    background: #def7ec;
+    color: #03543f;
+}
+
+.status-rejected {
+    background: #fde8e8;
+    color: #9b1c1c;
+}
+
+.action-link {
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.view-link {
+    color: var(--pw-teal);
+    margin-right: 14px;
+}
+
+.view-link:hover {
+    text-decoration: underline;
+}
+
+.download-link {
+    color: #059669;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 45px 20px;
+    color: var(--pw-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .docs-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .upload-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
 {% endblock %}

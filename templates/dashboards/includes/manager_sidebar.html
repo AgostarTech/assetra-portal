@@ -114,7 +114,7 @@
         </div>
 
         <!-- Collapsible Dropdown: Operations & Audit -->
-        <div class="manager-dropdown-group {% if 'documents_kyc' in request.resolver_match.url_name or 'support_tickets' in request.resolver_match.url_name or 'audit_logs' in request.resolver_match.url_name %}open{% endif %}">
+        <div class="manager-dropdown-group {% if 'documents_kyc' in request.resolver_match.url_name or 'support_tickets' in request.resolver_match.url_name or 'audit_logs' in request.resolver_match.url_name or 'seo_files' in request.resolver_match.url_name %}open{% endif %}">
             <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
                 <span class="manager-toggle-left">
                     <span class="manager-nav-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></span>
@@ -139,6 +139,13 @@
                    class="manager-nav-link {% if request.resolver_match.url_name == 'admin_audit_logs' %}active{% endif %}">
                     <span class="manager-nav-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span>
                     <span>System Audit Logs</span>
+                </a>
+
+                <!-- SEO & Site Verification Files -->
+                <a href="{% url 'support:seo_files_manager' %}"
+                   class="manager-nav-link {% if request.resolver_match.url_name == 'seo_files_manager' %}active{% endif %}">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-globe" aria-hidden="true"></i></span>
+                    <span>SEO & Verification</span>
                 </a>
             </div>
         </div>
@@ -379,7 +386,7 @@
     }
 
     .manager-dropdown-group.open .manager-submenu {
-        max-height: 300px;
+        max-height: 350px;
     }
 
     .manager-dropdown-group.open .manager-chevron {

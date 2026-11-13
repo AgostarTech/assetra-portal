@@ -1,29 +1,221 @@
 {% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
 {% load humanize %}
 
-{% block dashboard_title %}Statements & Reports{% endblock %}
-{% block view_header %}Official Statements & Reports{% endblock %}
+{% block dashboard_title %}Statements &amp; Reports | Assetra Africa{% endblock %}
+{% block view_header %}Official Statements &amp; Reports{% endblock %}
 
 {% block dashboard_content %}
-<div class="panel" style="background:#FFFFFF; border:1px solid rgba(15,23,42,0.12); border-radius:14px; padding:24px; box-shadow:0 3px 12px rgba(15,23,42,.03);">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+<div class="statements-workspace max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- HERO BANNER -->
+    <section class="statements-hero">
         <div>
-            <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Certified Portfolio Statement</h3>
-            <p style="margin:0; color:#687181; font-size:13px;">Review and download your official valuation summary.</p>
+            <div class="statements-eyebrow">CLIENT PORTAL / CERTIFIED REPORTS</div>
+            <h2>Official Statements &amp; Reports</h2>
+            <p>Review and download certified valuation summaries and portfolio statements for institutional or personal recordkeeping.</p>
         </div>
-        <a href="#" class="btn-primary" style="background:#086070; color:#FFF; padding:10px 16px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-file-pdf"></i> Download PDF Statement
-        </a>
+        <div>
+            <span class="vault-badge">
+                <i class="fa-solid fa-file-invoice"></i> Verified Statement
+            </span>
+        </div>
+    </section>
+
+    <!-- MAIN STATEMENT PANEL -->
+    <div class="statements-panel">
+        <div class="panel-header-row">
+            <div>
+                <h3>Certified Portfolio Statement</h3>
+                <p>Review and download your official net worth and asset valuation summary.</p>
+            </div>
+            <a href="#" class="btn-portal-primary">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF Statement
+            </a>
+        </div>
+
+        <div class="networth-card">
+            <div>
+                <span class="networth-label">Current Portfolio Net Worth</span>
+                <span class="networth-sub">Based on active recorded asset valuations</span>
+            </div>
+            <div class="networth-amount">
+                {{ summary.total_current_value|default:0|floatformat:2|intcomma }} TZS
+            </div>
+        </div>
     </div>
 
-    <div style="background:#F4F6F9; border-radius:10px; padding:18px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <strong style="display:block; font-size:13px; color:#0F172A;">Current Portfolio Net Worth</strong>
-            <span style="color:#687181; font-size:12px;">Based on active recorded valuations</span>
-        </div>
-        <div style="font-size:18px; font-weight:800; color:#086070;">
-            ${{ summary.total_current_value|default:0|floatformat:2|intcomma }}
-        </div>
-    </div>
 </div>
+
+<style>
+/* =========================================================
+   ASSETRA AFRICA — STATEMENTS & REPORTS
+========================================================= */
+
+.statements-workspace {
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-border: rgba(8, 96, 112, 0.15);
+    --pw-card: #ffffff;
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-bg-alt: #f8fafc;
+    --pw-radius: 14px;
+
+    color: var(--pw-text);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.statements-workspace *, .statements-workspace *::before, .statements-workspace *::after {
+    box-sizing: border-box;
+}
+
+/* Hero Banner */
+.statements-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border-radius: var(--pw-radius);
+    color: #fff;
+    background: linear-gradient(135deg, #086070, #097c92);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.15);
+}
+
+.statements-eyebrow {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.statements-hero h2 {
+    margin: 0 0 4px;
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    color: #fff;
+}
+
+.statements-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+}
+
+.vault-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Panel */
+.statements-panel {
+    background: var(--pw-card);
+    border: 1px solid var(--pw-border);
+    border-radius: var(--pw-radius);
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+}
+
+.panel-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--pw-border);
+}
+
+.panel-header-row h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: var(--pw-teal);
+    font-weight: 800;
+}
+
+.panel-header-row p {
+    margin: 0;
+    color: var(--pw-muted);
+    font-size: 12.5px;
+}
+
+.btn-portal-primary {
+    background: var(--pw-teal);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-portal-primary:hover {
+    background: var(--pw-teal-dark);
+    color: #fff;
+}
+
+/* Net Worth Card */
+.networth-card {
+    background: var(--pw-bg-alt);
+    border: 1px solid var(--pw-border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.networth-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--pw-text);
+    margin-bottom: 4px;
+}
+
+.networth-sub {
+    color: var(--pw-muted);
+    font-size: 12px;
+}
+
+.networth-amount {
+    font-size: clamp(22px, 2.5vw, 26px);
+    font-weight: 800;
+    color: var(--pw-teal);
+}
+
+@media (max-width: 768px) {
+    .statements-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .networth-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
 {% endblock %}

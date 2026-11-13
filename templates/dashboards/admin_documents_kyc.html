@@ -1,10 +1,119 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Documents &amp; KYC Verification | Assetra Africa{% endblock %}
+{% block dashboard_title %}Documents &amp; KYC Verification | Assetra Africa{% endblock %}
+{% block page_title %}Documents &amp; KYC Verification{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pwh-dashboard max-w-7xl mx-auto space-y-8 pb-12">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / OPERATIONS</div>
+            <h1>Documents &amp; KYC Verification</h1>
+            <p class="pwh-subtitle">Review, verify, or update uploaded client compliance and asset documents.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Document Queue</h2>
+                <p>Manage verification status and compliance reviews</p>
+            </div>
+            <span class="pwh-badge"><i class="fa-solid fa-file-shield" style="margin-right: 4px;"></i> KYC COMPLIANCE</span>
+        </div>
+
+        {% if documents %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Uploader</th>
+                        <th>Uploaded Date</th>
+                        <th>Current Status</th>
+                        <th style="text-align: right;">Action / Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if doc.title %}
+                                    {{ doc.title }}
+                                {% elif doc.get_category_display %}
+                                    {{ doc.get_category_display }}
+                                {% elif doc.category %}
+                                    {{ doc.category }}
+                                {% else %}
+                                    Compliance Document
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>
+                            {% if doc.uploader %}
+                                <strong style="color: var(--pwh-teal);">
+                                    {% if doc.uploader.get_full_name %}
+                                        {{ doc.uploader.get_full_name }}
+                                    {% elif doc.uploader.first_name %}
+                                        {{ doc.uploader.first_name }} {{ doc.uploader.last_name|default:"" }}
+                                    {% elif doc.uploader.name %}
+                                        {{ doc.uploader.name }}
+                                    {% elif doc.uploader.username %}
+                                        {{ doc.uploader.username }}
+                                    {% else %}
+                                        Client Uploader
+                                    {% endif %}
+                                </strong><br>
+                                <span style="color: var(--pwh-muted); font-size: 11px;">{{ doc.uploader.email|default:"No email registered" }}</span>
+                            {% else %}
+                                <span style="color: var(--pwh-muted);">System Record</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--pwh-muted);">
+                            {% if doc.uploaded_at %}
+                                {{ doc.uploaded_at|date:"d M Y, H:i" }}
+                            {% elif doc.created_at %}
+                                {{ doc.created_at|date:"d M Y, H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
+                                {{ doc.get_status_display|default:doc.status|default:"Pending Review" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <form method="post" style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                                {% csrf_token %}
+                                <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                                <select name="status" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11.5px; font-weight: 600;">
+                                    <option value="SUBMITTED" {% if doc.status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
+                                    <option value="UNDER_REVIEW" {% if doc.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
+                                    <option value="VERIFIED" {% if doc.status == 'VERIFIED' %}selected{% endif %}>Verified</option>
+                                    <option value="REJECTED" {% if doc.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <button type="submit" class="pwh-btn" style="min-height: 30px; padding: 5px 12px; font-size: 11.5px;">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">
+                <i class="fa-solid fa-folder-open" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
+                No compliance or asset documents found in the verification queue.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — DOCUMENTS & KYC VERIFICATION
@@ -195,114 +304,4 @@
     font-size: 13px;
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pwh-dashboard">
-    <header class="pwh-header">
-        <div>
-            <div class="pwh-eyebrow">ADMINISTRATION / OPERATIONS</div>
-            <h1>Documents &amp; KYC Verification</h1>
-            <p class="pwh-subtitle">Review, verify, or update uploaded client compliance and asset documents.</p>
-        </div>
-    </header>
-
-    <div class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>Document Queue</h2>
-                <p>Manage verification status and compliance reviews</p>
-            </div>
-            <span class="pwh-badge"><i class="fa-solid fa-file-shield" style="margin-right: 4px;"></i> KYC COMPLIANCE</span>
-        </div>
-
-        {% if documents %}
-        <div class="pwh-table-wrap">
-            <table class="pwh-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Uploader</th>
-                        <th>Uploaded Date</th>
-                        <th>Current Status</th>
-                        <th style="text-align: right;">Action / Update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for doc in documents %}
-                    <tr>
-                        <td>
-                            <strong>
-                                {% if doc.title %}
-                                    {{ doc.title }}
-                                {% elif doc.get_category_display %}
-                                    {{ doc.get_category_display }}
-                                {% elif doc.category %}
-                                    {{ doc.category }}
-                                {% else %}
-                                    Compliance Document
-                                {% endif %}
-                            </strong>
-                        </td>
-                        <td>
-                            {% if doc.uploader %}
-                                <strong style="color: var(--pwh-teal);">
-                                    {% if doc.uploader.get_full_name %}
-                                        {{ doc.uploader.get_full_name }}
-                                    {% elif doc.uploader.first_name %}
-                                        {{ doc.uploader.first_name }} {{ doc.uploader.last_name|default:"" }}
-                                    {% elif doc.uploader.name %}
-                                        {{ doc.uploader.name }}
-                                    {% elif doc.uploader.username %}
-                                        {{ doc.uploader.username }}
-                                    {% else %}
-                                        Client Uploader
-                                    {% endif %}
-                                </strong><br>
-                                <span style="color: var(--pwh-muted); font-size: 11px;">{{ doc.uploader.email|default:"No email registered" }}</span>
-                            {% else %}
-                                <span style="color: var(--pwh-muted);">System Record</span>
-                            {% endif %}
-                        </td>
-                        <td style="color: var(--pwh-muted);">
-                            {% if doc.uploaded_at %}
-                                {{ doc.uploaded_at|date:"d M Y, H:i" }}
-                            {% elif doc.created_at %}
-                                {{ doc.created_at|date:"d M Y, H:i" }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="pwh-status">
-                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
-                                {{ doc.get_status_display|default:doc.status|default:"Pending Review" }}
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            <form method="post" style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                                {% csrf_token %}
-                                <input type="hidden" name="doc_id" value="{{ doc.pk }}">
-                                <select name="status" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11.5px; font-weight: 600;">
-                                    <option value="SUBMITTED" {% if doc.status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
-                                    <option value="UNDER_REVIEW" {% if doc.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
-                                    <option value="VERIFIED" {% if doc.status == 'VERIFIED' %}selected{% endif %}>Verified</option>
-                                    <option value="REJECTED" {% if doc.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
-                                </select>
-                                <button type="submit" class="pwh-btn" style="min-height: 30px; padding: 5px 12px; font-size: 11.5px;">Save</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <div class="pwh-empty">
-                <i class="fa-solid fa-folder-open" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
-                No compliance or asset documents found in the verification queue.
-            </div>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}

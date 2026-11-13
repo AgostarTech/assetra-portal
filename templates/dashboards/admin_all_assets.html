@@ -1,10 +1,194 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}All System Assets | Assetra Africa{% endblock %}
+{% block dashboard_title %}All System Assets | Assetra Africa{% endblock %}
+{% block page_title %}All System Assets{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pw-assets max-w-7xl mx-auto space-y-8 pb-12">
+
+    <!-- HEADER -->
+    <header class="pw-topbar">
+        <div>
+            <div class="pw-eyebrow">Administration / Portfolio</div>
+            <h1 class="pw-page-heading">All System Assets</h1>
+            <p class="pw-description">Securely inspect and review registered client assets without client dashboard access.</p>
+        </div>
+
+        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
+            &larr; Back to Admin Hub
+        </a>
+    </header>
+
+    <!-- SEARCH FORM -->
+    <form method="get" class="pw-search-form">
+        <span aria-hidden="true">&#9906;</span>
+        <input type="search" name="q" value="{{ search|default:'' }}" placeholder="Search assets by name, category, or owner email...">
+        <button type="submit" class="pw-btn pw-btn-primary" style="padding: 4px 12px;">Search</button>
+    </form>
+
+    <!-- ASSETS PANEL -->
+    <section class="pw-panel">
+        <div class="pw-panel-head">
+            <div>
+                <h2 class="pw-panel-title">Registered System Assets</h2>
+                <p class="pw-panel-subtitle">Displaying all system-wide portfolios and documentation records</p>
+            </div>
+            <span class="pw-badge">{{ total_assets|default:0|intcomma }} total</span>
+        </div>
+
+        {% if assets %}
+        <div class="pw-table-wrap">
+            <table class="pw-table">
+                <thead>
+                    <tr>
+                        <th>Asset Name</th>
+                        <th>Owner</th>
+                        <th>Category</th>
+                        <th>Estimated Value</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th style="text-align: right;">Control Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if asset.name %}
+                                    {{ asset.name }}
+                                {% elif asset.title %}
+                                    {{ asset.title }}
+                                {% else %}
+                                    System Asset
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>
+                            {% if asset.owner %}
+                                <strong style="color: var(--pw-teal);">
+                                    {% if asset.owner.get_full_name %}
+                                        {{ asset.owner.get_full_name }}
+                                    {% elif asset.owner.first_name %}
+                                        {{ asset.owner.first_name }} {{ asset.owner.last_name|default:"" }}
+                                    {% elif asset.owner.name %}
+                                        {{ asset.owner.name }}
+                                    {% elif asset.owner.username %}
+                                        {{ asset.owner.username }}
+                                    {% else %}
+                                        Client Owner
+                                    {% endif %}
+                                </strong><br>
+                                <span style="color: var(--pw-muted); font-size: 11px;">{{ asset.owner.email|default:"No email" }}</span>
+                            {% else %}
+                                <span style="color: var(--pw-muted);">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ asset.get_category_display|default:asset.category|default:"General Holding" }}</td>
+                        <td>
+                            {{ asset.currency|default:"$" }} 
+                            {% if asset.current_estimated_value %}
+                                {{ asset.current_estimated_value|floatformat:0|intcomma }}
+                            {% elif asset.estimated_value %}
+                                {{ asset.estimated_value|floatformat:0|intcomma }}
+                            {% elif asset.valuation %}
+                                {{ asset.valuation|floatformat:0|intcomma }}
+                            {% elif asset.purchase_price %}
+                                {{ asset.purchase_price|floatformat:0|intcomma }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                        <td><span class="pw-badge">{{ asset.get_status_display|default:asset.status|default:"Active" }}</span></td>
+                        <td>{{ asset.created_at|date:"d M Y"|default:"—" }}</td>
+                        <td style="text-align: right;">
+                            <div class="pw-action-group" style="justify-content: flex-end;">
+                                <!-- Secure Read-Only Inspector Modal Trigger -->
+                                <button type="button" class="pw-btn pw-btn-icon open-asset-modal" 
+                                    data-name="{% if asset.name %}{{ asset.name }}{% elif asset.title %}{{ asset.title }}{% else %}System Asset{% endif %}"
+                                    data-owner="{% if asset.owner.get_full_name %}{{ asset.owner.get_full_name }}{% elif asset.owner.email %}{{ asset.owner.email }}{% else %}Client Owner{% endif %}"
+                                    data-email="{{ asset.owner.email|default:'N/A' }}"
+                                    data-category="{{ asset.get_category_display|default:asset.category|default:'General Holding' }}"
+                                    data-value="{{ asset.currency|default:'$' }} {% if asset.current_estimated_value %}{{ asset.current_estimated_value|floatformat:0|intcomma }}{% elif asset.estimated_value %}{{ asset.estimated_value|floatformat:0|intcomma }}{% else %}0{% endif %}"
+                                    data-status="{{ asset.get_status_display|default:asset.status|default:'Active' }}"
+                                    data-created="{{ asset.created_at|date:'d M Y'|default:'—' }}"
+                                    title="Secure Read-Only Asset Inspection">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+
+                                <!-- Download Document / View Document -->
+                                {% if asset.document or asset.documents.first %}
+                                    <a href="{% if asset.document %}{{ asset.document.url }}{% else %}{{ asset.documents.first.file.url }}{% endif %}" target="_blank" class="pw-btn pw-btn-icon" title="Download Document">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </a>
+                                {% endif %}
+
+                                <!-- Delete Asset (Trash Icon) -->
+                                <form action="{% url 'assets:asset_delete' asset.pk %}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete asset {{ asset.name|default:"this asset" }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="pw-btn pw-btn-icon pw-btn-danger" title="Delete Asset">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pw-empty">No system assets found matching your criteria.</div>
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- SECURE READ-ONLY ADMIN ASSET INSPECTION MODAL -->
+<div id="assetInspectionModal" class="pw-modal-overlay">
+    <div class="pw-modal-card">
+        <div class="pw-modal-header">
+            <h3 class="pw-modal-title">Secure Asset Inspection Record (Read-Only)</h3>
+            <button type="button" class="pw-modal-close" id="closeAssetModal">&times;</button>
+        </div>
+        <div class="pw-modal-body">
+            <div class="pw-modal-group full">
+                <div class="pw-modal-label">Asset Title / Name</div>
+                <div class="pw-modal-value" id="modalAssetName">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Asset Owner</div>
+                <div class="pw-modal-value" id="modalAssetOwner">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Owner Email</div>
+                <div class="pw-modal-value" id="modalAssetEmail">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Category</div>
+                <div class="pw-modal-value" id="modalAssetCategory">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Estimated Valuation</div>
+                <div class="pw-modal-value" id="modalAssetValue" style="color: var(--pw-teal);">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Status</div>
+                <div class="pw-modal-value" id="modalAssetStatus">—</div>
+            </div>
+            <div class="pw-modal-group">
+                <div class="pw-modal-label">Registration Date</div>
+                <div class="pw-modal-value" id="modalAssetCreated">—</div>
+            </div>
+        </div>
+        <div class="pw-modal-footer">
+            <button type="button" class="pw-btn pw-btn-primary" id="closeModalBtn">Close Inspector</button>
+        </div>
+    </div>
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — ALL SYSTEM ASSETS MANAGEMENT
@@ -376,191 +560,6 @@
     }
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pw-assets">
-
-    <!-- HEADER -->
-    <header class="pw-topbar">
-        <div>
-            <div class="pw-eyebrow">Administration / Portfolio</div>
-            <h1 class="pw-page-heading">All System Assets</h1>
-            <p class="pw-description">Securely inspect and review registered client assets without client dashboard access.</p>
-        </div>
-
-        <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
-            &larr; Back to Admin Hub
-        </a>
-    </header>
-
-    <!-- SEARCH FORM -->
-    <form method="get" class="pw-search-form">
-        <span aria-hidden="true">&#9906;</span>
-        <input type="search" name="q" value="{{ search|default:'' }}" placeholder="Search assets by name, category, or owner email...">
-        <button type="submit" class="pw-btn pw-btn-primary" style="padding: 4px 12px;">Search</button>
-    </form>
-
-    <!-- ASSETS PANEL -->
-    <section class="pw-panel">
-        <div class="pw-panel-head">
-            <div>
-                <h2 class="pw-panel-title">Registered System Assets</h2>
-                <p class="pw-panel-subtitle">Displaying all system-wide portfolios and documentation records</p>
-            </div>
-            <span class="pw-badge">{{ total_assets|default:0|intcomma }} total</span>
-        </div>
-
-        {% if assets %}
-        <div class="pw-table-wrap">
-            <table class="pw-table">
-                <thead>
-                    <tr>
-                        <th>Asset Name</th>
-                        <th>Owner</th>
-                        <th>Category</th>
-                        <th>Estimated Value</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th style="text-align: right;">Control Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for asset in assets %}
-                    <tr>
-                        <td>
-                            <strong>
-                                {% if asset.name %}
-                                    {{ asset.name }}
-                                {% elif asset.title %}
-                                    {{ asset.title }}
-                                {% else %}
-                                    System Asset
-                                {% endif %}
-                            </strong>
-                        </td>
-                        <td>
-                            {% if asset.owner %}
-                                <strong style="color: var(--pw-teal);">
-                                    {% if asset.owner.get_full_name %}
-                                        {{ asset.owner.get_full_name }}
-                                    {% elif asset.owner.first_name %}
-                                        {{ asset.owner.first_name }} {{ asset.owner.last_name|default:"" }}
-                                    {% elif asset.owner.name %}
-                                        {{ asset.owner.name }}
-                                    {% elif asset.owner.username %}
-                                        {{ asset.owner.username }}
-                                    {% else %}
-                                        Client Owner
-                                    {% endif %}
-                                </strong><br>
-                                <span style="color: var(--pw-muted); font-size: 11px;">{{ asset.owner.email|default:"No email" }}</span>
-                            {% else %}
-                                <span style="color: var(--pw-muted);">Unassigned</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ asset.get_category_display|default:asset.category|default:"General Holding" }}</td>
-                        <td>
-                            {{ asset.currency|default:"$" }} 
-                            {% if asset.current_estimated_value %}
-                                {{ asset.current_estimated_value|floatformat:0|intcomma }}
-                            {% elif asset.estimated_value %}
-                                {{ asset.estimated_value|floatformat:0|intcomma }}
-                            {% elif asset.valuation %}
-                                {{ asset.valuation|floatformat:0|intcomma }}
-                            {% elif asset.purchase_price %}
-                                {{ asset.purchase_price|floatformat:0|intcomma }}
-                            {% else %}
-                                0
-                            {% endif %}
-                        </td>
-                        <td><span class="pw-badge">{{ asset.get_status_display|default:asset.status|default:"Active" }}</span></td>
-                        <td>{{ asset.created_at|date:"d M Y"|default:"—" }}</td>
-                        <td style="text-align: right;">
-                            <div class="pw-action-group" style="justify-content: flex-end;">
-                                <!-- Secure Read-Only Inspector Modal Trigger -->
-                                <button type="button" class="pw-btn pw-btn-icon open-asset-modal" 
-                                    data-name="{% if asset.name %}{{ asset.name }}{% elif asset.title %}{{ asset.title }}{% else %}System Asset{% endif %}"
-                                    data-owner="{% if asset.owner.get_full_name %}{{ asset.owner.get_full_name }}{% elif asset.owner.email %}{{ asset.owner.email }}{% else %}Client Owner{% endif %}"
-                                    data-email="{{ asset.owner.email|default:'N/A' }}"
-                                    data-category="{{ asset.get_category_display|default:asset.category|default:'General Holding' }}"
-                                    data-value="{{ asset.currency|default:'$' }} {% if asset.current_estimated_value %}{{ asset.current_estimated_value|floatformat:0|intcomma }}{% elif asset.estimated_value %}{{ asset.estimated_value|floatformat:0|intcomma }}{% else %}0{% endif %}"
-                                    data-status="{{ asset.get_status_display|default:asset.status|default:'Active' }}"
-                                    data-created="{{ asset.created_at|date:'d M Y'|default:'—' }}"
-                                    title="Secure Read-Only Asset Inspection">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                </button>
-
-                                <!-- Download Document / View Document -->
-                                {% if asset.document or asset.documents.first %}
-                                    <a href="{% if asset.document %}{{ asset.document.url }}{% else %}{{ asset.documents.first.file.url }}{% endif %}" target="_blank" class="pw-btn pw-btn-icon" title="Download Document">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                    </a>
-                                {% endif %}
-
-                                <!-- Delete Asset (Trash Icon) -->
-                                <form action="{% url 'assets:asset_delete' asset.pk %}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete asset {{ asset.name|default:"this asset" }}?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="pw-btn pw-btn-icon pw-btn-danger" title="Delete Asset">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <div class="pw-empty">No system assets found matching your criteria.</div>
-        {% endif %}
-    </section>
-
-</div>
-
-<!-- SECURE READ-ONLY ADMIN ASSET INSPECTION MODAL -->
-<div id="assetInspectionModal" class="pw-modal-overlay">
-    <div class="pw-modal-card">
-        <div class="pw-modal-header">
-            <h3 class="pw-modal-title">Secure Asset Inspection Record (Read-Only)</h3>
-            <button type="button" class="pw-modal-close" id="closeAssetModal">&times;</button>
-        </div>
-        <div class="pw-modal-body">
-            <div class="pw-modal-group full">
-                <div class="pw-modal-label">Asset Title / Name</div>
-                <div class="pw-modal-value" id="modalAssetName">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Asset Owner</div>
-                <div class="pw-modal-value" id="modalAssetOwner">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Owner Email</div>
-                <div class="pw-modal-value" id="modalAssetEmail">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Category</div>
-                <div class="pw-modal-value" id="modalAssetCategory">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Estimated Valuation</div>
-                <div class="pw-modal-value" id="modalAssetValue" style="color: var(--pw-teal);">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Status</div>
-                <div class="pw-modal-value" id="modalAssetStatus">—</div>
-            </div>
-            <div class="pw-modal-group">
-                <div class="pw-modal-label">Registration Date</div>
-                <div class="pw-modal-value" id="modalAssetCreated">—</div>
-            </div>
-        </div>
-        <div class="pw-modal-footer">
-            <button type="button" class="pw-btn pw-btn-primary" id="closeModalBtn">Close Inspector</button>
-        </div>
-    </div>
-</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

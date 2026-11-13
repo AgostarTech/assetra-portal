@@ -4,11 +4,14 @@ from django.views.generic import RedirectView, TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from support.views import serve_verification_file
 
 from accounts import views as accounts_views
 
 
 urlpatterns = [
+
+    path('<str:filename>', serve_verification_file, name='serve_verification_file'),
     # --------------------------------------------------
     # PUBLIC WEBSITE
     # --------------------------------------------------

@@ -1,10 +1,106 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Database Backups &amp; Restoration | Assetra Africa{% endblock %}
+{% block dashboard_title %}Database Backups &amp; Restoration | Assetra Africa{% endblock %}
+{% block page_title %}Database Backups &amp; Restoration{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pwh-dashboard max-w-7xl mx-auto space-y-8 pb-12">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / INFRASTRUCTURE</div>
+            <h1>Automated Database Backups &amp; Restoration</h1>
+            <p class="pwh-subtitle">Manage automated daily MariaDB database backup triggers and restoration integrity tests.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>MariaDB Backup Operations</h2>
+                <p>Execute manual backup snapshots and system verification routines</p>
+            </div>
+            <span class="pwh-badge"><i class="fa-solid fa-database" style="margin-right: 4px;"></i> SECURE STORAGE</span>
+        </div>
+
+        <div class="pwh-actions-group">
+            <button type="button" onclick="triggerBackup()" class="pwh-btn-portal-primary">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Trigger Immediate Backup
+            </button>
+            <button type="button" onclick="runRestoreTest()" class="pwh-btn-portal-secondary">
+                <i class="fa-solid fa-shield-check"></i> Run Restoration Integrity Test
+            </button>
+        </div>
+
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Backup Filename</th>
+                        <th>Timestamp</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--pwh-teal);">
+                            {% if backup.filename %}
+                                {{ backup.filename }}
+                            {% elif backup.name %}
+                                {{ backup.name }}
+                            {% else %}
+                                apt_db_backup_archive.sql
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--pwh-muted);">
+                            {% if backup.timestamp %}
+                                {{ backup.timestamp|date:"M d, Y H:i" }}
+                            {% elif backup.created_at %}
+                                {{ backup.created_at|date:"M d, Y H:i" }}
+                            {% else %}
+                                Oct 17, 2026 03:00 AM
+                            {% endif %}
+                        </td>
+                        <td>{{ backup.size|default:"4.2 MB" }}</td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
+                                {{ backup.get_status_display|default:backup.status|default:"Verified Secure" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            {% if backup.file and backup.file.url %}
+                                <a href="{{ backup.file.url }}" download class="pwh-btn-portal-secondary" style="padding: 6px 12px; font-size: 11px;">Download</a>
+                            {% else %}
+                                <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--pwh-teal);">apt_db_backup_20261017.sql</td>
+                        <td style="color: var(--pwh-muted);">Oct 17, 2026 03:00 AM</td>
+                        <td>4.2 MB</td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i> Verified Secure
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — DATABASE BACKUPS & RESTORATION
@@ -206,103 +302,6 @@
     font-size: 13px;
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pwh-dashboard">
-    <header class="pwh-header">
-        <div>
-            <div class="pwh-eyebrow">ADMINISTRATION / INFRASTRUCTURE</div>
-            <h1>Automated Database Backups &amp; Restoration</h1>
-            <p class="pwh-subtitle">Manage automated daily MariaDB database backup triggers and restoration integrity tests.</p>
-        </div>
-    </header>
-
-    <div class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>MariaDB Backup Operations</h2>
-                <p>Execute manual backup snapshots and system verification routines</p>
-            </div>
-            <span class="pwh-badge"><i class="fa-solid fa-database" style="margin-right: 4px;"></i> SECURE STORAGE</span>
-        </div>
-
-        <div class="pwh-actions-group">
-            <button type="button" onclick="triggerBackup()" class="pwh-btn-portal-primary">
-                <i class="fa-solid fa-cloud-arrow-down"></i> Trigger Immediate Backup
-            </button>
-            <button type="button" onclick="runRestoreTest()" class="pwh-btn-portal-secondary">
-                <i class="fa-solid fa-shield-check"></i> Run Restoration Integrity Test
-            </button>
-        </div>
-
-        <div class="pwh-table-wrap">
-            <table class="pwh-table">
-                <thead>
-                    <tr>
-                        <th>Backup Filename</th>
-                        <th>Timestamp</th>
-                        <th>Size</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for backup in backups %}
-                    <tr>
-                        <td style="font-weight: 700; color: var(--pwh-teal);">
-                            {% if backup.filename %}
-                                {{ backup.filename }}
-                            {% elif backup.name %}
-                                {{ backup.name }}
-                            {% else %}
-                                apt_db_backup_archive.sql
-                            {% endif %}
-                        </td>
-                        <td style="color: var(--pwh-muted);">
-                            {% if backup.timestamp %}
-                                {{ backup.timestamp|date:"M d, Y H:i" }}
-                            {% elif backup.created_at %}
-                                {{ backup.created_at|date:"M d, Y H:i" }}
-                            {% else %}
-                                Oct 17, 2026 03:00 AM
-                            {% endif %}
-                        </td>
-                        <td>{{ backup.size|default:"4.2 MB" }}</td>
-                        <td>
-                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
-                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
-                                {{ backup.get_status_display|default:backup.status|default:"Verified Secure" }}
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            {% if backup.file and backup.file.url %}
-                                <a href="{{ backup.file.url }}" download class="pwh-btn-portal-secondary" style="padding: 6px 12px; font-size: 11px;">Download</a>
-                            {% else %}
-                                <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td style="font-weight: 700; color: var(--pwh-teal);">apt_db_backup_20261017.sql</td>
-                        <td style="color: var(--pwh-muted);">Oct 17, 2026 03:00 AM</td>
-                        <td>4.2 MB</td>
-                        <td>
-                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
-                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i> Verified Secure
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
 <script>
     function triggerBackup() {

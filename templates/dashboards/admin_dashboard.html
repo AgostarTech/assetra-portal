@@ -1,10 +1,151 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Admin Control Hub | Assetra Africa{% endblock %}
+{% block dashboard_title %}Admin Control Hub | Assetra Africa{% endblock %}
+{% block page_title %}Admin Control Hub{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pwh-dashboard max-w-7xl mx-auto space-y-8 pb-12">
+
+    <header class="pwh-header">
+        <div class="pwh-header-title-wrapper">
+            <img src="{% static 'images/house.jpg' %}" alt="Assetra Logo" class="pwh-header-logo" onerror="this.style.display='none';">
+            <div>
+                <div class="pwh-eyebrow">ASSETRA AFRICA / ADMINISTRATION</div>
+                <h1>Admin Control Hub</h1>
+                <p class="pwh-subtitle">
+                    High-level system health, user distribution, and asset valuation overview.
+                </p>
+            </div>
+        </div>
+
+        <div class="pwh-actions">
+            <button type="button" class="pwh-btn" onclick="window.location.reload()">
+                Refresh Overview
+            </button>
+            <a href="{% url 'dashboards:admin_manage_users' %}" class="pwh-btn pwh-btn-primary">
+                Manage Users
+            </a>
+        </div>
+    </header>
+
+    <!-- Key performance indicators (Compact & Precision-Fitted) -->
+    <section class="pwh-kpis">
+        <article class="pwh-card" title="{{ total_system_assets|default:0|intcomma }} Total Assets">
+            <div class="pwh-kpi-label">TOTAL ASSETS</div>
+            <div class="pwh-kpi-value">{{ total_system_assets|default:0|intcomma }}</div>
+            <div class="pwh-kpi-detail">
+                {{ active_asset_count|default:0|intcomma }} active assets
+            </div>
+        </article>
+
+        <article class="pwh-card" title="{{ total_users|default:0|intcomma }} Registered Users">
+            <div class="pwh-kpi-label">REGISTERED USERS</div>
+            <div class="pwh-kpi-value">{{ total_users|default:0|intcomma }}</div>
+            <div class="pwh-kpi-detail">
+                {{ active_users|default:0|intcomma }} active · {{ inactive_users|default:0|intcomma }} inactive
+            </div>
+        </article>
+
+        <article class="pwh-card" title="${{ total_asset_value|default:0|floatformat:0|intcomma }}">
+            <div class="pwh-kpi-label">REPORTED ASSET VALUE</div>
+            <div class="pwh-kpi-value">
+                ${{ total_asset_value|default:0|floatformat:0|intcomma }}
+            </div>
+            <div class="pwh-kpi-detail">
+                Aggregate system valuation
+            </div>
+        </article>
+
+        <article class="pwh-card" title="{{ pending_count|default:0|intcomma }} Pending Queues">
+            <div class="pwh-kpi-label">PENDING QUEUES</div>
+            <div class="pwh-kpi-value">{{ pending_count|default:0|intcomma }}</div>
+            <div class="pwh-kpi-detail">Documents awaiting review</div>
+        </article>
+    </section>
+
+    <!-- Portfolio overview -->
+    <section class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Portfolio Distribution Summary</h2>
+                <p>Asset breakdown across categories</p>
+            </div>
+            <span class="pwh-badge">PORTFOLIO</span>
+        </div>
+
+        {% if category_stats %}
+            {% for category in category_stats %}
+            <div class="pwh-category">
+                <div class="pwh-category-heading">
+                    <strong>
+                        {% if category.label %}
+                            {{ category.label }}
+                        {% elif category.name %}
+                            {{ category.name }}
+                        {% else %}
+                            Portfolio Category
+                        {% endif %}
+                    </strong>
+                    <span class="pwh-muted">{{ category.asset_count|default:0|intcomma }} assets</span>
+                </div>
+
+                <div class="pwh-progress">
+                    <div class="pwh-progress-fill"
+                         style="width:{% if category.percentage > 100 %}100{% elif category.percentage < 0 %}0{% else %}{{ category.percentage|default:0 }}{% endif %}%;">
+                    </div>
+                </div>
+
+                <div class="pwh-category-footer">
+                    <span>{{ category.percentage|default:0|floatformat:1 }}% system share</span>
+                    <span>${{ category.total_value|default:0|floatformat:0|intcomma }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="pwh-empty">No category statistics available.</div>
+        {% endif %}
+    </section>
+
+    <!-- Account Overview Summary -->
+    <section class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Account Distribution Summary</h2>
+                <p>Breakdown of user access roles</p>
+            </div>
+            <a class="pwh-btn" href="{% url 'dashboards:admin_manage_users' %}">
+                View All Users
+            </a>
+        </div>
+
+        <div class="pwh-summary-grid">
+            <div class="pwh-summary-item">
+                <span>Total Users</span>
+                <strong>{{ total_users|default:0|intcomma }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Active Accounts</span>
+                <strong>{{ active_users|default:0|intcomma }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Standard Clients</span>
+                <strong>{{ total_clients|default:0|intcomma }}</strong>
+            </div>
+            <div class="pwh-summary-item">
+                <span>Administrators</span>
+                <strong>{{ admin_users|default:0|intcomma }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <footer class="pwh-footnote">
+        Assetra Africa · Administration Control Hub
+    </footer>
+
+</div>
+
 <style>
 .pwh-dashboard {
     --pwh-teal: #086070;
@@ -125,7 +266,6 @@
     color: #ffffff;
 }
 
-/* Reduced size KPI grid cards with robust fitting */
 .pwh-dashboard .pwh-kpis {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -307,7 +447,6 @@
     .pwh-dashboard .pwh-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .pwh-dashboard .pwh-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -318,158 +457,12 @@
     .pwh-dashboard .pwh-summary-grid {
         grid-template-columns: 1fr;
     }
-
     .pwh-dashboard .pwh-panel {
         padding: 16px 14px;
     }
-
     .pwh-dashboard .pwh-card {
         padding: 14px 16px;
     }
 }
 </style>
-{% endblock %}
-
-{% block content %}
-
-<div class="pwh-dashboard">
-
-    <header class="pwh-header">
-        <div class="pwh-header-title-wrapper">
-            <img src="{% static 'images/house.jpg' %}" alt="Assetra Logo" class="pwh-header-logo" onerror="this.style.display='none';">
-            <div>
-                <div class="pwh-eyebrow">ASSETRA AFRICA / ADMINISTRATION</div>
-                <h1>Admin Control Hub</h1>
-                <p class="pwh-subtitle">
-                    High-level system health, user distribution, and asset valuation overview.
-                </p>
-            </div>
-        </div>
-
-        <div class="pwh-actions">
-            <button type="button" class="pwh-btn" onclick="window.location.reload()">
-                Refresh Overview
-            </button>
-            <a href="{% url 'dashboards:admin_manage_users' %}" class="pwh-btn pwh-btn-primary">
-                Manage Users
-            </a>
-        </div>
-    </header>
-
-    <!-- Key performance indicators (Compact & Precision-Fitted) -->
-    <section class="pwh-kpis">
-        <article class="pwh-card" title="{{ total_system_assets|default:0|intcomma }} Total Assets">
-            <div class="pwh-kpi-label">TOTAL ASSETS</div>
-            <div class="pwh-kpi-value">{{ total_system_assets|default:0|intcomma }}</div>
-            <div class="pwh-kpi-detail">
-                {{ active_asset_count|default:0|intcomma }} active assets
-            </div>
-        </article>
-
-        <article class="pwh-card" title="{{ total_users|default:0|intcomma }} Registered Users">
-            <div class="pwh-kpi-label">REGISTERED USERS</div>
-            <div class="pwh-kpi-value">{{ total_users|default:0|intcomma }}</div>
-            <div class="pwh-kpi-detail">
-                {{ active_users|default:0|intcomma }} active · {{ inactive_users|default:0|intcomma }} inactive
-            </div>
-        </article>
-
-        <article class="pwh-card" title="${{ total_asset_value|default:0|floatformat:0|intcomma }}">
-            <div class="pwh-kpi-label">REPORTED ASSET VALUE</div>
-            <div class="pwh-kpi-value">
-                ${{ total_asset_value|default:0|floatformat:0|intcomma }}
-            </div>
-            <div class="pwh-kpi-detail">
-                Aggregate system valuation
-            </div>
-        </article>
-
-        <article class="pwh-card" title="{{ pending_count|default:0|intcomma }} Pending Queues">
-            <div class="pwh-kpi-label">PENDING QUEUES</div>
-            <div class="pwh-kpi-value">{{ pending_count|default:0|intcomma }}</div>
-            <div class="pwh-kpi-detail">Documents awaiting review</div>
-        </article>
-    </section>
-
-    <!-- Portfolio overview -->
-    <section class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>Portfolio Distribution Summary</h2>
-                <p>Asset breakdown across categories</p>
-            </div>
-            <span class="pwh-badge">PORTFOLIO</span>
-        </div>
-
-        {% if category_stats %}
-            {% for category in category_stats %}
-            <div class="pwh-category">
-                <div class="pwh-category-heading">
-                    <strong>
-                        {% if category.label %}
-                            {{ category.label }}
-                        {% elif category.name %}
-                            {{ category.name }}
-                        {% else %}
-                            Portfolio Category
-                        {% endif %}
-                    </strong>
-                    <span class="pwh-muted">{{ category.asset_count|default:0|intcomma }} assets</span>
-                </div>
-
-                <div class="pwh-progress">
-                    <div class="pwh-progress-fill"
-                         style="width:{% if category.percentage > 100 %}100{% elif category.percentage < 0 %}0{% else %}{{ category.percentage|default:0 }}{% endif %}%;">
-                    </div>
-                </div>
-
-                <div class="pwh-category-footer">
-                    <span>{{ category.percentage|default:0|floatformat:1 }}% system share</span>
-                    <span>${{ category.total_value|default:0|floatformat:0|intcomma }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="pwh-empty">No category statistics available.</div>
-        {% endif %}
-    </section>
-
-    <!-- Account Overview Summary -->
-    <section class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>Account Distribution Summary</h2>
-                <p>Breakdown of user access roles</p>
-            </div>
-            <a class="pwh-btn" href="{% url 'dashboards:admin_manage_users' %}">
-                View All Users
-            </a>
-        </div>
-
-        <div class="pwh-summary-grid">
-            <div class="pwh-summary-item">
-                <span>Total Users</span>
-                <strong>{{ total_users|default:0|intcomma }}</strong>
-            </div>
-            <div class="pwh-summary-item">
-                <span>Active Accounts</span>
-                <strong>{{ active_users|default:0|intcomma }}</strong>
-            </div>
-            <div class="pwh-summary-item">
-                <span>Standard Clients</span>
-                <strong>{{ total_clients|default:0|intcomma }}</strong>
-            </div>
-            <div class="pwh-summary-item">
-                <span>Administrators</span>
-                <strong>{{ admin_users|default:0|intcomma }}</strong>
-            </div>
-        </div>
-    </section>
-
-    <footer class="pwh-footnote">
-        Assetra Africa · Administration Control Hub
-    </footer>
-
-</div>
-
 {% endblock %}

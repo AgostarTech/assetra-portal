@@ -1,10 +1,123 @@
-{% extends "base.html" %}
+{% extends 'dashboards/base_dashboard.html' %}
 {% load static %}
 {% load humanize %}
 
-{% block title %}Support Tickets | Admin Control Hub{% endblock %}
+{% block dashboard_title %}Support Tickets | Admin Control Hub{% endblock %}
+{% block page_title %}Support Tickets &amp; Inquiries{% endblock %}
 
-{% block extra_css %}
+{% block dashboard_content %}
+<div class="pwh-dashboard max-w-7xl mx-auto space-y-8 pb-12">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / SUPPORT</div>
+            <h1>Support Tickets &amp; Inquiries</h1>
+            <p class="pwh-subtitle">Manage, track, and resolve client support requests and service inquiries.</p>
+        </div>
+    </header>
+
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>Active Inquiries</h2>
+                <p>Client service queue and resolution tracker</p>
+            </div>
+            <span class="pwh-badge"><i class="fa-solid fa-headset" style="margin-right: 4px;"></i> {{ tickets.count|default:0|intcomma }} TICKETS</span>
+        </div>
+
+        {% if tickets %}
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Client</th>
+                        <th>Priority</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if ticket.subject %}
+                                    {{ ticket.subject }}
+                                {% elif ticket.title %}
+                                    {{ ticket.title }}
+                                {% else %}
+                                    Support Inquiry
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>
+                            {% if ticket.user %}
+                                <strong style="color: var(--pwh-teal);">
+                                    {% if ticket.user.get_full_name %}
+                                        {{ ticket.user.get_full_name }}
+                                    {% elif ticket.user.first_name %}
+                                        {{ ticket.user.first_name }} {{ ticket.user.last_name|default:"" }}
+                                    {% elif ticket.user.name %}
+                                        {{ ticket.user.name }}
+                                    {% elif ticket.user.username %}
+                                        {{ ticket.user.username }}
+                                    {% else %}
+                                        Client User
+                                    {% endif %}
+                                </strong><br>
+                                <span style="color: var(--pwh-muted); font-size: 11px;">{{ ticket.user.email|default:"No email registered" }}</span>
+                            {% else %}
+                                <span style="color: var(--pwh-muted);">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="font-weight: 600; font-size: 11px; color: {% if ticket.priority == 'HIGH' or ticket.priority == 'URGENT' %}#dc2626{% else %}var(--pwh-text){% endif %};">
+                                {{ ticket.get_priority_display|default:ticket.priority|default:"Normal" }}
+                            </span>
+                        </td>
+                        <td style="color: var(--pwh-muted);">
+                            {% if ticket.created_at %}
+                                {{ ticket.created_at|date:"d M Y, H:i" }}
+                            {% elif ticket.timestamp %}
+                                {{ ticket.timestamp|date:"d M Y, H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                <i class="fa-solid fa-circle-dot" style="font-size: 8px;"></i>
+                                {{ ticket.get_status_display|default:ticket.status|default:"Open" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <form method="post" style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticket_id" value="{{ ticket.pk }}">
+                                <select name="status" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11.5px; font-weight: 600;">
+                                    <option value="OPEN" {% if ticket.status == 'OPEN' %}selected{% endif %}>Open</option>
+                                    <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                    <option value="RESOLVED" {% if ticket.status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                                    <option value="CLOSED" {% if ticket.status == 'CLOSED' %}selected{% endif %}>Closed</option>
+                                </select>
+                                <button type="submit" class="pwh-btn" style="min-height: 30px; padding: 5px 12px; font-size: 11.5px;">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="pwh-empty">
+                <i class="fa-solid fa-circle-check" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
+                No support tickets currently recorded in the active queue.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <style>
 /* =========================================================
    ASSETRA AFRICA — SUPPORT TICKETS MANAGEMENT
@@ -196,118 +309,4 @@
     font-size: 13px;
 }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="pwh-dashboard">
-    <header class="pwh-header">
-        <div>
-            <div class="pwh-eyebrow">ADMINISTRATION / SUPPORT</div>
-            <h1>Support Tickets &amp; Inquiries</h1>
-            <p class="pwh-subtitle">Manage, track, and resolve client support requests and service inquiries.</p>
-        </div>
-    </header>
-
-    <div class="pwh-panel">
-        <div class="pwh-panel-header">
-            <div>
-                <h2>Active Inquiries</h2>
-                <p>Client service queue and resolution tracker</p>
-            </div>
-            <span class="pwh-badge"><i class="fa-solid fa-headset" style="margin-right: 4px;"></i> {{ tickets.count|default:0|intcomma }} TICKETS</span>
-        </div>
-
-        {% if tickets %}
-        <div class="pwh-table-wrap">
-            <table class="pwh-table">
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Client</th>
-                        <th>Priority</th>
-                        <th>Created</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Update Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ticket in tickets %}
-                    <tr>
-                        <td>
-                            <strong>
-                                {% if ticket.subject %}
-                                    {{ ticket.subject }}
-                                {% elif ticket.title %}
-                                    {{ ticket.title }}
-                                {% else %}
-                                    Support Inquiry
-                                {% endif %}
-                            </strong>
-                        </td>
-                        <td>
-                            {% if ticket.user %}
-                                <strong style="color: var(--pwh-teal);">
-                                    {% if ticket.user.get_full_name %}
-                                        {{ ticket.user.get_full_name }}
-                                    {% elif ticket.user.first_name %}
-                                        {{ ticket.user.first_name }} {{ ticket.user.last_name|default:"" }}
-                                    {% elif ticket.user.name %}
-                                        {{ ticket.user.name }}
-                                    {% elif ticket.user.username %}
-                                        {{ ticket.user.username }}
-                                    {% else %}
-                                        Client User
-                                    {% endif %}
-                                </strong><br>
-                                <span style="color: var(--pwh-muted); font-size: 11px;">{{ ticket.user.email|default:"No email registered" }}</span>
-                            {% else %}
-                                <span style="color: var(--pwh-muted);">Unassigned</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span style="font-weight: 600; font-size: 11px; color: {% if ticket.priority == 'HIGH' or ticket.priority == 'URGENT' %}#dc2626{% else %}var(--pwh-text){% endif %};">
-                                {{ ticket.get_priority_display|default:ticket.priority|default:"Normal" }}
-                            </span>
-                        </td>
-                        <td style="color: var(--pwh-muted);">
-                            {% if ticket.created_at %}
-                                {{ ticket.created_at|date:"d M Y, H:i" }}
-                            {% elif ticket.timestamp %}
-                                {{ ticket.timestamp|date:"d M Y, H:i" }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="pwh-status">
-                                <i class="fa-solid fa-circle-dot" style="font-size: 8px;"></i>
-                                {{ ticket.get_status_display|default:ticket.status|default:"Open" }}
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            <form method="post" style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
-                                {% csrf_token %}
-                                <input type="hidden" name="ticket_id" value="{{ ticket.pk }}">
-                                <select name="status" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11.5px; font-weight: 600;">
-                                    <option value="OPEN" {% if ticket.status == 'OPEN' %}selected{% endif %}>Open</option>
-                                    <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                                    <option value="RESOLVED" {% if ticket.status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-                                    <option value="CLOSED" {% if ticket.status == 'CLOSED' %}selected{% endif %}>Closed</option>
-                                </select>
-                                <button type="submit" class="pwh-btn" style="min-height: 30px; padding: 5px 12px; font-size: 11.5px;">Save</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <div class="pwh-empty">
-                <i class="fa-solid fa-circle-check" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
-                No support tickets currently recorded in the active queue.
-            </div>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}

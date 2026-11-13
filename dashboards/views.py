@@ -442,5 +442,13 @@ def client_support(request):
 
 @login_required
 def client_profile(request):
-    context = {"user": request.user}
+    user_assets = Asset.objects.filter(owner=request.user)
+    total_wealth_valuation = user_assets.aggregate(total=Sum("current_estimated_value"))["total"] or Decimal("0.00")
+    
+    context = {
+        "user": request.user,
+        "user_assets": user_assets,
+        "total_wealth_valuation": total_wealth_valuation,
+        "user_total_wealth": total_wealth_valuation,
+    }
     return render(request, "dashboards/profile.html", context)
