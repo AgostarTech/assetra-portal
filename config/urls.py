@@ -17,25 +17,25 @@ def sitemap_view(request):
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://assetra.africa/</loc>
+    <loc>https://www.assetra.africa/</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://assetra.africa/#about</loc>
+    <loc>https://www.assetra.africa/#about</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://assetra.africa/#services</loc>
+    <loc>https://www.assetra.africa/#services</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://assetra.africa/#contact</loc>
+    <loc>https://www.assetra.africa/#contact</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -48,7 +48,7 @@ def robots_view(request):
     txt_content = """User-agent: *
 Allow: /
 
-Sitemap: https://assetra.africa/sitemap.xml
+Sitemap: https://www.assetra.africa/sitemap.xml
 """
     return HttpResponse(txt_content, content_type="text/plain")
 
