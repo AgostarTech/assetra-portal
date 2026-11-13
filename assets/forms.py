@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from django import forms
 
 from .models import (
@@ -17,7 +18,6 @@ from .models import (
 # ============================================================
 
 class AssetForm(forms.ModelForm):
-    # East African Currencies + USD and EUR Dropdown Choices
     CURRENCY_CHOICES = [
         ("TZS", "TZS - Tanzanian Shilling"),
         ("KES", "KES - Kenyan Shilling"),
@@ -31,6 +31,16 @@ class AssetForm(forms.ModelForm):
     currency = forms.ChoiceField(
         choices=CURRENCY_CHOICES,
         widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    # Explicitly defined as CharField so Django doesn't block commas early
+    purchase_price = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0.00"})
+    )
+    current_estimated_value = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0.00"})
     )
 
     class Meta:
@@ -47,16 +57,50 @@ class AssetForm(forms.ModelForm):
         ]
 
         widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Asset Name"}
+            ),
+            "unique_reference": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Unique ID or Reference"}
+            ),
             "purchase_date": forms.DateInput(
-                attrs={"type": "date"}
+                attrs={"type": "date", "class": "form-control"}
             ),
             "valuation_date": forms.DateInput(
-                attrs={"type": "date"}
+                attrs={"type": "date", "class": "form-control"}
             ),
             "description": forms.Textarea(
-                attrs={"rows": 3}
+                attrs={"rows": 3, "class": "form-control", "placeholder": "Optional description..."}
             ),
         }
+
+    def clean_purchase_price(self):
+        data = self.cleaned_data.get("purchase_price")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
+
+    def clean_current_estimated_value(self):
+        data = self.cleaned_data.get("current_estimated_value")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
 
 
 # ============================================================
@@ -72,6 +116,27 @@ class VehicleForm(forms.ModelForm):
             "model",
             "year",
         ]
+        widgets = {
+            "registration_number": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g., T 123 ABC"}
+            ),
+            "make": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g., Toyota"}
+            ),
+            "model": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g., Land Cruiser"}
+            ),
+            "year": forms.NumberInput(
+                attrs={"class": "form-control", "min": "1900", "max": "2030", "placeholder": "YYYY"}
+            ),
+        }
+
+    def clean_year(self):
+        year = self.cleaned_data.get("year")
+        if year is not None:
+            if year < 1900 or year > 2030:
+                raise forms.ValidationError("Please enter a valid manufacturing year between 1900 and 2030.")
+        return year
 
 
 # ============================================================
@@ -79,6 +144,11 @@ class VehicleForm(forms.ModelForm):
 # ============================================================
 
 class LandForm(forms.ModelForm):
+    size = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0.00"})
+    )
+
     class Meta:
         model = Land
         fields = [
@@ -87,6 +157,25 @@ class LandForm(forms.ModelForm):
             "size",
             "measurement_unit",
         ]
+        widgets = {
+            "location": forms.TextInput(attrs={"class": "form-control"}),
+            "plot_reference": forms.TextInput(attrs={"class": "form-control"}),
+            "measurement_unit": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Acres, Sq Meters"})
+        }
+
+    def clean_size(self):
+        data = self.cleaned_data.get("size")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
 
 
 # ============================================================
@@ -103,8 +192,10 @@ class HouseForm(forms.ModelForm):
         ]
 
         widgets = {
+            "location": forms.TextInput(attrs={"class": "form-control"}),
+            "property_identification": forms.TextInput(attrs={"class": "form-control"}),
             "building_information": forms.Textarea(
-                attrs={"rows": 3}
+                attrs={"rows": 3, "class": "form-control"}
             ),
         }
 
@@ -114,6 +205,11 @@ class HouseForm(forms.ModelForm):
 # ============================================================
 
 class StockForm(forms.ModelForm):
+    units = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0"})
+    )
+
     class Meta:
         model = Stock
         fields = [
@@ -121,6 +217,24 @@ class StockForm(forms.ModelForm):
             "ticker",
             "units",
         ]
+        widgets = {
+            "company": forms.TextInput(attrs={"class": "form-control"}),
+            "ticker": forms.TextInput(attrs={"class": "form-control"}),
+        }
+
+    def clean_units(self):
+        data = self.cleaned_data.get("units")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
 
 
 # ============================================================
@@ -128,6 +242,15 @@ class StockForm(forms.ModelForm):
 # ============================================================
 
 class GovernmentBondForm(forms.ModelForm):
+    face_value = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0.00"})
+    )
+    coupon_rate = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "0.00"})
+    )
+
     class Meta:
         model = GovernmentBond
         fields = [
@@ -138,10 +261,39 @@ class GovernmentBondForm(forms.ModelForm):
         ]
 
         widgets = {
+            "issuer": forms.TextInput(attrs={"class": "form-control"}),
             "maturity_date": forms.DateInput(
-                attrs={"type": "date"}
+                attrs={"type": "date", "class": "form-control"}
             ),
         }
+
+    def clean_face_value(self):
+        data = self.cleaned_data.get("face_value")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
+
+    def clean_coupon_rate(self):
+        data = self.cleaned_data.get("coupon_rate")
+        if data in [None, ""]:
+            return None
+        if isinstance(data, str):
+            cleaned_str = data.replace(",", "").strip()
+            if not cleaned_str:
+                return None
+            try:
+                return Decimal(cleaned_str)
+            except InvalidOperation:
+                raise forms.ValidationError("Enter a valid number.")
+        return data
 
 
 # ============================================================
@@ -158,11 +310,13 @@ class OtherAssetForm(forms.ModelForm):
         widgets = {
             "asset_sub_type": forms.TextInput(
                 attrs={
+                    "class": "form-control",
                     "placeholder": "e.g., Artwork, Machinery, Jewelry",
                 }
             ),
             "serial_number_or_identifier": forms.TextInput(
                 attrs={
+                    "class": "form-control",
                     "placeholder": "Serial number or unique ID (optional)",
                 }
             ),
@@ -189,11 +343,16 @@ class AssetDocumentForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(
                 attrs={
+                    "class": "form-control",
                     "placeholder": "e.g. Vehicle registration certificate",
                 }
             ),
+            "document_type": forms.Select(
+                attrs={"class": "form-select"}
+            ),
             "file": forms.ClearableFileInput(
                 attrs={
+                    "class": "form-control",
                     "accept": ".pdf,.jpg,.jpeg,.png",
                 }
             ),
@@ -209,10 +368,7 @@ class AssetDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # A document is optional when creating or editing an asset.
         self.fields["file"].required = False
-
-        # Title and document type are required only when a file is uploaded.
         self.fields["title"].required = False
         self.fields["document_type"].required = False
 

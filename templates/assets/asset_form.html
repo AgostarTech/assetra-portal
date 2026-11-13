@@ -515,24 +515,22 @@
 
     // Automatic Comma Separator for Amount & Numeric Inputs
     document.addEventListener("DOMContentLoaded", function () {
-        // Target number inputs or text inputs whose names include price, value, amount, or capital
         const numericInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
 
         numericInputs.forEach(input => {
             const fieldName = input.getAttribute('name') || '';
             const lowerName = fieldName.toLowerCase();
 
-            // Identify monetary / valuation fields automatically
             if (lowerName.includes('price') || lowerName.includes('value') || 
                 lowerName.includes('amount') || lowerName.includes('capital') || 
-                lowerName.includes('valuation') || lowerName.includes('balance')) {
+                lowerName.includes('valuation') || lowerName.includes('balance') ||
+                lowerName.includes('units') || lowerName.includes('size') ||
+                lowerName.includes('face_value') || lowerName.includes('liability')) {
                 
-                // Convert type to text so commas display correctly
                 if (input.type === 'number') {
                     input.type = 'text';
                 }
 
-                // Format initial value if present
                 if (input.value) {
                     let cleanVal = input.value.replace(/,/g, '');
                     if (!isNaN(cleanVal) && cleanVal !== '') {
@@ -540,15 +538,11 @@
                     }
                 }
 
-                // Format as user types
                 input.addEventListener('input', function (e) {
                     let cursorPosition = input.selectionStart;
                     let originalLength = input.value.length;
 
-                    // Remove non-digit characters except decimals if needed
                     let rawValue = input.value.replace(/[^0-9.]/g, '');
-                    
-                    // Split by decimal point to handle fractional currency if entered
                     let parts = rawValue.split('.');
                     let integerPart = parts[0];
                     let decimalPart = parts.length > 1 ? '.' + parts[1] : '';
@@ -559,7 +553,6 @@
 
                     input.value = integerPart + decimalPart;
 
-                    // Adjust cursor position smoothly
                     let newLength = input.value.length;
                     cursorPosition = Math.max(0, cursorPosition + (newLength - originalLength));
                     input.setSelectionRange(cursorPosition, cursorPosition);
@@ -567,7 +560,6 @@
             }
         });
 
-        // Strip commas right before form submission so Django receives clean numbers
         const form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function () {
@@ -575,7 +567,9 @@
                     const fieldName = (input.getAttribute('name') || '').toLowerCase();
                     if (fieldName.includes('price') || fieldName.includes('value') || 
                         fieldName.includes('amount') || fieldName.includes('capital') || 
-                        fieldName.includes('valuation') || fieldName.includes('balance')) {
+                        fieldName.includes('valuation') || fieldName.includes('balance') ||
+                        fieldName.includes('units') || fieldName.includes('size') ||
+                        fieldName.includes('face_value') || fieldName.includes('liability')) {
                         input.value = input.value.replace(/,/g, '');
                     }
                 });
