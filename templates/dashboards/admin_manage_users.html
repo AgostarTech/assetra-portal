@@ -6,18 +6,19 @@
 {% block extra_css %}
 <style>
 /* =========================================================
-   ASSETRA AFRICA — USER MANAGEMENT (COMPACT LIGHT THEME)
+   ASSETRA AFRICA — USER MANAGEMENT (SIDEBAR COLOR MATCHED)
 ========================================================= */
 
 .pw-users {
-    --pw-teal: #062c30;
-    --pw-emerald: #059669;
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-emerald: #34d399;
     --pw-gold: #c5a059;
     --pw-bg: #f8fafc;
     --pw-card: #ffffff;
-    --pw-text: #111827;
-    --pw-muted: #4b5563;
-    --pw-border: rgba(6, 44, 48, 0.12);
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-border: rgba(8, 96, 112, 0.15);
     --pw-danger: #dc2626;
 
     width: 100%;
@@ -47,8 +48,7 @@
 
 .pw-users .pw-stat:hover,
 .pw-users .pw-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(6, 44, 48, 0.08);
+    box-shadow: 0 8px 25px rgba(8, 96, 112, 0.08);
 }
 
 /* Topbar & Header */
@@ -108,11 +108,11 @@
 .pw-users .pw-btn-primary {
     background: var(--pw-teal);
     border-color: var(--pw-teal);
-    color: #34d399;
+    color: #ffffff;
 }
 
 .pw-users .pw-btn-primary:hover {
-    background: #041f22;
+    background: var(--pw-teal-dark);
     color: #ffffff;
 }
 
@@ -166,7 +166,7 @@
     background: var(--pw-card);
     border: 1px solid var(--pw-border);
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(6, 44, 48, 0.02);
+    box-shadow: 0 2px 10px rgba(8, 96, 112, 0.03);
 }
 
 .pw-users .pw-stat-label {
@@ -196,7 +196,7 @@
     background: var(--pw-card);
     border: 1px solid var(--pw-border);
     border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(6, 44, 48, 0.04);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
     overflow: hidden;
 }
 
@@ -253,7 +253,7 @@
 }
 
 .pw-users .pw-table thead th {
-    padding: 10px 16px;
+    padding: 12px 16px;
     color: var(--pw-muted);
     background: #f1f5f9;
     border-bottom: 1px solid var(--pw-border);
@@ -264,14 +264,14 @@
 }
 
 .pw-users .pw-table tbody td {
-    padding: 12px 16px;
+    padding: 14px 16px;
     color: var(--pw-text);
     border-bottom: 1px solid var(--pw-border);
     vertical-align: middle;
 }
 
 .pw-users .pw-table tbody tr:hover {
-    background: rgba(52, 211, 153, 0.03);
+    background: rgba(8, 96, 112, 0.03);
 }
 
 /* Inline Form Controls */
@@ -309,15 +309,16 @@
 
 .pw-users .pw-badge {
     display: inline-flex;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 12px;
     font-size: 10px;
     font-weight: 700;
 }
 
 .pw-users .pw-badge-admin {
-    background: rgba(197, 160, 89, 0.15);
-    color: #92400e;
+    background: rgba(8, 96, 112, 0.1);
+    color: var(--pw-teal);
+    border: 1px solid rgba(8, 96, 112, 0.2);
 }
 
 .pw-users .pw-badge-user {
@@ -355,11 +356,11 @@
         <div>
             <div class="pw-eyebrow">Assetra Africa / Administration</div>
             <h1 class="pw-page-heading">User Management & Permissions</h1>
-            <p class="pw-description">Provision accounts, modify role permissions, inspect details, and manage security access.</p>
+            <p class="pw-description">Provision accounts matching signup details, modify role permissions, inspect details, and manage security access.</p>
         </div>
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <!-- Trigger modal or link for creating a user -->
+            <!-- Trigger modal for creating a user matching signup details -->
             <button type="button" class="pw-btn pw-btn-primary" onclick="document.getElementById('createUserModal').style.display='flex'">
                 + Create User
             </button>
@@ -389,12 +390,12 @@
         </article>
         <article class="pw-stat">
             <p class="pw-stat-label">Active Users</p>
-            <p class="pw-stat-value" style="color: var(--pw-emerald);">{{ active_users_count|default:0 }}</p>
+            <p class="pw-stat-value" style="color: #059669;">{{ active_users_count|default:0 }}</p>
             <p class="pw-stat-note">Currently operational</p>
         </article>
         <article class="pw-stat">
             <p class="pw-stat-label">Administrators</p>
-            <p class="pw-stat-value" style="color: var(--pw-gold);">{{ admin_users_count|default:0 }}</p>
+            <p class="pw-stat-value" style="color: var(--pw-teal);">{{ admin_users_count|default:0 }}</p>
             <p class="pw-stat-note">Elevated access privilege</p>
         </article>
     </section>
@@ -422,7 +423,7 @@
                         <th>Role & Permissions</th>
                         <th>Status</th>
                         <th>Joined Date</th>
-                        <th>Actions</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -432,7 +433,17 @@
                                 <strong style="color: var(--pw-teal);">{{ u.username }}</strong><br>
                                 <span style="color: var(--pw-muted); font-size: 11px;">{{ u.email|default:"No email" }}</span>
                             </td>
-                            <td>{{ u.get_full_name|default:"Not provided" }}</td>
+                            <td>
+                                {% if u.get_full_name %}
+                                    {{ u.get_full_name }}
+                                {% elif u.first_name %}
+                                    {{ u.first_name }} {{ u.last_name }}
+                                {% elif u.name %}
+                                    {{ u.name }}
+                                {% else %}
+                                    <span style="color: var(--pw-muted); font-style: italic;">Not provided</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if u.is_superuser or u.is_staff or u.role == 'ADMIN' %}
                                     <span class="pw-badge pw-badge-admin">Administrator</span>
@@ -448,8 +459,8 @@
                                 {% endif %}
                             </td>
                             <td style="color: var(--pw-muted);">{{ u.date_joined|date:"d M Y" }}</td>
-                            <td>
-                                <div class="pw-actions-cell">
+                            <td style="text-align: right;">
+                                <div class="pw-actions-cell" style="justify-content: flex-end;">
                                     {% if not u.is_superuser and u.id != request.user.id %}
                                         <!-- Inline Role/Permission & Status Update Form -->
                                         <form method="post" action="{% url 'dashboards:admin_manage_users' %}" class="pw-account-form">
@@ -489,37 +500,47 @@
         </div>
     </section>
 
-    <!-- CREATE USER MODAL (Simple overlay style) -->
-    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
-        <div style="background: var(--pw-card); border-radius: 12px; padding: 24px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; color: var(--pw-teal); font-size: 16px;">Create New User Account</h3>
+    <!-- CREATE USER MODAL MATCHING SIGNUP DETAILS -->
+    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: var(--pw-card); border: 1px solid var(--pw-border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(8, 96, 112, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--pw-border); padding-bottom: 12px;">
+                <h3 style="margin: 0; color: var(--pw-teal); font-size: 16px; font-weight: 800;">Create User (Matching Signup Details)</h3>
                 <button type="button" onclick="document.getElementById('createUserModal').style.display='none'" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--pw-muted);">&times;</button>
             </div>
             <form method="post" action="{% url 'dashboards:admin_manage_users' %}">
                 {% csrf_token %}
                 <input type="hidden" name="create_user" value="1">
                 <div style="display: grid; gap: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">FIRST NAME</label>
+                            <input type="text" name="first_name" class="pw-search-input" style="width: 100%;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">LAST NAME</label>
+                            <input type="text" name="last_name" class="pw-search-input" style="width: 100%;">
+                        </div>
+                    </div>
                     <div>
-                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">USERNAME</label>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">USERNAME *</label>
                         <input type="text" name="username" required class="pw-search-input" style="width: 100%;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">EMAIL ADDRESS</label>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">EMAIL ADDRESS</label>
                         <input type="email" name="email" class="pw-search-input" style="width: 100%;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">INITIAL PASSWORD</label>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">PASSWORD *</label>
                         <input type="password" name="password" required class="pw-search-input" style="width: 100%;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--pw-muted);">ASSIGN ROLE & PERMISSIONS</label>
+                        <label style="display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--pw-muted); text-transform: uppercase;">ASSIGN ROLE & PERMISSIONS</label>
                         <select name="role" class="pw-select" style="width: 100%; height: 38px;">
                             <option value="USER">Normal User</option>
                             <option value="ADMIN">Administrator</option>
                         </select>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; border-top: 1px solid var(--pw-border); padding-top: 12px;">
                         <button type="button" class="pw-btn" onclick="document.getElementById('createUserModal').style.display='none'">Cancel</button>
                         <button type="submit" class="pw-btn pw-btn-primary">Create Account</button>
                     </div>

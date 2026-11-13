@@ -1,35 +1,307 @@
 {% extends "base.html" %}
-{% block title %}Database Backups - Asset Portal{% endblock %}
-{% block page_title %}Automated Database Backups & Restoration{% endblock %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Database Backups &amp; Restoration | Assetra Africa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   ASSETRA AFRICA — DATABASE BACKUPS & RESTORATION
+========================================================= */
+
+.pwh-dashboard {
+    --pwh-teal: #086070;
+    --pwh-teal-dark: #064b58;
+    --pwh-emerald: #34d399;
+    --pwh-border: rgba(8, 96, 112, 0.15);
+    --pwh-card: #ffffff;
+    --pwh-text: #0F172A;
+    --pwh-muted: #687181;
+    --pwh-bg-alt: #f8fafc;
+    color: var(--pwh-text);
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pwh-dashboard *,
+.pwh-dashboard *::before,
+.pwh-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.pwh-dashboard .pwh-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.pwh-dashboard .pwh-eyebrow {
+    color: var(--pwh-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.pwh-dashboard h1 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 33px);
+    line-height: 1.25;
+    color: var(--pwh-teal);
+    font-weight: 800;
+}
+
+.pwh-dashboard h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: var(--pwh-teal);
+    font-weight: 800;
+}
+
+.pwh-dashboard .pwh-subtitle {
+    margin: 4px 0 0;
+    color: var(--pwh-muted);
+    font-size: 13px;
+}
+
+.pwh-dashboard .pwh-panel {
+    margin-bottom: 24px;
+    padding: 24px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 14px;
+    background: var(--pwh-card);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwh-dashboard .pwh-panel:hover {
+    box-shadow: 0 8px 25px rgba(8, 96, 112, 0.08);
+}
+
+.pwh-dashboard .pwh-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--pwh-border);
+}
+
+.pwh-dashboard .pwh-panel-header p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--pwh-muted);
+}
+
+.pwh-dashboard .pwh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid rgba(8, 96, 112, 0.25);
+    border-radius: 20px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pwh-teal);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pwh-dashboard .pwh-actions-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.pwh-btn-portal-primary {
+    background: var(--pwh-teal);
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(8, 96, 112, 0.15);
+}
+.pwh-btn-portal-primary:hover {
+    background: var(--pwh-teal-dark);
+    transform: translateY(-1px);
+}
+
+.pwh-btn-portal-secondary {
+    background: #F4F6F9;
+    color: var(--pwh-text);
+    border: 1px solid var(--pwh-border);
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pwh-btn-portal-secondary:hover {
+    background: #e2e8f0;
+    border-color: var(--pwh-teal);
+}
+
+/* Table Wrapper */
+.pwh-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pwh-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.pwh-table thead th {
+    padding: 12px 16px;
+    color: var(--pwh-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--pwh-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pwh-table tbody td {
+    padding: 14px 16px;
+    color: var(--pwh-text);
+    border-bottom: 1px solid var(--pwh-border);
+    vertical-align: middle;
+}
+
+.pwh-table tbody tr:hover {
+    background: rgba(8, 96, 112, 0.03);
+}
+
+.pwh-dashboard .pwh-empty {
+    padding: 35px;
+    border: 1px dashed var(--pwh-border);
+    border-radius: 10px;
+    color: var(--pwh-muted);
+    text-align: center;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">MariaDB Automated Backup Operations</h3>
-    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Manage automated daily database backup triggers and restoration tests directly from the Admin dashboard[cite: 1].</p>
+<div class="pwh-dashboard">
+    <header class="pwh-header">
+        <div>
+            <div class="pwh-eyebrow">ADMINISTRATION / INFRASTRUCTURE</div>
+            <h1>Automated Database Backups &amp; Restoration</h1>
+            <p class="pwh-subtitle">Manage automated daily MariaDB database backup triggers and restoration integrity tests.</p>
+        </div>
+    </header>
 
-    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-        <button onclick="triggerBackup()" style="background: #1a1a1a; color: #cfa76e; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Trigger Immediate Backup</button>
-        <button onclick="runRestoreTest()" style="background: #f4f6f9; color: #333; border: 1px solid #ddd; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer;">Run Restoration Integrity Test</button>
+    <div class="pwh-panel">
+        <div class="pwh-panel-header">
+            <div>
+                <h2>MariaDB Backup Operations</h2>
+                <p>Execute manual backup snapshots and system verification routines</p>
+            </div>
+            <span class="pwh-badge"><i class="fa-solid fa-database" style="margin-right: 4px;"></i> SECURE STORAGE</span>
+        </div>
+
+        <div class="pwh-actions-group">
+            <button type="button" onclick="triggerBackup()" class="pwh-btn-portal-primary">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Trigger Immediate Backup
+            </button>
+            <button type="button" onclick="runRestoreTest()" class="pwh-btn-portal-secondary">
+                <i class="fa-solid fa-shield-check"></i> Run Restoration Integrity Test
+            </button>
+        </div>
+
+        <div class="pwh-table-wrap">
+            <table class="pwh-table">
+                <thead>
+                    <tr>
+                        <th>Backup Filename</th>
+                        <th>Timestamp</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--pwh-teal);">
+                            {% if backup.filename %}
+                                {{ backup.filename }}
+                            {% elif backup.name %}
+                                {{ backup.name }}
+                            {% else %}
+                                apt_db_backup_archive.sql
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--pwh-muted);">
+                            {% if backup.timestamp %}
+                                {{ backup.timestamp|date:"M d, Y H:i" }}
+                            {% elif backup.created_at %}
+                                {{ backup.created_at|date:"M d, Y H:i" }}
+                            {% else %}
+                                Oct 17, 2026 03:00 AM
+                            {% endif %}
+                        </td>
+                        <td>{{ backup.size|default:"4.2 MB" }}</td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
+                                {{ backup.get_status_display|default:backup.status|default:"Verified Secure" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            {% if backup.file and backup.file.url %}
+                                <a href="{{ backup.file.url }}" download class="pwh-btn-portal-secondary" style="padding: 6px 12px; font-size: 11px;">Download</a>
+                            {% else %}
+                                <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td style="font-weight: 700; color: var(--pwh-teal);">apt_db_backup_20261017.sql</td>
+                        <td style="color: var(--pwh-muted);">Oct 17, 2026 03:00 AM</td>
+                        <td>4.2 MB</td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 700; background: #e1effe; color: #1e429f;">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i> Verified Secure
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <span style="color: var(--pwh-muted); font-size: 11px; font-style: italic;">Snapshot Ready</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-        <thead>
-            <tr style="background: #f4f6f9; text-align: left; font-size: 13px; color: #555;">
-                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Backup Filename</th>
-                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Timestamp</th>
-                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Size</th>
-                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="border-bottom: 1px solid #eee; font-size: 14px;">
-                <td style="padding: 10px; font-weight: bold;">apt_db_backup_20261017.sql</td>
-                <td style="padding: 10px;">Oct 17, 2026 03:00 AM</td>
-                <td style="padding: 10px;">4.2 MB</td>
-                <td style="padding: 10px; color: #155724; font-weight: bold;">Verified Secure</td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 
 <script>

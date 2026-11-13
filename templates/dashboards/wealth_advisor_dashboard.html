@@ -1,47 +1,277 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Manager Console - Asset Portal{% endblock %}
+{% block title %}Manager Console | Assetra Africa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/manager_dashboard.css' %}">
+<style>
+/* =========================================================
+   ASSETRA AFRICA — MANAGER CONSOLE OVERRIDE & REFINEMENT
+========================================================= */
+
+.manager-container {
+    --mc-teal: #086070;
+    --mc-teal-dark: #064b58;
+    --mc-emerald: #34d399;
+    --mc-border: rgba(8, 96, 112, 0.15);
+    --mc-card: #ffffff;
+    --mc-text: #0F172A;
+    --mc-muted: #687181;
+    --mc-bg-alt: #f8fafc;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    color: var(--mc-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.manager-container *, .manager-container *::before, .manager-container *::after {
+    box-sizing: border-box;
+}
+
+.manager-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--mc-border);
+}
+
+.manager-header h1 {
+    margin: 0 0 6px;
+    font-size: clamp(24px, 3vw, 32px);
+    color: var(--mc-teal);
+    font-weight: 800;
+}
+
+.manager-header p {
+    margin: 0;
+    color: var(--mc-muted);
+    font-size: 13px;
+}
+
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--mc-teal);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(8, 96, 112, 0.15);
+}
+
+.btn-export:hover {
+    background: var(--mc-teal-dark);
+    transform: translateY(-1px);
+    color: #fff;
+}
+
+/* Metric Cards */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.metric-card-box {
+    background: var(--mc-card);
+    border: 1px solid var(--mc-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(8, 96, 112, 0.04);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(8, 96, 112, 0.08);
+}
+
+.metric-title {
+    margin: 0 0 8px;
+    color: var(--mc-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    margin: 0 0 6px;
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    color: var(--mc-teal);
+}
+
+.metric-subtext {
+    color: var(--mc-muted);
+    font-size: 11px;
+}
+
+/* Queue Sections */
+.queue-section {
+    background: var(--mc-card);
+    border: 1px solid var(--mc-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+}
+
+.queue-title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--mc-teal);
+}
+
+.queue-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+.queue-table thead th {
+    padding: 12px 16px;
+    color: var(--mc-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--mc-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.queue-table tbody td {
+    padding: 14px 16px;
+    color: var(--mc-text);
+    border-bottom: 1px solid var(--mc-border);
+    vertical-align: middle;
+}
+
+.queue-table tbody tr:hover {
+    background: rgba(8, 96, 112, 0.03);
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--mc-teal);
+    border: 1px solid rgba(8, 96, 112, 0.2);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-approve, .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-approve {
+    background: #059669;
+    color: #ffffff;
+}
+.btn-approve:hover {
+    background: #047857;
+}
+
+.btn-reject {
+    background: #dc2626;
+    color: #ffffff;
+}
+.btn-reject:hover {
+    background: #b91c1c;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 35px;
+    color: var(--mc-muted);
+    font-size: 13px;
+    font-style: italic;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/manager_dashboard.css' %}">
-
 <div class="manager-container">
     
     <!-- Top Header Bar -->
     <div class="manager-header">
         <div>
-            <h1>Manager Console: {{ request.user.get_full_name|default:request.user.username }}</h1>
-            <p>Executive Portfolio Oversight & Compliance Verification Center</p>
+            <h1>Manager Console: 
+                {% if request.user.get_full_name %}
+                    {{ request.user.get_full_name }}
+                {% elif request.user.first_name %}
+                    {{ request.user.first_name }} {{ request.user.last_name|default:"" }}
+                {% elif request.user.username %}
+                    {{ request.user.username }}
+                {% else %}
+                    Executive Manager
+                {% endif %}
+            </h1>
+            <p>Executive Portfolio Oversight &amp; Compliance Verification Center</p>
         </div>
         <div>
             <a href="{% url 'export_compliance_report' %}" class="btn-export">
-                Export Audit Report (PDF)
+                <i class="fa-solid fa-file-pdf"></i> Export Audit Report (PDF)
             </a>
         </div>
     </div>
 
     <!-- Expanded Executive Metric Cards -->
-    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <div class="metrics-grid">
         <div class="metric-card-box">
             <p class="metric-title">Pending Document Reviews</p>
-            <h3 class="metric-value">{{ pending_count }} Items</h3>
+            <h3 class="metric-value">{{ pending_count|default:0|intcomma }} Items</h3>
             <span class="metric-subtext">Awaiting Compliance Sign-off</span>
         </div>
         <div class="metric-card-box">
             <p class="metric-title">Total Active Clients</p>
-            <h3 class="metric-value" style="color: #ffffff;">{{ total_clients }}</h3>
+            <h3 class="metric-value" style="color: var(--mc-teal);">{{ total_clients|default:0|intcomma }}</h3>
             <span class="metric-subtext">Registered High-Net-Worth Users</span>
         </div>
         <div class="metric-card-box">
             <p class="metric-title">Active Monitored Assets</p>
-            <h3 class="metric-value" style="color: #38bdf8;">{{ total_managed_assets }} Assets</h3>
-            <span class="metric-subtext">Real Estate, Vehicles & Equities</span>
+            <h3 class="metric-value" style="color: #059669;">{{ total_managed_assets|default:0|intcomma }} Assets</h3>
+            <span class="metric-subtext">Real Estate, Vehicles &amp; Equities</span>
         </div>
     </div>
 
     <!-- Document Verification Queue Table -->
-    <div class="queue-section" style="margin-bottom: 35px;">
+    <div class="queue-section">
         <h2 class="queue-title">Document Verification Queue</h2>
         <div style="overflow-x: auto;">
             <table class="queue-table">
@@ -51,20 +281,63 @@
                         <th>Client</th>
                         <th>Uploaded Time</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th style="text-align: right;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for doc in documents %}
                     <tr>
-                        <td><strong>{{ doc.get_category_display }}</strong> - {{ doc.asset.name|default:"General File" }}</td>
-                        <td>{{ doc.uploader.username }}</td>
-                        <td style="color: #94a3b8;">{{ doc.uploaded_at|timesince }} ago</td>
                         <td>
-                            <span class="badge-status">{{ doc.get_status_display }}</span>
+                            <strong>
+                                {% if doc.get_category_display %}
+                                    {{ doc.get_category_display }}
+                                {% elif doc.category %}
+                                    {{ doc.category }}
+                                {% else %}
+                                    Compliance Record
+                                {% endif %}
+                            </strong> 
+                            <span style="color: var(--mc-muted); font-size: 11px; display: block;">
+                                {% if doc.asset and doc.asset.name %}
+                                    {{ doc.asset.name }}
+                                {% elif doc.title %}
+                                    {{ doc.title }}
+                                {% else %}
+                                    General File
+                                {% endif %}
+                            </span>
                         </td>
                         <td>
-                            <form method="POST" action="{% url 'review_document' doc.id %}" class="action-buttons">
+                            <strong style="color: var(--mc-teal);">
+                                {% if doc.uploader.get_full_name %}
+                                    {{ doc.uploader.get_full_name }}
+                                {% elif doc.uploader.first_name %}
+                                    {{ doc.uploader.first_name }} {{ doc.uploader.last_name|default:"" }}
+                                {% elif doc.uploader.username %}
+                                    {{ doc.uploader.username }}
+                                {% else %}
+                                    Client Uploader
+                                {% endif %}
+                            </strong><br>
+                            <span style="color: var(--mc-muted); font-size: 11px;">{{ doc.uploader.email|default:"No email registered" }}</span>
+                        </td>
+                        <td style="color: var(--mc-muted);">
+                            {% if doc.uploaded_at %}
+                                {{ doc.uploaded_at|timesince }} ago
+                            {% elif doc.created_at %}
+                                {{ doc.created_at|timesince }} ago
+                            {% else %}
+                                Recently
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-status">
+                                <i class="fa-solid fa-circle-dot" style="font-size: 8px;"></i>
+                                {{ doc.get_status_display|default:doc.status|default:"Pending Review" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <form method="POST" action="{% url 'review_document' doc.id %}" class="action-buttons" style="justify-content: flex-end;">
                                 {% csrf_token %}
                                 <button type="submit" name="action" value="approve" class="btn-approve">Approve</button>
                                 <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
@@ -73,7 +346,10 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="empty-state">No pending verification items found. Inbox zero achieved.</td>
+                        <td colspan="5" class="empty-state">
+                            <i class="fa-solid fa-circle-check" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--mc-teal);"></i>
+                            No pending verification items found. Inbox zero achieved.
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -82,13 +358,13 @@
     </div>
 
     <!-- Targeted Client Oversight Table -->
-    <div class="queue-section">
+    <div class="queue-section" style="margin-bottom: 0;">
         <h2 class="queue-title">Target Client Portfolio Overview</h2>
         <div style="overflow-x: auto;">
             <table class="queue-table">
                 <thead>
                     <tr>
-                        <th>Client Username</th>
+                        <th>Client Name / Username</th>
                         <th>Email Address</th>
                         <th>Date Joined</th>
                         <th>Account Status</th>
@@ -97,20 +373,46 @@
                 <tbody>
                     {% for client in all_clients %}
                     <tr>
-                        <td><strong>{{ client.username }}</strong></td>
-                        <td>{{ client.email }}</td>
-                        <td style="color: #94a3b8;">{{ client.date_joined|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <strong style="color: var(--mc-teal);">
+                                {% if client.get_full_name %}
+                                    {{ client.get_full_name }}
+                                {% elif client.first_name %}
+                                    {{ client.first_name }} {{ client.last_name|default:"" }}
+                                {% elif client.username %}
+                                    {{ client.username }}
+                                {% else %}
+                                    Client Account
+                                {% endif %}
+                            </strong><br>
+                            <span style="color: var(--mc-muted); font-size: 11px;">@{{ client.username|default:"client" }}</span>
+                        </td>
+                        <td>{{ client.email|default:"No email registered" }}</td>
+                        <td style="color: var(--mc-muted);">
+                            {% if client.date_joined %}
+                                {{ client.date_joined|date:"Y-m-d H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
                         <td>
                             {% if client.is_active %}
-                                <span style="color: #34d399; font-weight: 600;">Active</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; color: #059669; font-weight: 700; font-size: 11px;">
+                                    <i class="fa-solid fa-circle" style="font-size: 7px;"></i> Active
+                                </span>
                             {% else %}
-                                <span style="color: #f87171; font-weight: 600;">Inactive / Locked</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; color: #dc2626; font-weight: 700; font-size: 11px;">
+                                    <i class="fa-solid fa-circle" style="font-size: 7px;"></i> Inactive / Locked
+                                </span>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="empty-state">No client accounts registered yet.</td>
+                        <td colspan="4" class="empty-state">
+                            <i class="fa-solid fa-users" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--mc-teal);"></i>
+                            No client accounts registered yet.
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

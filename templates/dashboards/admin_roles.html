@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}Dynamic Role Assignment - Asset Portal{% endblock %}
 {% block page_title %}Enterprise Role Management & Access Control{% endblock %}
 
@@ -9,13 +11,27 @@
 
     <div style="background: #fdfbf7; border: 1px solid #cfa76e; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
         <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1a1a1a;">Assign Role to User</h4>
-        <form method="POST" onsubmit="alert('User role successfully updated!'); return false;">
+        <form method="POST">
             {% csrf_token %}
             <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: center;">
                 <select name="user" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
                     <option value="">-- Select User Account --</option>
-                    <option value="agola_waziri">Agola Waziri</option>
-                    <option value="enterprise_client_beta">Enterprise Client Beta</option>
+                    {% for u in users|default:clients %}
+                    <option value="{{ u.pk|default:u.username }}">
+                        {% if u.get_full_name %}
+                            {{ u.get_full_name }} ({{ u.username }})
+                        {% elif u.first_name %}
+                            {{ u.first_name }} {{ u.last_name|default:"" }} ({{ u.username }})
+                        {% elif u.name %}
+                            {{ u.name }}
+                        {% elif u.username %}
+                            {{ u.username }}
+                        {% else %}
+                            {{ u.email|default:"User Account" }}
+                        {% endif %}
+                        {% if u.pk %} (ID: {{ u.pk }}){% endif %}
+                    </option>
+                    {% endfor %}
                 </select>
                 <select name="role" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
                     <option value="">-- Select Enterprise Role --</option>

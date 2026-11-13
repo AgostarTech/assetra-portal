@@ -3,6 +3,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- =========================
+        GLOBAL APP FAVICONS & BRANDING
+    ========================= -->
+    <link rel="icon" type="image/jpeg" href="{% static 'images/house.jpg' %}?v=2">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/house.jpg' %}?v=2">
+    <link rel="apple-touch-icon" href="{% static 'images/house.jpg' %}?v=2">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block dashboard_title %}Portal{% endblock %} | Private Wealth Portal</title>
     
@@ -92,8 +99,12 @@
 <body>
 
     <div class="portal-layout">
-        <!-- Persistent Left Sidebar -->
-        {% include "includes/sidebar.html" %}
+        <!-- Persistent Left Sidebar (Switches automatically based on admin vs user role) -->
+        {% if user.is_superuser or user.is_staff or user.role == 'ADMIN' %}
+            {% include "dashboards/includes/manager_sidebar.html" %}
+        {% else %}
+            {% include "includes/sidebar.html" %}
+        {% endif %}
 
         <!-- Main Viewport Area -->
         <div class="portal-content-wrapper">

@@ -1,25 +1,39 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Enterprise Asset Portfolio{% endblock %}</title>
-    <!-- Tailwind CSS (CDN for development) -->
+    <title>{% block title %}Assetra Africa Portal | Intelligent Asset Management{% endblock %}</title>
+    
+    <!-- =====================================================
+         GLOBAL BRAND FAVICONS (ASSETRA AFRICA)
+         ===================================================== -->
+    <link rel="icon" type="image/jpeg" href="{% static settings.SITE_LOGO|default:'images/house.jpg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static settings.SITE_LOGO|default:'images/house.jpg' %}">
+    <link rel="apple-touch-icon" href="{% static settings.SITE_LOGO|default:'images/house.jpg' %}">
+
+    <!-- Tailwind CSS (CDN for development/production fallback) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Custom Tailwind Configuration -->
     <script src="{% static 'js/tailwind-config.js' %}"></script>
+    <!-- FontAwesome Icons for Branding & UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
     <!-- Custom Public Styles -->
     <link rel="stylesheet" href="{% static 'css/public.css' %}">
 </head>
-<body class="bg-brand-black text-slate-200 font-sans antialiased flex flex-col min-h-screen">
+<body class="bg-brand-black text-slate-200 font-sans antialiased flex flex-col min-h-screen selection:bg-[#086070] selection:text-white">
     
+    <!-- Public Header Include -->
     {% include 'public/includes/header.html' %}
 
+    <!-- Main Dynamic Content Area -->
     <main class="flex-grow">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Public Footer Include -->
     {% include 'public/includes/footer.html' %}
+
 </body>
 </html>

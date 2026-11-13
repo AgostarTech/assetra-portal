@@ -1,23 +1,24 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Admin Control Hub | Assetra Africa{% endblock %}
 
 {% block extra_css %}
 <style>
 .pwh-dashboard {
-    --pwh-teal: #062c30;
+    --pwh-teal: #086070;
+    --pwh-teal-dark: #064b58;
     --pwh-emerald: #34d399;
-    --pwh-emerald-dark: #059669;
-    --pwh-gold: #c5a059;
-    --pwh-border: rgba(6, 44, 48, 0.12);
+    --pwh-border: rgba(8, 96, 112, 0.15);
     --pwh-card: #ffffff;
-    --pwh-text: #1e293b;
-    --pwh-muted: #64748b;
+    --pwh-text: #0F172A;
+    --pwh-muted: #687181;
     --pwh-bg-alt: #f8fafc;
     color: var(--pwh-text);
     width: 100%;
     min-width: 0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
 .pwh-dashboard *,
@@ -35,8 +36,26 @@
     margin-bottom: 24px;
 }
 
+.pwh-dashboard .pwh-header-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pwh-dashboard .pwh-header-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(8, 96, 112, 0.25);
+    background: rgba(8, 96, 112, 0.08);
+    box-shadow: 0 4px 12px rgba(8, 96, 112, 0.1);
+}
+
 .pwh-dashboard .pwh-eyebrow {
-    color: var(--pwh-gold);
+    color: var(--pwh-teal);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 1.8px;
@@ -85,61 +104,77 @@
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .pwh-dashboard .pwh-btn:hover {
     background: #f1f5f9;
     border-color: var(--pwh-teal);
+    transform: translateY(-1px);
 }
 
 .pwh-dashboard .pwh-btn-primary {
     background: var(--pwh-teal);
     border-color: var(--pwh-teal);
-    color: var(--pwh-emerald);
-}
-
-.pwh-dashboard .pwh-btn-primary:hover {
-    background: #093b40;
     color: #ffffff;
 }
 
+.pwh-dashboard .pwh-btn-primary:hover {
+    background: var(--pwh-teal-dark);
+    color: #ffffff;
+}
+
+/* Reduced size KPI grid cards with robust fitting */
 .pwh-dashboard .pwh-kpis {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
     margin-bottom: 24px;
 }
 
 .pwh-dashboard .pwh-card {
     min-width: 0;
-    padding: 22px;
+    padding: 16px 18px;
     border: 1px solid var(--pwh-border);
     border-radius: 12px;
     background: var(--pwh-card);
-    box-shadow: 0 4px 16px rgba(6, 44, 48, 0.04);
+    box-shadow: 0 3px 12px rgba(8, 96, 112, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pwh-dashboard .pwh-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(8, 96, 112, 0.08);
 }
 
 .pwh-dashboard .pwh-kpi-label {
     color: var(--pwh-muted);
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 800;
     letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pwh-dashboard .pwh-kpi-value {
-    margin: 12px 0 6px;
-    font-size: clamp(22px, 2.5vw, 29px);
+    margin: 8px 0 4px;
+    font-size: clamp(18px, 1.8vw, 24px);
     font-weight: 800;
     color: var(--pwh-teal);
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.5px;
 }
 
 .pwh-dashboard .pwh-kpi-detail {
     color: var(--pwh-muted);
-    font-size: 11px;
-    line-height: 1.5;
+    font-size: 10.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pwh-dashboard .pwh-panel {
@@ -148,7 +183,7 @@
     border: 1px solid var(--pwh-border);
     border-radius: 12px;
     background: var(--pwh-card);
-    box-shadow: 0 4px 16px rgba(6, 44, 48, 0.03);
+    box-shadow: 0 4px 16px rgba(8, 96, 112, 0.04);
 }
 
 .pwh-dashboard .pwh-panel-header {
@@ -169,11 +204,11 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 10px;
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    padding: 5px 12px;
+    border: 1px solid rgba(8, 96, 112, 0.25);
     border-radius: 20px;
-    background: rgba(52, 211, 153, 0.1);
-    color: var(--pwh-emerald-dark);
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pwh-teal);
     font-size: 10px;
     font-weight: 700;
 }
@@ -199,6 +234,7 @@
     margin-bottom: 8px;
     font-size: 12px;
     color: var(--pwh-teal);
+    font-weight: 700;
 }
 
 .pwh-dashboard .pwh-category-footer {
@@ -217,7 +253,7 @@
 .pwh-dashboard .pwh-progress-fill {
     height: 100%;
     border-radius: inherit;
-    background: var(--pwh-emerald-dark);
+    background: var(--pwh-teal);
 }
 
 .pwh-dashboard .pwh-summary-grid {
@@ -267,7 +303,7 @@
     color: var(--pwh-muted);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .pwh-dashboard .pwh-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -288,7 +324,7 @@
     }
 
     .pwh-dashboard .pwh-card {
-        padding: 18px;
+        padding: 14px 16px;
     }
 }
 </style>
@@ -299,12 +335,15 @@
 <div class="pwh-dashboard">
 
     <header class="pwh-header">
-        <div>
-            <div class="pwh-eyebrow">ASSETRA AFRICA / ADMINISTRATION</div>
-            <h1>Admin Control Hub</h1>
-            <p class="pwh-subtitle">
-                High-level system health, user distribution, and asset valuation overview.
-            </p>
+        <div class="pwh-header-title-wrapper">
+            <img src="{% static 'images/house.jpg' %}" alt="Assetra Logo" class="pwh-header-logo" onerror="this.style.display='none';">
+            <div>
+                <div class="pwh-eyebrow">ASSETRA AFRICA / ADMINISTRATION</div>
+                <h1>Admin Control Hub</h1>
+                <p class="pwh-subtitle">
+                    High-level system health, user distribution, and asset valuation overview.
+                </p>
+            </div>
         </div>
 
         <div class="pwh-actions">
@@ -317,37 +356,37 @@
         </div>
     </header>
 
-    <!-- Key performance indicators -->
+    <!-- Key performance indicators (Compact & Precision-Fitted) -->
     <section class="pwh-kpis">
-        <article class="pwh-card">
+        <article class="pwh-card" title="{{ total_system_assets|default:0|intcomma }} Total Assets">
             <div class="pwh-kpi-label">TOTAL ASSETS</div>
-            <div class="pwh-kpi-value">{{ total_system_assets|default:0 }}</div>
+            <div class="pwh-kpi-value">{{ total_system_assets|default:0|intcomma }}</div>
             <div class="pwh-kpi-detail">
-                {{ active_asset_count|default:0 }} active assets
+                {{ active_asset_count|default:0|intcomma }} active assets
             </div>
         </article>
 
-        <article class="pwh-card">
+        <article class="pwh-card" title="{{ total_users|default:0|intcomma }} Registered Users">
             <div class="pwh-kpi-label">REGISTERED USERS</div>
-            <div class="pwh-kpi-value">{{ total_users|default:0 }}</div>
+            <div class="pwh-kpi-value">{{ total_users|default:0|intcomma }}</div>
             <div class="pwh-kpi-detail">
-                {{ active_users|default:0 }} active · {{ inactive_users|default:0 }} inactive
+                {{ active_users|default:0|intcomma }} active · {{ inactive_users|default:0|intcomma }} inactive
             </div>
         </article>
 
-        <article class="pwh-card">
+        <article class="pwh-card" title="${{ total_asset_value|default:0|floatformat:0|intcomma }}">
             <div class="pwh-kpi-label">REPORTED ASSET VALUE</div>
             <div class="pwh-kpi-value">
-                {{ total_asset_value|default:0|floatformat:2 }}
+                ${{ total_asset_value|default:0|floatformat:0|intcomma }}
             </div>
             <div class="pwh-kpi-detail">
                 Aggregate system valuation
             </div>
         </article>
 
-        <article class="pwh-card">
+        <article class="pwh-card" title="{{ pending_count|default:0|intcomma }} Pending Queues">
             <div class="pwh-kpi-label">PENDING QUEUES</div>
-            <div class="pwh-kpi-value">{{ pending_count|default:0 }}</div>
+            <div class="pwh-kpi-value">{{ pending_count|default:0|intcomma }}</div>
             <div class="pwh-kpi-detail">Documents awaiting review</div>
         </article>
     </section>
@@ -366,8 +405,16 @@
             {% for category in category_stats %}
             <div class="pwh-category">
                 <div class="pwh-category-heading">
-                    <strong>{{ category.label }}</strong>
-                    <span class="pwh-muted">{{ category.asset_count }} assets</span>
+                    <strong>
+                        {% if category.label %}
+                            {{ category.label }}
+                        {% elif category.name %}
+                            {{ category.name }}
+                        {% else %}
+                            Portfolio Category
+                        {% endif %}
+                    </strong>
+                    <span class="pwh-muted">{{ category.asset_count|default:0|intcomma }} assets</span>
                 </div>
 
                 <div class="pwh-progress">
@@ -378,7 +425,7 @@
 
                 <div class="pwh-category-footer">
                     <span>{{ category.percentage|default:0|floatformat:1 }}% system share</span>
-                    <span>{{ category.total_value|default:0|floatformat:2 }}</span>
+                    <span>${{ category.total_value|default:0|floatformat:0|intcomma }}</span>
                 </div>
             </div>
             {% endfor %}
@@ -402,19 +449,19 @@
         <div class="pwh-summary-grid">
             <div class="pwh-summary-item">
                 <span>Total Users</span>
-                <strong>{{ total_users|default:0 }}</strong>
+                <strong>{{ total_users|default:0|intcomma }}</strong>
             </div>
             <div class="pwh-summary-item">
                 <span>Active Accounts</span>
-                <strong>{{ active_users|default:0 }}</strong>
+                <strong>{{ active_users|default:0|intcomma }}</strong>
             </div>
             <div class="pwh-summary-item">
                 <span>Standard Clients</span>
-                <strong>{{ total_clients|default:0 }}</strong>
+                <strong>{{ total_clients|default:0|intcomma }}</strong>
             </div>
             <div class="pwh-summary-item">
                 <span>Administrators</span>
-                <strong>{{ admin_users|default:0 }}</strong>
+                <strong>{{ admin_users|default:0|intcomma }}</strong>
             </div>
         </div>
     </section>

@@ -9,12 +9,12 @@
     :root {
         --asset-bg: #f4f7f9;
         --asset-surface: #ffffff;
-        --asset-teal: #0b535b;
-        --asset-teal-hover: #073c42;
-        --asset-teal-soft: rgba(11, 83, 91, 0.08);
-        --asset-emerald: #059669;
-        --asset-text: #0f172a;
-        --asset-muted: #64748b;
+        --asset-teal: #086070;
+        --asset-teal-hover: #064b58;
+        --asset-teal-soft: rgba(8, 96, 112, 0.08);
+        --asset-emerald: #16845b;
+        --asset-text: #0F172A;
+        --asset-muted: #687181;
         --asset-border: rgba(15, 23, 42, 0.08);
     }
 
@@ -34,6 +34,48 @@
         margin-inline: auto;
         position: relative;
         z-index: 2;
+    }
+
+    /* BRAND LOGO HEADER BAR */
+    .asset-public-navbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        z-index: 10;
+        border-bottom: 1px solid var(--asset-border);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+    }
+
+    .asset-brand-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+
+    .asset-brand-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--asset-teal);
+        box-shadow: 0 4px 12px rgba(8, 96, 112, 0.2);
+    }
+
+    .asset-brand-text {
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--asset-text);
+    }
+
+    .asset-brand-text span {
+        color: var(--asset-teal);
     }
 
     .asset-eyebrow {
@@ -60,10 +102,10 @@
     /* FULL-SCREEN HERO WITH SLIDING BACKGROUND CAROUSEL */
     .asset-hero {
         position: relative;
-        min-height: 580px;
+        min-height: 640px;
         display: flex;
         align-items: center;
-        padding: 90px 0;
+        padding: 130px 0 90px 0;
         overflow: hidden;
         border-bottom: 1px solid var(--asset-border);
     }
@@ -99,7 +141,7 @@
     .asset-bg-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, rgba(244, 247, 249, 0.96) 0%, rgba(244, 247, 249, 0.85) 50%, rgba(244, 247, 249, 0.6) 100%);
+        background: linear-gradient(90deg, rgba(244, 247, 249, 0.97) 0%, rgba(244, 247, 249, 0.88) 50%, rgba(244, 247, 249, 0.65) 100%);
         z-index: 1;
     }
 
@@ -159,13 +201,13 @@
     .asset-button-primary {
         color: #ffffff;
         background: var(--asset-teal);
-        box-shadow: 0 8px 22px rgba(11, 83, 91, 0.25);
+        box-shadow: 0 8px 22px rgba(8, 96, 112, 0.25);
     }
 
     .asset-button-primary:hover {
         background: var(--asset-teal-hover);
         transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(11, 83, 91, 0.35);
+        box-shadow: 0 12px 28px rgba(8, 96, 112, 0.35);
     }
 
     .asset-button-secondary {
@@ -248,7 +290,7 @@
     .asset-card:hover {
         transform: translateY(-4px);
         border-color: var(--asset-teal);
-        box-shadow: 0 10px 25px rgba(11, 83, 91, 0.08);
+        box-shadow: 0 10px 25px rgba(8, 96, 112, 0.08);
     }
 
     .asset-card-icon {
@@ -308,7 +350,7 @@
     @media (max-width: 900px) {
         .asset-hero {
             min-height: auto;
-            padding: 70px 0;
+            padding: 120px 0 70px 0;
         }
         .asset-grid-3 {
             grid-template-columns: 1fr;
@@ -321,6 +363,21 @@
 </style>
 
 <main class="asset-home">
+
+    <!-- TOP BRANDING NAVIGATION BAR WITH HOUSE.JPG LOGO -->
+    <nav class="asset-public-navbar">
+        <div class="asset-container" style="display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" class="asset-brand-link">
+                <img src="{% static 'images/house.jpg' %}" alt="Assetra Africa Logo" class="asset-brand-logo">
+                <span class="asset-brand-text">Assetra <span>Africa</span></span>
+            </a>
+            <div>
+                <a href="{% url 'accounts:login' %}" class="asset-button asset-button-secondary" style="min-height: 38px; padding: 8px 16px; font-size: 0.75rem;">
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </nav>
 
     <!-- HERO SECTION WITH SLIDING BACKGROUND CAROUSEL -->
     <section class="asset-hero">

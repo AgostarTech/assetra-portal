@@ -46,11 +46,11 @@ def role_router(request):
 @login_required
 def user_dashboard(request):
     engine = PortfolioEngine(request.user)
-    summary = engine.get_portfolio_summary()
+    summary = engine.get_portfolio_summary() or {}
     distribution = summary.get("distribution", [])
 
-    dist_labels = [item["category"] for item in distribution] if distribution else ["Vehicles", "Land", "Houses", "Stocks", "Bonds", "Other"]
-    dist_data = [float(item["total_value"]) for item in distribution] if distribution else [0, 0, 0, 0, 0, 0]
+    dist_labels = [item.get("category", "Asset") for item in distribution] if distribution else ["Vehicles", "Land", "Houses", "Stocks", "Bonds", "Other"]
+    dist_data = [float(item.get("total_value", 0)) for item in distribution] if distribution else [0, 0, 0, 0, 0, 0]
 
     total_val = float(summary.get("total_current_value") or 0.00)
     
@@ -137,31 +137,41 @@ def admin_dashboard(request):
 @require_http_methods(["GET", "POST"])
 def admin_manage_users(request):
     if request.method == "POST":
-        # 1. Handle User Creation
+        # 1. Handle User Creation matching exact signup requirements
         if request.POST.get("create_user") == "1":
+            username = request.POST.get("username", "").strip()
             email = request.POST.get("email", "").strip()
+            first_name = request.POST.get("first_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
             password = request.POST.get("password", "").strip()
             role = request.POST.get("role", "USER").strip().upper()
 
-            if not email or not password:
-                messages.error(request, "Email and password are required for new users.")
+            if not username or not password:
+                messages.error(request, "Username and password are required for new users.")
                 return redirect("dashboards:admin_manage_users")
 
-            if User.objects.filter(email=email).exists():
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f"Username '{username}' already exists.")
+                return redirect("dashboards:admin_manage_users")
+
+            if email and User.objects.filter(email=email).exists():
                 messages.error(request, f"Email '{email}' already exists.")
                 return redirect("dashboards:admin_manage_users")
 
             with transaction.atomic():
                 is_admin = role == "ADMIN"
                 User.objects.create_user(
+                    username=username,
                     email=email,
+                    first_name=first_name,
+                    last_name=last_name,
                     password=password,
                     role=role,
                     is_staff=is_admin,
                     is_superuser=is_admin,
                     is_active=True
                 )
-            messages.success(request, f"User account '{email}' created successfully.")
+            messages.success(request, f"User account '{username}' created successfully with full signup details.")
             return redirect("dashboards:admin_manage_users")
 
         # 2. Handle User Deletion
@@ -174,10 +184,12 @@ def admin_manage_users(request):
 
             if target_user.pk == request.user.pk:
                 messages.error(request, "You cannot delete your own active account.")
+                return redirect("dashboards:admin_manage_users")
             elif target_user.is_superuser:
                 messages.error(request, "Cannot delete a superuser account.")
+                return redirect("dashboards:admin_manage_users")
             else:
-                uident = getattr(target_user, 'email', target_user.pk)
+                uident = getattr(target_user, 'username', target_user.pk)
                 try:
                     with transaction.atomic():
                         target_user.delete()
@@ -212,7 +224,7 @@ def admin_manage_users(request):
             target_user.is_staff = is_admin
             target_user.save(update_fields=["role", "is_active", "is_staff"])
 
-        messages.success(request, f"Access settings updated for {getattr(target_user, 'email', target_user.pk)}.")
+        messages.success(request, f"Access settings updated for {getattr(target_user, 'username', target_user.pk)}.")
         return redirect("dashboards:admin_manage_users")
 
     search = request.GET.get("q", "").strip()
@@ -220,7 +232,7 @@ def admin_manage_users(request):
 
     if search:
         users = users.filter(
-            Q(email__icontains=search) | Q(first_name__icontains=search) | Q(last_name__icontains=search)
+            Q(username__icontains=search) | Q(email__icontains=search) | Q(first_name__icontains=search) | Q(last_name__icontains=search)
         )
 
     context = {
@@ -269,7 +281,7 @@ def admin_groups_permissions(request):
             target_user = get_object_or_404(User, pk=user_id)
             
             target_user.groups.add(group)
-            uident = getattr(target_user, 'email', target_user.pk)
+            uident = getattr(target_user, 'username', target_user.pk)
             messages.success(request, f"User '{uident}' added to group '{group.name}'.")
             return redirect("dashboards:admin_groups_permissions")
 
@@ -281,7 +293,7 @@ def admin_groups_permissions(request):
             target_user = get_object_or_404(User, pk=user_id)
             
             target_user.groups.remove(group)
-            uident = getattr(target_user, 'email', target_user.pk)
+            uident = getattr(target_user, 'username', target_user.pk)
             messages.success(request, f"User '{uident}' removed from group '{group.name}'.")
             return redirect("dashboards:admin_groups_permissions")
 
@@ -302,7 +314,7 @@ def admin_all_assets(request):
 
     if asset_query:
         assets_list = assets_list.filter(
-            Q(name__icontains=asset_query) | Q(category__icontains=asset_query) | Q(owner__email__icontains=asset_query)
+            Q(name__icontains=asset_query) | Q(category__icontains=asset_query) | Q(owner__email__icontains=asset_query) | Q(owner__username__icontains=asset_query)
         )
 
     paginator = Paginator(assets_list, 15)

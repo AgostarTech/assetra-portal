@@ -235,8 +235,8 @@
 <div class="metrics-grid">
     <div class="metric-card">
         <div class="metric-title">Portfolio Assets</div>
-        <div class="metric-value">{{ total_valuation|floatformat:0|intcomma }} TZS</div>
-        <div class="metric-sub"><i class="fa-solid fa-arrow-up"></i> {{ asset_count }} Active Item(s) Synchronized</div>
+        <div class="metric-value">{{ total_valuation|default:0|floatformat:0|intcomma }} TZS</div>
+        <div class="metric-sub"><i class="fa-solid fa-arrow-up"></i> {{ asset_count|default:0 }} Active Item(s) Synchronized</div>
     </div>
     <div class="metric-card">
         <div class="metric-title">Account Status</div>
@@ -321,13 +321,15 @@
         });
     })();
 
-    // 2. Wealth Progress & Market Prediction Line Chart
+    // 2. Wealth Progress & Market Prediction Line Chart (Safeguarded)
     (function () {
-        const ctx = document.getElementById("wealthProgressChart").getContext("2d");
+        const canvasEl = document.getElementById("wealthProgressChart");
+        if (!canvasEl) return;
+        const ctx = canvasEl.getContext("2d");
 
         const labels = ["Inception", "Q1", "Q2", "Q3", "Current", "Next Qtr (Est.)", "Year End (Est.)"];
-        const historicalData = {{ historical_chart_data|safe }};
-        const predictedData  = {{ predicted_chart_data|safe }};
+        const historicalData = {{ historical_chart_data|default:"[0,0,0,0,0,0,0]"|safe }};
+        const predictedData  = {{ predicted_chart_data|default:"[0,0,0,0,0,0,0]"|safe }};
 
         new Chart(ctx, {
             type: "line",
@@ -397,12 +399,14 @@
         });
     })();
 
-    // 3. Asset Category Breakdown Line Chart (Clean Line-Based View)
+    // 3. Asset Category Breakdown Line Chart (Safeguarded)
     (function () {
-        const ctx = document.getElementById("assetCategoryChart").getContext("2d");
+        const canvasEl = document.getElementById("assetCategoryChart");
+        if (!canvasEl) return;
+        const ctx = canvasEl.getContext("2d");
 
-        const categoryLabels = {{ chart_dist_labels|safe }};
-        const categoryData = {{ chart_dist_data|safe }};
+        const categoryLabels = {{ chart_dist_labels|default:"[]"|safe }};
+        const categoryData = {{ chart_dist_data|default:"[]"|safe }};
 
         new Chart(ctx, {
             type: "line",

@@ -1,14 +1,208 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Documents & KYC | Admin Control Hub{% endblock %}
+{% block title %}Documents &amp; KYC Verification | Assetra Africa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   ASSETRA AFRICA — DOCUMENTS & KYC VERIFICATION
+========================================================= */
+
+.pwh-dashboard {
+    --pwh-teal: #086070;
+    --pwh-teal-dark: #064b58;
+    --pwh-emerald: #34d399;
+    --pwh-border: rgba(8, 96, 112, 0.15);
+    --pwh-card: #ffffff;
+    --pwh-text: #0F172A;
+    --pwh-muted: #687181;
+    --pwh-bg-alt: #f8fafc;
+    color: var(--pwh-text);
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(16px, 2vw, 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pwh-dashboard *,
+.pwh-dashboard *::before,
+.pwh-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.pwh-dashboard .pwh-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.pwh-dashboard .pwh-eyebrow {
+    color: var(--pwh-teal);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.pwh-dashboard h1 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 33px);
+    line-height: 1.25;
+    color: var(--pwh-teal);
+    font-weight: 800;
+}
+
+.pwh-dashboard h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: var(--pwh-teal);
+    font-weight: 800;
+}
+
+.pwh-dashboard .pwh-subtitle {
+    margin: 4px 0 0;
+    color: var(--pwh-muted);
+    font-size: 13px;
+}
+
+.pwh-dashboard .pwh-panel {
+    margin-bottom: 24px;
+    padding: 24px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 14px;
+    background: var(--pwh-card);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwh-dashboard .pwh-panel:hover {
+    box-shadow: 0 8px 25px rgba(8, 96, 112, 0.08);
+}
+
+.pwh-dashboard .pwh-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--pwh-border);
+}
+
+.pwh-dashboard .pwh-panel-header p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--pwh-muted);
+}
+
+.pwh-dashboard .pwh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid rgba(8, 96, 112, 0.25);
+    border-radius: 20px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pwh-teal);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Table Styles */
+.pwh-dashboard .pwh-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pwh-dashboard .pwh-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 12px;
+}
+
+.pwh-dashboard .pwh-table thead th {
+    padding: 12px 16px;
+    color: var(--pwh-muted);
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--pwh-border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pwh-dashboard .pwh-table tbody td {
+    padding: 14px 16px;
+    color: var(--pwh-text);
+    border-bottom: 1px solid var(--pwh-border);
+    vertical-align: middle;
+}
+
+.pwh-dashboard .pwh-table tbody tr:hover {
+    background: rgba(8, 96, 112, 0.03);
+}
+
+.pwh-dashboard .pwh-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: #e1effe;
+    color: #1e429f;
+}
+
+.pwh-dashboard .pwh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 6px 14px;
+    border: 1px solid var(--pwh-border);
+    border-radius: 8px;
+    background: var(--pwh-teal);
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwh-dashboard .pwh-btn:hover {
+    background: var(--pwh-teal-dark);
+    transform: translateY(-1px);
+}
+
+.pwh-dashboard .pwh-empty {
+    padding: 35px;
+    border: 1px dashed var(--pwh-border);
+    border-radius: 10px;
+    color: var(--pwh-muted);
+    text-align: center;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="pwh-dashboard">
     <header class="pwh-header">
         <div>
             <div class="pwh-eyebrow">ADMINISTRATION / OPERATIONS</div>
-            <h1>Documents & KYC Verification</h1>
+            <h1>Documents &amp; KYC Verification</h1>
             <p class="pwh-subtitle">Review, verify, or update uploaded client compliance and asset documents.</p>
         </div>
     </header>
@@ -17,9 +211,9 @@
         <div class="pwh-panel-header">
             <div>
                 <h2>Document Queue</h2>
-                <p>Manage verification status</p>
+                <p>Manage verification status and compliance reviews</p>
             </div>
-            <span class="pwh-badge">KYC</span>
+            <span class="pwh-badge"><i class="fa-solid fa-file-shield" style="margin-right: 4px;"></i> KYC COMPLIANCE</span>
         </div>
 
         {% if documents %}
@@ -31,27 +225,71 @@
                         <th>Uploader</th>
                         <th>Uploaded Date</th>
                         <th>Current Status</th>
-                        <th>Action / Update</th>
+                        <th style="text-align: right;">Action / Update</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for doc in documents %}
                     <tr>
-                        <td><strong>{{ doc.get_category_display|default:doc.category|default:"Document" }}</strong></td>
-                        <td>{{ doc.uploader.email|default:"—" }}</td>
-                        <td>{{ doc.uploaded_at|date:"d M Y, H:i"|default:"—" }}</td>
-                        <td><span class="pwh-status">{{ doc.status|default:"Pending" }}</span></td>
                         <td>
-                            <form method="post" style="display: flex; gap: 8px;">
+                            <strong>
+                                {% if doc.title %}
+                                    {{ doc.title }}
+                                {% elif doc.get_category_display %}
+                                    {{ doc.get_category_display }}
+                                {% elif doc.category %}
+                                    {{ doc.category }}
+                                {% else %}
+                                    Compliance Document
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>
+                            {% if doc.uploader %}
+                                <strong style="color: var(--pwh-teal);">
+                                    {% if doc.uploader.get_full_name %}
+                                        {{ doc.uploader.get_full_name }}
+                                    {% elif doc.uploader.first_name %}
+                                        {{ doc.uploader.first_name }} {{ doc.uploader.last_name|default:"" }}
+                                    {% elif doc.uploader.name %}
+                                        {{ doc.uploader.name }}
+                                    {% elif doc.uploader.username %}
+                                        {{ doc.uploader.username }}
+                                    {% else %}
+                                        Client Uploader
+                                    {% endif %}
+                                </strong><br>
+                                <span style="color: var(--pwh-muted); font-size: 11px;">{{ doc.uploader.email|default:"No email registered" }}</span>
+                            {% else %}
+                                <span style="color: var(--pwh-muted);">System Record</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--pwh-muted);">
+                            {% if doc.uploaded_at %}
+                                {{ doc.uploaded_at|date:"d M Y, H:i" }}
+                            {% elif doc.created_at %}
+                                {{ doc.created_at|date:"d M Y, H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="pwh-status">
+                                <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i>
+                                {{ doc.get_status_display|default:doc.status|default:"Pending Review" }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <form method="post" style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
                                 {% csrf_token %}
                                 <input type="hidden" name="doc_id" value="{{ doc.pk }}">
-                                <select name="status" style="padding: 5px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11px;">
+                                <select name="status" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--pwh-border); background: var(--pwh-card); color: var(--pwh-text); font-size: 11.5px; font-weight: 600;">
                                     <option value="SUBMITTED" {% if doc.status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
                                     <option value="UNDER_REVIEW" {% if doc.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
                                     <option value="VERIFIED" {% if doc.status == 'VERIFIED' %}selected{% endif %}>Verified</option>
                                     <option value="REJECTED" {% if doc.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
                                 </select>
-                                <button type="submit" class="pwh-btn" style="min-height: 28px; padding: 4px 10px; font-size: 11px;">Save</button>
+                                <button type="submit" class="pwh-btn" style="min-height: 30px; padding: 5px 12px; font-size: 11.5px;">Save</button>
                             </form>
                         </td>
                     </tr>
@@ -60,7 +298,10 @@
             </table>
         </div>
         {% else %}
-            <div class="pwh-empty">No documents found in the queue.</div>
+            <div class="pwh-empty">
+                <i class="fa-solid fa-folder-open" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pwh-teal);"></i>
+                No compliance or asset documents found in the verification queue.
+            </div>
         {% endif %}
     </div>
 </div>

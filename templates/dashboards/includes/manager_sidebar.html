@@ -5,7 +5,7 @@
     <!-- Brand -->
     <div class="manager-brand">
         <a href="{% url 'dashboards:admin_dashboard' %}" class="manager-brand-link">
-            <div class="manager-logo" aria-hidden="true">A</div>
+            <img src="{% static 'images/house.jpg' %}" alt="Assetra Logo" class="manager-logo" onerror="this.style.display='none';">
             <div>
                 <div class="manager-brand-name">ASSETRA AFRICA</div>
                 <div class="manager-brand-subtitle">ADMINISTRATION</div>
@@ -57,7 +57,7 @@
     <!-- Navigation -->
     <nav class="manager-navigation" aria-label="Administration Navigation">
 
-        <div class="manager-section-label">SYSTEM COMMAND</div>
+        <div class="manager-section-label"><i class="fa-solid fa-terminal" style="margin-right: 6px;"></i> SYSTEM COMMAND</div>
 
         <a href="{% url 'dashboards:admin_dashboard' %}"
            class="manager-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
@@ -68,13 +68,16 @@
         <!-- Collapsible Dropdown: User & Access Control -->
         <div class="manager-dropdown-group {% if 'users' in request.resolver_match.url_name or 'groups_permissions' in request.resolver_match.url_name %}open{% endif %}">
             <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
-                <span class="manager-section-label" style="padding:0; margin:0;">USER & ACCESS CONTROL</span>
+                <span class="manager-toggle-left">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-users-gear" aria-hidden="true"></i></span>
+                    <span class="manager-section-title">USER & ACCESS CONTROL</span>
+                </span>
                 <i class="fa-solid fa-chevron-down manager-chevron"></i>
             </button>
             <div class="manager-submenu">
                 <a href="{% url 'dashboards:admin_manage_users' %}"
                    class="manager-nav-link {% if request.resolver_match.url_name == 'admin_manage_users' %}active{% endif %}">
-                    <span class="manager-nav-icon"><i class="fa-solid fa-users-gear" aria-hidden="true"></i></span>
+                    <span class="manager-nav-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
                     <span>User Accounts</span>
                 </a>
 
@@ -89,13 +92,16 @@
         <!-- Collapsible Dropdown: Portfolio & Assets -->
         <div class="manager-dropdown-group {% if 'all_assets' in request.resolver_match.url_name or 'client_portfolios' in request.resolver_match.url_name %}open{% endif %}">
             <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
-                <span class="manager-section-label" style="padding:0; margin:0;">PORTFOLIO & ASSETS</span>
+                <span class="manager-toggle-left">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-vault" aria-hidden="true"></i></span>
+                    <span class="manager-section-title">PORTFOLIO & ASSETS</span>
+                </span>
                 <i class="fa-solid fa-chevron-down manager-chevron"></i>
             </button>
             <div class="manager-submenu">
                 <a href="{% url 'dashboards:admin_all_assets' %}"
                    class="manager-nav-link {% if request.resolver_match.url_name == 'admin_all_assets' %}active{% endif %}">
-                    <span class="manager-nav-icon"><i class="fa-solid fa-vault" aria-hidden="true"></i></span>
+                    <span class="manager-nav-icon"><i class="fa-solid fa-box-archive" aria-hidden="true"></i></span>
                     <span>All System Assets</span>
                 </a>
 
@@ -110,7 +116,10 @@
         <!-- Collapsible Dropdown: Operations & Audit -->
         <div class="manager-dropdown-group {% if 'documents_kyc' in request.resolver_match.url_name or 'support_tickets' in request.resolver_match.url_name or 'audit_logs' in request.resolver_match.url_name %}open{% endif %}">
             <button type="button" class="manager-dropdown-toggle" onclick="toggleDropdown(this)">
-                <span class="manager-section-label" style="padding:0; margin:0;">OPERATIONS & AUDIT</span>
+                <span class="manager-toggle-left">
+                    <span class="manager-nav-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></span>
+                    <span class="manager-section-title">OPERATIONS & AUDIT</span>
+                </span>
                 <i class="fa-solid fa-chevron-down manager-chevron"></i>
             </button>
             <div class="manager-submenu">
@@ -137,7 +146,7 @@
         <div class="manager-divider" aria-hidden="true"></div>
 
         <a href="{% url 'dashboards:role_router' %}" class="manager-nav-link">
-            <span class="manager-nav-icon"><i class="fa-solid fa-arrow-left-long" aria-hidden="true"></i></span>
+            <span class="manager-nav-icon"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i></span>
             <span>Role Home</span>
         </a>
 
@@ -170,17 +179,18 @@
         top: 0;
         display: flex;
         flex-direction: column;
-        background: #062c30;
+        background: #086070;
         color: #f4f4f6;
-        border-right: 1px solid rgba(52, 211, 153, 0.2);
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
         font-family: Inter, "Segoe UI", Arial, sans-serif;
         z-index: 100;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .manager-brand {
         padding: 24px 20px;
-        border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-        background: rgba(5, 44, 48, 0.6);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(6, 75, 88, 0.5);
     }
 
     .manager-brand-link {
@@ -194,18 +204,18 @@
     .manager-logo {
         width: 40px;
         height: 40px;
+        object-fit: cover;
+        object-position: center;
         flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         border-radius: 50%;
-        border: 1px solid #34d399;
-        background: rgba(52, 211, 153, 0.12);
-        color: #34d399;
-        font-family: Georgia, serif;
-        font-size: 18px;
-        font-weight: 800;
-        box-shadow: 0 0 15px rgba(52, 211, 153, 0.25);
+        border: 1.5px solid rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+    }
+
+    .manager-brand-link:hover .manager-logo {
+        transform: rotate(6deg) scale(1.05);
     }
 
     .manager-brand-name {
@@ -216,7 +226,7 @@
 
     .manager-brand-subtitle {
         margin-top: 2px;
-        color: #34d399;
+        color: rgba(255, 255, 255, 0.75);
         font-size: 8.5px;
         font-weight: 700;
         letter-spacing: 2px;
@@ -224,13 +234,13 @@
 
     .manager-identity {
         padding: 18px 20px;
-        border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-        background: rgba(11, 83, 91, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(6, 75, 88, 0.3);
     }
 
     .manager-label,
     .manager-section-label {
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.65);
         font-size: 9.5px;
         font-weight: 700;
         letter-spacing: 1.5px;
@@ -257,9 +267,9 @@
         display: grid;
         place-items: center;
         border-radius: 50%;
-        background: rgba(52, 211, 153, 0.15);
-        border: 1px solid rgba(52, 211, 153, 0.35);
-        color: #34d399;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
         font-size: 14px;
         font-weight: 800;
         font-family: Georgia, serif;
@@ -271,10 +281,10 @@
         right: 0;
         width: 10px;
         height: 10px;
-        background: #34d399;
-        border: 2px solid #062c30;
+        background: #4ade80;
+        border: 2px solid #086070;
         border-radius: 50%;
-        box-shadow: 0 0 8px #34d399;
+        box-shadow: 0 0 6px #4ade80;
     }
 
     .manager-user-details {
@@ -296,19 +306,25 @@
         gap: 5px;
         margin-top: 5px;
         padding: 3px 8px;
-        border: 1px solid rgba(52, 211, 153, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 20px;
-        background: rgba(5, 150, 105, 0.2);
-        color: #34d399;
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
         font-size: 9.5px;
         font-weight: 700;
         letter-spacing: 0.5px;
     }
 
+    /* Invisible scrollbars with smooth scrolling */
     .manager-navigation {
         flex: 1;
         padding: 16px 14px;
         overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .manager-navigation::-webkit-scrollbar {
+        display: none;
     }
 
     .manager-dropdown-group {
@@ -323,13 +339,33 @@
         justify-content: space-between;
         background: transparent;
         border: none;
-        padding: 4px 10px 8px;
+        padding: 10px 12px;
+        border-radius: 8px;
         cursor: pointer;
         text-align: left;
+        transition: background 0.25s ease, padding-left 0.25s ease;
+    }
+
+    .manager-dropdown-toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+        padding-left: 16px;
+    }
+
+    .manager-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .manager-section-title {
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
     }
 
     .manager-chevron {
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.65);
         font-size: 10px;
         transition: transform 0.25s ease;
     }
@@ -339,6 +375,7 @@
         overflow: hidden;
         transition: max-height 0.3s ease-in-out;
         padding-left: 6px;
+        margin-top: 4px;
     }
 
     .manager-dropdown-group.open .manager-submenu {
@@ -347,35 +384,55 @@
 
     .manager-dropdown-group.open .manager-chevron {
         transform: rotate(180deg);
-        color: #34d399;
+        color: #ffffff;
     }
 
     .manager-nav-link {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 12px;
         margin-bottom: 3px;
         padding: 10px 12px;
         border-radius: 8px;
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
         font-size: 12px;
         font-weight: 500;
-        transition: all 0.2s ease;
+        overflow: hidden;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .manager-nav-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%) scaleY(0);
+        width: 3px;
+        height: 60%;
+        background: #34d399;
+        border-radius: 0 4px 4px 0;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .manager-nav-link:hover::before,
+    .manager-nav-link.active::before {
+        transform: translateY(-50%) scaleY(1);
     }
 
     .manager-nav-link:hover {
-        background: rgba(52, 211, 153, 0.1);
-        color: #34d399;
-        transform: translateX(2px);
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+        transform: translateX(4px);
     }
 
     .manager-nav-link.active {
-        background: linear-gradient(135deg, rgba(5, 150, 105, 0.25), rgba(11, 83, 91, 0.4));
-        border: 1px solid rgba(52, 211, 153, 0.3);
-        color: #34d399;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
         font-weight: 700;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .manager-nav-icon {
@@ -383,27 +440,29 @@
         flex-shrink: 0;
         text-align: center;
         font-size: 13px;
-        color: #34d399;
+        color: rgba(255, 255, 255, 0.85);
+        transition: color 0.2s ease;
     }
 
+    .manager-nav-link:hover .manager-nav-icon,
     .manager-nav-link.active .manager-nav-icon {
-        color: #34d399;
+        color: #ffffff;
     }
 
     .manager-divider {
         margin: 14px 10px;
-        border-top: 1px solid rgba(52, 211, 153, 0.15);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .manager-sidebar-footer {
         padding: 16px 20px;
-        border-top: 1px solid rgba(52, 211, 153, 0.15);
-        background: rgba(5, 44, 48, 0.6);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(6, 75, 88, 0.5);
     }
 
     .manager-footer-caption {
         margin-bottom: 12px;
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.65);
         font-size: 10px;
         letter-spacing: 0.5px;
     }
@@ -417,20 +476,21 @@
         padding: 10px 14px;
         border: 1px solid rgba(252, 165, 165, 0.3);
         border-radius: 8px;
-        background: rgba(127, 29, 29, 0.25);
+        background: rgba(127, 29, 29, 0.3);
         color: #fca5a5;
         font-size: 11.5px;
         font-weight: 700;
         letter-spacing: 0.5px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .manager-logout-button:hover {
-        background: rgba(127, 29, 29, 0.45);
+        background: rgba(127, 29, 29, 0.5);
         border-color: rgba(252, 165, 165, 0.5);
         color: #ffffff;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(127, 29, 29, 0.3);
     }
 
     .manager-logout-icon {

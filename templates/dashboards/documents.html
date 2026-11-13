@@ -1,4 +1,5 @@
 {% extends 'dashboards/client_dashboard.html' %}
+{% load static %}
 
 {% block dashboard_title %}My Documents{% endblock %}
 {% block view_header %}Account Documents & Records{% endblock %}
@@ -8,11 +9,30 @@
     <h3 style="margin:0 0 5px; font-size:17px; color:#0F172A;">Uploaded Documents</h3>
     <p style="margin:0 0 20px; color:#687181; font-size:13px;">Securely store and review your asset titles, certificates, and verification records.</p>
 
+    <!-- Document Upload / Submission Form -->
+    <div style="background:#F8FAFC; border:1px solid rgba(15,23,42,0.08); border-radius:10px; padding:16px; margin-bottom:20px;">
+        <h4 style="margin:0 0 10px; font-size:13px; color:#0F172A; font-weight:700;">Upload New Document</h4>
+        <form method="POST" enctype="multipart/form-data" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            {% csrf_token %}
+            <input type="hidden" name="upload_document" value="1">
+            <input type="text" name="title" placeholder="Document Title (e.g., Land Title Deed)" required style="flex:1; min-width:200px; padding:8px 12px; border:1px solid rgba(15,23,42,0.15); border-radius:6px; font-size:12px; background:#fff;">
+            <select name="category" style="padding:8px 12px; border:1px solid rgba(15,23,42,0.15); border-radius:6px; font-size:12px; background:#fff;">
+                <option value="TITLE_DEED">Title Deed</option>
+                <option value="KYC">KYC Verification</option>
+                <option value="CERTIFICATE">Ownership Certificate</option>
+                <option value="OTHER">Other Record</option>
+            </select>
+            <input type="file" name="file" required style="font-size:12px; color:#687181;">
+            <button type="submit" style="background:#086070; color:#fff; border:none; padding:8px 16px; font-weight:700; border-radius:6px; cursor:pointer; font-size:12px;">Upload File</button>
+        </form>
+    </div>
+
     <div class="table-wrapper" style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; font-size:12px;">
             <thead>
                 <tr style="background:#F8FAFC; border-bottom:1px solid rgba(15,23,42,0.08);">
                     <th style="padding:12px; text-align:left; color:#687181;">Document Title</th>
+                    <th style="padding:12px; text-align:left; color:#687181;">Category</th>
                     <th style="padding:12px; text-align:left; color:#687181;">Status</th>
                     <th style="padding:12px; text-align:left; color:#687181;">Uploaded Date</th>
                     <th style="padding:12px; text-align:right; color:#687181;">Actions</th>
@@ -21,26 +41,38 @@
             <tbody>
                 {% for doc in documents %}
                 <tr style="border-bottom:1px solid #edf0f5;">
-                    <td style="padding:12px; font-weight:600; color:#0F172A;">{{ doc.title|default:"Unnamed document" }}</td>
+                    <td style="padding:12px; font-weight:600; color:#0F172A;">
+                        {% if doc.title %}
+                            {{ doc.title }}
+                        {% elif doc.file.name %}
+                            {{ doc.file.name|cut:"documents/"|cut:"uploads/" }}
+                        {% else %}
+                            Unnamed Document
+                        {% endif %}
+                    </td>
+                    <td style="padding:12px; color:#687181;">
+                        {{ doc.get_category_display|default:doc.category|default:"General Record" }}
+                    </td>
                     <td style="padding:12px;">
                         <span style="padding:4px 8px; border-radius:20px; font-size:10px; font-weight:700; background:#e1effe; color:#1e429f;">
-                            {{ doc.get_status_display|default:"Submitted" }}
+                            {{ doc.get_status_display|default:doc.status|default:"Submitted" }}
                         </span>
                     </td>
-                    <td style="padding:12px; color:#687181;">{{ doc.uploaded_at|date:"d M Y" }}</td>
+                    <td style="padding:12px; color:#687181;">{{ doc.uploaded_at|date:"d M Y, H:i"|default:"—" }}</td>
                     <td style="padding:12px; text-align:right;">
-                        {% if doc.file %}
-                        <a href="{{ doc.file.url }}" target="_blank" style="color:#086070; font-weight:700; text-decoration:none;">View File</a>
+                        {% if doc.file and doc.file.url %}
+                        <a href="{{ doc.file.url }}" target="_blank" style="color:#086070; font-weight:700; text-decoration:none; margin-right:12px;">View File</a>
+                        <a href="{{ doc.file.url }}" download style="color:#16764f; font-weight:700; text-decoration:none;">Download</a>
                         {% else %}
-                        <span style="color:#687181;">Not available</span>
+                        <span style="color:#687181;">File missing</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" style="text-align:center; padding:40px; color:#687181;">
+                    <td colspan="5" style="text-align:center; padding:40px; color:#687181;">
                         <i class="fa-solid fa-folder-open" style="font-size:24px; margin-bottom:8px; display:block;"></i>
-                        No documents uploaded yet.
+                        No documents uploaded yet. Use the form above to upload your first record.
                     </td>
                 </tr>
                 {% endfor %}

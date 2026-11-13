@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Groups & Permissions | Assetra Africa{% endblock %}
+{% block title %}Groups &amp; Permissions | Assetra Africa{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -10,14 +11,14 @@
 ========================================================= */
 
 .pw-groups {
-    --pw-teal: #062c30;
-    --pw-emerald: #059669;
-    --pw-gold: #c5a059;
-    --pw-bg: #f8fafc;
+    --pw-teal: #086070;
+    --pw-teal-dark: #064b58;
+    --pw-emerald: #34d399;
+    --pw-border: rgba(8, 96, 112, 0.15);
     --pw-card: #ffffff;
-    --pw-text: #111827;
-    --pw-muted: #4b5563;
-    --pw-border: rgba(6, 44, 48, 0.12);
+    --pw-text: #0F172A;
+    --pw-muted: #687181;
+    --pw-bg-alt: #f8fafc;
     --pw-danger: #dc2626;
 
     width: 100%;
@@ -45,7 +46,7 @@
 }
 
 .pw-groups .pw-panel:hover {
-    box-shadow: 0 8px 25px rgba(6, 44, 48, 0.08);
+    box-shadow: 0 8px 25px rgba(8, 96, 112, 0.08);
 }
 
 /* Topbar & Header */
@@ -87,7 +88,7 @@
     justify-content: center;
     gap: 6px;
     min-height: 36px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border: 1px solid var(--pw-border);
     border-radius: 8px;
     font-size: 12px;
@@ -105,11 +106,11 @@
 .pw-groups .pw-btn-primary {
     background: var(--pw-teal);
     border-color: var(--pw-teal);
-    color: #34d399;
+    color: #ffffff;
 }
 
 .pw-groups .pw-btn-primary:hover {
-    background: #041f22;
+    background: var(--pw-teal-dark);
     color: #ffffff;
 }
 
@@ -155,7 +156,7 @@
     background: var(--pw-card);
     border: 1px solid var(--pw-border);
     border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(6, 44, 48, 0.04);
+    box-shadow: 0 4px 20px rgba(8, 96, 112, 0.04);
     overflow: hidden;
     margin-bottom: 20px;
 }
@@ -199,7 +200,7 @@
     height: 36px;
     padding: 6px 12px;
     color: var(--pw-text);
-    background: #f8fafc;
+    background: var(--pw-bg-alt);
     border: 1px solid var(--pw-border);
     border-radius: 8px;
     font-size: 12px;
@@ -243,15 +244,16 @@
 }
 
 .pw-groups .pw-table tbody tr:hover {
-    background: rgba(52, 211, 153, 0.03);
+    background: rgba(8, 96, 112, 0.03);
 }
 
 .pw-groups .pw-badge {
     display: inline-flex;
-    padding: 3px 10px;
-    background: rgba(197, 160, 89, 0.15);
-    color: #92400e;
-    border-radius: 12px;
+    padding: 5px 12px;
+    background: rgba(8, 96, 112, 0.08);
+    color: var(--pw-teal);
+    border: 1px solid rgba(8, 96, 112, 0.25);
+    border-radius: 20px;
     font-size: 10px;
     font-weight: 700;
 }
@@ -260,7 +262,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .pw-groups .pw-member-chip {
@@ -268,10 +270,12 @@
     align-items: center;
     gap: 6px;
     padding: 4px 8px;
-    background: #f1f5f9;
+    background: var(--pw-bg-alt);
     border: 1px solid var(--pw-border);
     border-radius: 6px;
     font-size: 11px;
+    font-weight: 600;
+    color: var(--pw-teal);
 }
 
 .pw-groups .pw-empty {
@@ -300,8 +304,8 @@
     <header class="pw-topbar">
         <div>
             <div class="pw-eyebrow">Administration / Access Control</div>
-            <h1 class="pw-page-heading">User Groups & Permissions</h1>
-            <p class="pw-description">Organize users into Normal Users, Admins, and Superadmins, or manage custom permission groups.</p>
+            <h1 class="pw-page-heading">User Groups &amp; Permissions</h1>
+            <p class="pw-description">Organize users into role categories and manage granular system permission groups.</p>
         </div>
 
         <a href="{% url 'dashboards:admin_dashboard' %}" class="pw-btn">
@@ -325,14 +329,14 @@
         <div class="pw-panel-head">
             <div>
                 <h2 class="pw-panel-title">Create New Permission Group</h2>
-                <p class="pw-panel-subtitle">Add a custom group to partition user access levels.</p>
+                <p class="pw-panel-subtitle">Add a custom group to partition user access levels across Assetra Africa.</p>
             </div>
         </div>
         <div class="pw-panel-body">
             <form method="post" class="pw-form-group">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="create_group">
-                <input type="text" name="group_name" placeholder="Group Name (e.g., Compliance Officers, Risk Managers)" required class="pw-input">
+                <input type="text" name="group_name" placeholder="Group Name (e.g., Compliance Officers, Wealth Advisors)" required class="pw-input">
                 <button type="submit" class="pw-btn pw-btn-primary">Create Group</button>
             </form>
         </div>
@@ -342,10 +346,10 @@
     <section class="pw-panel">
         <div class="pw-panel-head">
             <div>
-                <h2 class="pw-panel-title">System Groups & Members</h2>
-                <p class="pw-panel-subtitle">Manage group memberships, view counts, and delete groups.</p>
+                <h2 class="pw-panel-title">System Groups &amp; Members</h2>
+                <p class="pw-panel-subtitle">Manage group memberships, view permissions, and control access levels.</p>
             </div>
-            <span class="pw-badge">{{ groups.count|default:0 }} groups</span>
+            <span class="pw-badge"><i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> {{ groups.count|default:0|intcomma }} groups</span>
         </div>
 
         {% if groups %}
@@ -356,7 +360,7 @@
                         <th>Group Name</th>
                         <th>Assigned Members</th>
                         <th>Add Member</th>
-                        <th>Actions</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -364,24 +368,32 @@
                     <tr>
                         <td>
                             <strong style="color: var(--pw-teal); font-size: 13px;">{{ group.name }}</strong><br>
-                            <span style="color: var(--pw-muted); font-size: 11px;">{{ group.permissions.count }} permissions assigned</span>
+                            <span style="color: var(--pw-muted); font-size: 11px;">{{ group.permissions.count|default:0|intcomma }} permissions assigned</span>
                         </td>
                         <td>
                             <div class="pw-member-list">
                                 {% for member in group.user_set.all %}
                                     <span class="pw-member-chip">
-                                        {{ member.username }}
+                                        {% if member.get_full_name %}
+                                            {{ member.get_full_name }}
+                                        {% elif member.first_name %}
+                                            {{ member.first_name }} {{ member.last_name|default:"" }}
+                                        {% elif member.username %}
+                                            {{ member.username }}
+                                        {% else %}
+                                            {{ member.email|default:"User" }}
+                                        {% endif %}
                                         <!-- Remove member form -->
                                         <form method="post" style="display:inline;">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="remove_member">
                                             <input type="hidden" name="group_id" value="{{ group.pk }}">
                                             <input type="hidden" name="user_id" value="{{ member.pk }}">
-                                            <button type="submit" style="background:none; border:none; color:var(--pw-danger); cursor:pointer; font-weight:bold; padding:0 2px;" title="Remove member">&times;</button>
+                                            <button type="submit" style="background:none; border:none; color:var(--pw-danger); cursor:pointer; font-weight:bold; padding:0 2px; font-size: 13px;" title="Remove member">&times;</button>
                                         </form>
                                     </span>
                                 {% empty %}
-                                    <span style="color: var(--pw-muted); font-style: italic; font-size: 11px;">No members in this group</span>
+                                    <span style="color: var(--pw-muted); font-style: italic; font-size: 11px;">No members assigned to this group</span>
                                 {% endfor %}
                             </div>
                         </td>
@@ -391,22 +403,32 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="add_member">
                                 <input type="hidden" name="group_id" value="{{ group.pk }}">
-                                <select name="user_id" class="pw-select" required style="width: 160px; font-size: 11px;">
+                                <select name="user_id" class="pw-select" required style="width: 180px; font-size: 11.5px;">
                                     <option value="">Select user...</option>
                                     {% for usr in all_users %}
-                                        <option value="{{ usr.pk }}">{{ usr.username }}</option>
+                                        <option value="{{ usr.pk }}">
+                                            {% if usr.get_full_name %}
+                                                {{ usr.get_full_name }} ({{ usr.username }})
+                                            {% elif usr.first_name %}
+                                                {{ usr.first_name }} {{ usr.last_name|default:"" }}
+                                            {% elif usr.username %}
+                                                {{ usr.username }}
+                                            {% else %}
+                                                {{ usr.email }}
+                                            {% endif %}
+                                        </option>
                                     {% endfor %}
                                 </select>
                                 <button type="submit" class="pw-btn" style="padding: 4px 10px; font-size: 11px;">Add</button>
                             </form>
                         </td>
-                        <td>
+                        <td style="text-align: right;">
                             <!-- Delete Group Form -->
-                            <form method="post" onsubmit="return confirm('Are you sure you want to delete the group {{ group.name }}?');">
+                            <form method="post" onsubmit="return confirm('Are you sure you want to delete the group {{ group.name }}?');" style="display: inline-block;">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete_group">
                                 <input type="hidden" name="group_id" value="{{ group.pk }}">
-                                <button type="submit" class="pw-btn pw-btn-danger" style="padding: 4px 8px; font-size: 11px;">Delete Group</button>
+                                <button type="submit" class="pw-btn pw-btn-danger" style="padding: 5px 10px; font-size: 11px;">Delete Group</button>
                             </form>
                         </td>
                     </tr>
@@ -415,7 +437,10 @@
             </table>
         </div>
         {% else %}
-            <div class="pw-empty">No user groups have been created yet.</div>
+            <div class="pw-empty">
+                <i class="fa-solid fa-shield-halved" style="font-size: 24px; margin-bottom: 8px; display: block; color: var(--pw-teal);"></i>
+                No user groups have been created yet.
+            </div>
         {% endif %}
     </section>
 

@@ -5,7 +5,9 @@
 {% block dashboard_title %}Geographic Map - Asset Portal{% endblock %}
 {% block view_header %}Asset Geographic Distribution{% endblock %}
 
-{% block dashboard_content %}
+{% block extra_css %}
+<!-- Leaflet CSS CDN for Real Mapping -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
     :root {
         --asset-primary: #086070;
@@ -34,6 +36,17 @@
         box-shadow: 0 3px 12px rgba(15, 23, 42, .03); margin-bottom: 25px;
     }
 
+    /* Real Map Box Styling */
+    #real-leaflet-map {
+        width: 100%;
+        height: 420px;
+        border-radius: 10px;
+        border: 1px solid var(--asset-border);
+        margin-top: 15px;
+        margin-bottom: 25px;
+        z-index: 1;
+    }
+
     .geo-grid {
         display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px;
     }
@@ -45,7 +58,9 @@
     .geo-item h5 { margin: 0; font-size: 14px; font-weight: 700; color: var(--asset-text); }
     .geo-item span { font-size: 12px; color: var(--asset-muted); }
 </style>
+{% endblock %}
 
+{% block dashboard_content %}
 <div class="asset-workspace">
     <section class="asset-hero">
         <div>
@@ -59,16 +74,28 @@
             <i class="fa-solid fa-map-location-dot" style="color: var(--asset-primary); margin-right: 8px;"></i> Active Land &amp; Property Coordinates
         </h3>
         <p style="color: var(--asset-muted); font-size: 12.5px;">
-            Showing all verified physical real estate holdings registered in your private portfolio.
+            Showing all verified physical real estate holdings registered in your private portfolio on the live map.
         </p>
+
+        <!-- Real Interactive Map Container -->
+        <div id="real-leaflet-map"></div>
 
         {% if geo_assets %}
             <div class="geo-grid">
                 {% for asset in geo_assets %}
                     <div class="geo-item">
-                        <h5><i class="fa-solid fa-building-columns" style="color: var(--asset-primary); margin-right: 6px;"></i> {{ asset.name }}</h5>
-                        <span><strong>Category:</strong> {{ asset.get_category_display }}</span>
-                        <span><strong>Valuation:</strong> ${{ asset.current_estimated_value|floatformat:2|intcomma }}</span>
+                        <h5>
+                            <i class="fa-solid fa-building-columns" style="color: var(--asset-primary); margin-right: 6px;"></i> 
+                            {% if asset.name %}
+                                {{ asset.name }}
+                            {% elif asset.title %}
+                                {{ asset.title }}
+                            {% else %}
+                                Real Estate Asset
+                            {% endif %}
+                        </h5>
+                        <span><strong>Category:</strong> {{ asset.get_category_display|default:asset.category|default:"Property Holding" }}</span>
+                        <span><strong>Valuation:</strong> ${{ asset.current_estimated_value|default:asset.value|default:0|floatformat:2|intcomma }}</span>
                         <span><strong>Status:</strong> <span style="color: #16764f; font-weight: 700;">Verified Active</span></span>
                         <a href="{% url 'assets:asset_detail' asset.id %}" style="margin-top: 6px; font-size: 11.5px; color: var(--asset-primary); text-decoration: none; font-weight: 700;">
                             View Property Deed &rarr;
@@ -84,4 +111,56 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Leaflet JS CDN Script -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Map centered around Dar es Salaam, Tanzania (or default coordinates)
+        var map = L.map('real-leaflet-map').setView([-6.7924, 39.2083], 12);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Parse asset coordinates passed from Django backend safely
+        var assetsData = [
+            {% for asset in geo_assets %}
+            {
+                name: "{% if asset.name %}{{ asset.name|escapejs }}{% elif asset.title %}{{ asset.title|escapejs }}{% else %}Property Asset{% endif %}",
+                lat: {{ asset.latitude|default:-6.7924 }},
+                lng: {{ asset.longitude|default:39.2083 }},
+                category: "{{ asset.get_category_display|default:'Real Estate' }}",
+                value: "${{ asset.current_estimated_value|default:asset.value|default:0|floatformat:2|intcomma }}",
+                url: "{% url 'assets:asset_detail' asset.id %}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var bounds = [];
+
+        // Loop through assets and add markers to the map
+        assetsData.forEach(function(item) {
+            if (item.lat && item.lng) {
+                var marker = L.marker([item.lat, item.lng]).addTo(map);
+                marker.bindPopup(
+                    "<div style='font-family: Inter, sans-serif; font-size: 12px;'>" +
+                    "<strong style='color: #086070; font-size: 13px;'>" + item.name + "</strong><br>" +
+                    "<span><strong>Category:</strong> " + item.category + "</span><br>" +
+                    "<span><strong>Valuation:</strong> " + item.value + "</span><br>" +
+                    "<a href='" + item.url + "' style='color: #086070; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;'>View Deed &rarr;</a>" +
+                    "</div>"
+                );
+                bounds.push([item.lat, item.lng]);
+            }
+        });
+
+        // Fit map bounds if markers exist
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+    });
+</script>
 {% endblock %}

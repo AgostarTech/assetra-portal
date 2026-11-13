@@ -248,8 +248,24 @@
                 <tbody>
                     {% for item in portfolio_data %}
                     <tr>
-                        <td><strong>{{ item.client.get_full_name|default:item.client.email|default:"Client" }}</strong></td>
-                        <td style="color: var(--pw-muted);">{{ item.client.email }}</td>
+                        <td>
+                            <strong>
+                                {% if item.client.get_full_name %}
+                                    {{ item.client.get_full_name }}
+                                {% elif item.client.first_name %}
+                                    {{ item.client.first_name }} {{ item.client.last_name|default:"" }}
+                                {% elif item.client.name %}
+                                    {{ item.client.name }}
+                                {% elif item.client.username %}
+                                    {{ item.client.username }}
+                                {% elif item.client.email %}
+                                    {{ item.client.email }}
+                                {% else %}
+                                    Institutional Client
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td style="color: var(--pw-muted);">{{ item.client.email|default:"N/A" }}</td>
                         <td>
                             <span class="pw-badge" style="background: rgba(5, 150, 105, 0.15); color: #065f46;">
                                 {{ item.asset_count }} assets
