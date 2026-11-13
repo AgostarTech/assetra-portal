@@ -512,5 +512,75 @@
             window.location.href = "{% url 'portal_redirect' %}";
         }
     }
+
+    // Automatic Comma Separator for Amount & Numeric Inputs
+    document.addEventListener("DOMContentLoaded", function () {
+        // Target number inputs or text inputs whose names include price, value, amount, or capital
+        const numericInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+
+        numericInputs.forEach(input => {
+            const fieldName = input.getAttribute('name') || '';
+            const lowerName = fieldName.toLowerCase();
+
+            // Identify monetary / valuation fields automatically
+            if (lowerName.includes('price') || lowerName.includes('value') || 
+                lowerName.includes('amount') || lowerName.includes('capital') || 
+                lowerName.includes('valuation') || lowerName.includes('balance')) {
+                
+                // Convert type to text so commas display correctly
+                if (input.type === 'number') {
+                    input.type = 'text';
+                }
+
+                // Format initial value if present
+                if (input.value) {
+                    let cleanVal = input.value.replace(/,/g, '');
+                    if (!isNaN(cleanVal) && cleanVal !== '') {
+                        input.value = Number(cleanVal).toLocaleString('en-US');
+                    }
+                }
+
+                // Format as user types
+                input.addEventListener('input', function (e) {
+                    let cursorPosition = input.selectionStart;
+                    let originalLength = input.value.length;
+
+                    // Remove non-digit characters except decimals if needed
+                    let rawValue = input.value.replace(/[^0-9.]/g, '');
+                    
+                    // Split by decimal point to handle fractional currency if entered
+                    let parts = rawValue.split('.');
+                    let integerPart = parts[0];
+                    let decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+
+                    if (integerPart !== '') {
+                        integerPart = Number(integerPart).toLocaleString('en-US');
+                    }
+
+                    input.value = integerPart + decimalPart;
+
+                    // Adjust cursor position smoothly
+                    let newLength = input.value.length;
+                    cursorPosition = Math.max(0, cursorPosition + (newLength - originalLength));
+                    input.setSelectionRange(cursorPosition, cursorPosition);
+                });
+            }
+        });
+
+        // Strip commas right before form submission so Django receives clean numbers
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                numericInputs.forEach(input => {
+                    const fieldName = (input.getAttribute('name') || '').toLowerCase();
+                    if (fieldName.includes('price') || fieldName.includes('value') || 
+                        fieldName.includes('amount') || fieldName.includes('capital') || 
+                        fieldName.includes('valuation') || fieldName.includes('balance')) {
+                        input.value = input.value.replace(/,/g, '');
+                    }
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}
