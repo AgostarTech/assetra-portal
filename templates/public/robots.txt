@@ -1,0 +1,10 @@
+# Allow all standard search engine crawlers to index the site
+User-agent: *
+Allow: /
+
+# Disallow sensitive administrative or private paths (uncomment if applicable)
+# Disallow: /admin/
+# Disallow: /private/
+
+# Point search engine crawlers directly to your XML sitemap
+Sitemap: https://assetra.africa/sitemap.xml

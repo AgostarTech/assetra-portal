@@ -7,6 +7,37 @@
     <title>{% block title %}Assetra Africa Portal | Intelligent Asset Management{% endblock %}</title>
     
     <!-- =====================================================
+         ELITE SEO & BRAND META TAGS
+         ===================================================== -->
+    <meta name="description" content="Discover Assetra Africa, the secure platform delivering streamlined asset records, intelligent wealth control, and professional management solutions.">
+    <link rel="canonical" href="https://assetra.africa/">
+
+    <!-- Open Graph / Social Media Preview Tags (LinkedIn, WhatsApp, Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://assetra.africa/">
+    <meta property="og:title" content="Assetra Africa Portal | Intelligent Asset Management">
+    <meta property="og:description" content="Discover Assetra Africa, the secure platform delivering streamlined asset records, intelligent wealth control, and professional management solutions.">
+    <meta property="og:image" content="https://assetra.africa{% static 'images/house.jpg' %}">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://assetra.africa/">
+    <meta name="twitter:title" content="Assetra Africa Portal | Intelligent Asset Management">
+    <meta name="twitter:description" content="Discover Assetra Africa, the secure platform delivering streamlined asset records, intelligent wealth control, and professional management solutions.">
+    <meta name="twitter:image" content="https://assetra.africa{% static 'images/house.jpg' %}">
+
+    <!-- Organization Schema Markup for Brand Recognition -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Assetra Africa",
+      "url": "https://assetra.africa",
+      "logo": "https://assetra.africa{% static 'images/house.jpg' %}"
+    }
+    </script>
+
+    <!-- =====================================================
          GLOBAL BRAND FAVICONS (ASSETRA AFRICA)
          ===================================================== -->
     <link rel="icon" type="image/jpeg" href="{% static settings.SITE_LOGO|default:'images/house.jpg' %}">

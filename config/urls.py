@@ -4,14 +4,63 @@ from django.views.generic import RedirectView, TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.http import HttpResponse
 from support.views import serve_verification_file
 
 from accounts import views as accounts_views
 
 
-urlpatterns = [
+# --------------------------------------------------
+# DEDICATED SEO VIEWS (SITEMAP & ROBOTS.TXT)
+# --------------------------------------------------
+def sitemap_view(request):
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://assetra.africa/</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://assetra.africa/#about</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://assetra.africa/#services</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://assetra.africa/#contact</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>"""
+    return HttpResponse(xml_content, content_type="application/xml")
 
+
+def robots_view(request):
+    txt_content = """User-agent: *
+Allow: /
+
+Sitemap: https://assetra.africa/sitemap.xml
+"""
+    return HttpResponse(txt_content, content_type="text/plain")
+
+
+urlpatterns = [
+    # --------------------------------------------------
+    # SEO & VERIFICATION FILES (PLACED FIRST TO AVOID CATCH-ALL)
+    # --------------------------------------------------
+    path('sitemap.xml', sitemap_view, name='sitemap'),
+    path('robots.txt', robots_view, name='robots'),
     path('<str:filename>', serve_verification_file, name='serve_verification_file'),
+
     # --------------------------------------------------
     # PUBLIC WEBSITE
     # --------------------------------------------------
